@@ -1,0 +1,475 @@
+/* Main HUD Clickergochi — mobile vertical 9:16, tudo arredondado / circular.
+   So visual, sem logica de jogo. */
+.container {
+    width: 100%;
+    height: 100%;
+}
+.main-screen {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+/* ---- TOPO: barra full-width + controles abaixo com respiro ---- */
+.top-area {
+    width: 100%;
+    flex-direction: column;
+}
+.level-bar {
+    width: 100%;
+    height: 40px;
+    border-radius: 20px;
+    background-color: rgba(60, 50, 90, 0.25);
+    border-width: 3px;
+    border-color: rgb(255, 255, 255);
+}
+.level-fill {
+    height: 100%;
+    width: 40%;
+    border-radius: 16px;
+    background-color: rgb(150, 220, 120);
+}
+.top-controls {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 26px;
+}
+.mute-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    font-size: 34px;
+    background-color: rgba(255, 255, 255, 0.92);
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    color: rgb(60, 50, 90);
+}
+.level-block {
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+}
+.level-text {
+    font-size: 22px;
+    color: rgb(255, 255, 255);
+}
+.slime-counter {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 8px;
+    background-color: rgba(255, 255, 255, 0.92);
+    border-radius: 24px;
+    padding-left: 10px;
+    padding-right: 20px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-width: 3px;
+    border-color: rgb(150, 220, 150);
+}
+.slime-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 21px;
+    background-color: rgb(110, 220, 130);
+    border-width: 3px;
+    border-color: rgb(70, 170, 90);
+    margin-right: 10px;
+}
+.slime-count {
+    font-size: 26px;
+    color: rgb(60, 50, 90);
+}
+/* ---- Medidores em coluna vertical ---- */
+.stats-column {
+    flex-direction: column;
+    align-items: center;
+}
+.stat-ring {
+    width: 84px;
+    height: 84px;
+    border-radius: 42px;
+    background-color: rgba(255, 255, 255, 0.88);
+    border-width: 5px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+    justify-content: center;
+}
+.ring-hunger { border-color: rgb(255, 170, 120); }
+.ring-fun { border-color: rgb(140, 190, 255); }
+.ring-hygiene { border-color: rgb(140, 230, 220); }
+.stat-fill {
+    position: absolute;
+    left: 11px;
+    top: 11px;
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+}
+.fill-hunger { background-color: rgb(255, 170, 120); }
+.fill-fun { background-color: rgb(140, 190, 255); }
+.fill-hygiene { background-color: rgb(140, 230, 220); }
+.stat-icon {
+    font-size: 28px;
+    color: rgb(60, 50, 90);
+}
+/* ---- MEIO ---- */
+.middle-area {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.furniture-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.furniture-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 34px;
+    margin-left: 12px;
+    margin-right: 12px;
+    font-size: 23px;
+    background-color: rgba(255, 255, 255, 0.94);
+    border-width: 4px;
+    border-color: rgb(200, 180, 240);
+    color: rgb(60, 50, 90);
+}
+.slime-btn {
+    width: 210px;
+    height: 210px;
+    border-radius: 105px;
+    font-size: 96px;
+    background-color: rgb(140, 230, 150);
+    border-width: 6px;
+    border-color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
+}
+/* ---- BASE ---- */
+.bottom-nav {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.96);
+    border-radius: 40px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-width: 3px;
+    border-color: rgb(200, 180, 240);
+}
+.nav-btn {
+    width: 104px;
+    height: 104px;
+    border-radius: 52px;
+    font-size: 21px;
+    background-color: rgb(240, 235, 255);
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    color: rgb(60, 50, 90);
+}
+/* ---- TELAS DAS LOJAS ---- */
+.screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(58, 70, 110);
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+.shop-title {
+    font-size: 42px;
+    color: rgb(255, 255, 255);
+    margin-top: 8px;
+}
+.shop-options {
+    flex-grow: 1;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.shop-option-btn {
+    width: 360px;
+    max-width: 94%;
+    height: 100px;
+    border-radius: 30px;
+    font-size: 26px;
+    margin-top: 12px;
+    background-color: rgb(255, 255, 255);
+    border-width: 4px;
+    border-color: rgb(200, 180, 240);
+    color: rgb(60, 50, 90);
+}
+.shop-back-btn {
+    width: 260px;
+    height: 72px;
+    border-radius: 36px;
+    font-size: 26px;
+    margin-bottom: 10px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    color: rgb(60, 50, 90);
+}
+.detail-placeholder {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.85);
+}
+/* ---- STICKERS: sempre 3 por fileira, tamanho via codigo ---- */
+.sticker-scroll {
+    flex-grow: 1;
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+.sticker-grid {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.sticker-card {
+    width: 30%;
+    height: 150px;
+    border-radius: 28px;
+    margin: 8px;
+    font-size: 18px;
+    background-color: rgb(255, 255, 255);
+    border-width: 3px;
+    border-color: rgb(200, 180, 240);
+    color: rgb(60, 50, 90);
+}
+.sticker-popup-card {
+    height: 380px;
+}
+.sticker-header-row {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+}
+.sticker-thumb {
+    width: 88px;
+    height: 88px;
+    border-radius: 44px;
+    background-color: rgb(240, 235, 255);
+    border-width: 3px;
+    border-color: rgb(200, 180, 240);
+    align-items: center;
+    justify-content: center;
+}
+.sticker-thumb-icon {
+    font-size: 46px;
+    color: rgb(60, 50, 90);
+}
+.sticker-name {
+    font-size: 28px;
+    color: rgb(60, 50, 90);
+    margin-left: 16px;
+}
+.sticker-desc {
+    width: 100%;
+    font-size: 22px;
+    color: rgb(100, 90, 130);
+    margin-top: 16px;
+    white-space: normal;
+}
+/* ---- COMIDAS ---- */
+.food-scroll {
+    flex-grow: 1;
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+.food-list {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+.food-card {
+    width: 100%;
+    max-width: 560px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(255, 255, 255);
+    border-radius: 28px;
+    border-width: 3px;
+    border-color: rgb(200, 180, 240);
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    margin-top: 10px;
+}
+.food-img {
+    width: 76px;
+    height: 76px;
+    border-radius: 38px;
+    font-size: 40px;
+    background-color: rgb(240, 235, 255);
+    color: rgb(60, 50, 90);
+}
+.food-info {
+    flex-grow: 1;
+    flex-direction: column;
+    margin-left: 14px;
+}
+.food-name {
+    font-size: 24px;
+    color: rgb(60, 50, 90);
+}
+.food-price {
+    font-size: 21px;
+    color: rgb(90, 160, 90);
+}
+.buy-btn {
+    width: 140px;
+    height: 60px;
+    border-radius: 30px;
+    font-size: 22px;
+    background-color: rgb(150, 220, 120);
+    border-width: 3px;
+    border-color: rgb(100, 180, 90);
+    color: rgb(255, 255, 255);
+}
+/* ---- POPUPS ---- */
+.overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(40, 30, 70, 0.55);
+    align-items: center;
+    justify-content: center;
+}
+.hidden { display: none; }
+.popup-card {
+    width: 90%;
+    max-width: 480px;
+    height: 440px;
+    border-radius: 34px;
+    background-color: rgb(255, 255, 255);
+    flex-direction: column;
+    align-items: center;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    padding-left: 26px;
+    padding-right: 26px;
+    border-width: 4px;
+    border-color: rgb(200, 180, 240);
+}
+.popup-close-btn {
+    position: absolute;
+    top: -22px;
+    right: -22px;
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    font-size: 26px;
+    background-color: rgb(255, 255, 255);
+    border-width: 4px;
+    border-color: rgb(255, 130, 130);
+    color: rgb(220, 80, 80);
+}
+.popup-title {
+    font-size: 34px;
+    color: rgb(60, 50, 90);
+    margin-bottom: 12px;
+    margin-top: 8px;
+}
+.popup-spacer {
+    flex-grow: 1;
+}
+.popup-actions-row {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+.popup-btn-small {
+    width: 200px;
+    height: 68px;
+    border-radius: 34px;
+    font-size: 22px;
+    margin-left: 6px;
+    margin-right: 6px;
+    background-color: rgb(240, 235, 255);
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    color: rgb(60, 50, 90);
+}
+.popup-btn {
+    width: 320px;
+    height: 64px;
+    border-radius: 32px;
+    font-size: 24px;
+    margin-top: 10px;
+    background-color: rgb(240, 235, 255);
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    color: rgb(60, 50, 90);
+}
+.popup-btn-main {
+    background-color: rgb(150, 220, 120);
+    border-color: rgb(100, 180, 90);
+    color: rgb(255, 255, 255);
+}
+.carousel {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+.skin-card {
+    width: 92px;
+    height: 130px;
+    border-radius: 26px;
+    margin-left: 4px;
+    margin-right: 4px;
+    font-size: 17px;
+    background-color: rgb(240, 235, 255);
+    border-width: 3px;
+    border-color: rgb(220, 210, 240);
+    color: rgb(60, 50, 90);
+}
+.skin-selected {
+    background-color: rgb(255, 255, 255);
+    border-color: rgb(150, 120, 220);
+    border-width: 5px;
+}
+.arrow-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 27px;
+    font-size: 24px;
+    background-color: rgb(240, 235, 255);
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    color: rgb(60, 50, 90);
+}
+/* ---- FEEL: particulas e texto flutuante do slime ---- */
+.feel-dot {
+    position: absolute;
+}
+.feel-float {
+    position: absolute;
+    font-size: 34px;
+    color: rgb(110, 190, 110);
+    -unity-font-style: bold;
+}
