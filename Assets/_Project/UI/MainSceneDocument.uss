@@ -107,11 +107,10 @@
 .ring-hygiene { border-color: rgb(140, 230, 220); }
 .stat-fill {
     position: absolute;
-    left: 11px;
-    top: 11px;
-    width: 52px;
-    height: 52px;
-    border-radius: 26px;
+    left: 7px;
+    top: 7px;
+    width: 60px;
+    height: 60px;
 }
 .fill-hunger { background-color: rgb(255, 170, 120); }
 .fill-fun { background-color: rgb(140, 190, 255); }
@@ -472,4 +471,23 @@
     font-size: 34px;
     color: rgb(110, 190, 110);
     -unity-font-style: bold;
+}
+
+.stat-pct {
+    font-size: 16px;
+    color: rgb(60, 50, 90);
+    margin-top: -2px;
+}
+.critter-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+.critter-btn {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 0;
 }

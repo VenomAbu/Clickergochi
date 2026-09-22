@@ -19,6 +19,9 @@ public class MainHUDController : MonoBehaviour
     public int level = 1;
     public int slimeCount = 0;
 
+    [Header("Sistemas")]
+    public SlimeManager slimeManager;
+
     [Header("Sons (vazio = sintetizado fofo e calmo)")]
     public AudioClip slimeClip;
     public AudioClip clickClip;
@@ -42,6 +45,9 @@ public class MainHUDController : MonoBehaviour
     private Label _stickerDescLabel;
     private string _currentFurniture = "Cama";
     private Button[] _skinCards;
+    private Button _slimeButton;
+    private int _lastMoodTier = -1;
+    private float _moodTimer;
     private readonly List<Label> _slimeLabels = new();
     private readonly List<VisualElement> _screens = new();
     private readonly List<Button> _stickerCards = new();
@@ -50,7 +56,7 @@ public class MainHUDController : MonoBehaviour
     private int _skinIndex = 1;
     private readonly string[] _furnitureNames = { "Cama", "Sofá", "Planta" };
     private readonly string[] _shopOptions = { "Pacote de Stickers", "Skin dos Slimes", "Skin dos Móveis" };
-    private readonly string[] _foodNames = { "Maçã", "Pizza", "Bolo", "Sorvete", "Suco" };
+    private readonly List<FoodItemData> foods = new();
 
     private readonly string[] _stickerThumbs =
     {
@@ -137,10 +143,23 @@ public class MainHUDController : MonoBehaviour
                 _slimeLabels.Add(label);
         }
 
-        // Tela principal.
+        if (slimeManager == null)
+            slimeManager = FindFirstObjectByType<SlimeManager>();
+
+        // Tela principal: clique real vai para o SlimeManager (Fase 1).
         var slimeBtn = root.Q<Button>("SlimeButton");
+        _slimeButton = slimeBtn;
         if (slimeBtn != null)
-            slimeBtn.clicked += () => { slimeCount++; RefreshCounters(); };
+            slimeBtn.clicked += () =>
+            {
+                if (slimeManager != null)
+                    SyncFromManager();
+                else
+                {
+                    slimeCount++;
+                    RefreshCounters();
+                }
+            };
 
         for (int i = 0; i < 3; i++)
         {
@@ -162,6 +181,14 @@ public class MainHUDController : MonoBehaviour
 
         if (_muteButton != null)
             _muteButton.clicked += ToggleMute;
+
+        // Baratas: sons e refresh via sistema de audio existente.
+        var roaches = FindFirstObjectByType<CockroachManager>();
+        if (roaches != null)
+        {
+            roaches.onCritterHit += PlayClick;
+            roaches.onCritterKilled += () => { PlayBuy(); PullFromManager(); };
+        }
 
         // Popup do movel.
         var close = root.Q<Button>("CloseButton");
@@ -230,14 +257,8 @@ public class MainHUDController : MonoBehaviour
         if (stickersBack != null)
             stickersBack.clicked += () => { PlayClose(); ShowScreen("MainScreen"); };
 
-        // Comidas: botoes de comprar (demo).
-        for (int i = 0; i < 5; i++)
-        {
-            int idx = i;
-            var buy = root.Q<Button>($"Buy{idx}");
-            if (buy != null)
-                buy.clicked += () => { PlayBuy(); Debug.Log($"[MainHUD] Comprar {_foodNames[idx]} (demo, sem logica)."); };
-        }
+        // Comidas: cards montados dos FoodItemData + compra real.
+        BuildFoodList();
         var foodBack = root.Q<Button>("FoodBack");
         if (foodBack != null)
             foodBack.clicked += () => { PlayClose(); ShowScreen("MainScreen"); };
@@ -251,6 +272,107 @@ public class MainHUDController : MonoBehaviour
         RefreshStats();
         RefreshSkins();
         ApplyMuteIcon();
+        RefreshMood();
+    }
+
+    /// <summary>Puxa gosma e barras do SlimeManager para a UI (Fase 1-2).</summary>
+    public void SyncFromManager()
+    {
+        if (slimeManager == null)
+            return;
+        slimeManager.RegisterClick();
+        PullFromManager();
+    }
+
+    public void PullFromManager()
+    {
+        if (slimeManager == null)
+            return;
+        slimeCount = Mathf.FloorToInt(slimeManager.Goo);
+        hunger = slimeManager.Hunger;
+        fun = slimeManager.Fun;
+        hygiene = slimeManager.Hygiene;
+        RefreshCounters();
+        RefreshStats();
+        RefreshMood();
+    }
+
+    private void BuildFoodList()
+    {
+        var root = GetComponent<UIDocument>()?.rootVisualElement;
+        var list = root?.Q<VisualElement>("FoodList");
+        if (list == null)
+            return;
+        list.Clear();
+        foods.Clear();
+        var all = Resources.LoadAll<FoodItemData>("Food");
+        System.Array.Sort(all, (x, y) => x.order.CompareTo(y.order));
+        foods.AddRange(all);
+        for (int i = 0; i < foods.Count; i++)
+        {
+            int idx = i;
+            var item = foods[idx];
+            var card = new VisualElement();
+            card.AddToClassList("food-card");
+            var img = new Label(item.iconEmoji);
+            img.AddToClassList("food-img");
+            var info = new VisualElement();
+            info.AddToClassList("food-info");
+            var name = new Label(item.foodName);
+            name.AddToClassList("food-name");
+            var price = new Label($"{item.price} slimes");
+            price.AddToClassList("food-price");
+            info.Add(name);
+            info.Add(price);
+            var buy = new Button(() => BuyFood(idx)) { text = "Comprar", name = $"Buy{idx}" };
+            buy.AddToClassList("buy-btn");
+            card.Add(img);
+            card.Add(info);
+            card.Add(buy);
+            list.Add(card);
+        }
+    }
+
+    private void BuyFood(int index)
+    {
+        if (slimeManager == null || index < 0 || index >= foods.Count)
+            return;
+        var item = foods[index];
+        if (slimeManager.SpendGoo(item.price))
+        {
+            slimeManager.AddHunger(item.hungerRestore);
+            PlayBuy();
+            PullFromManager();
+        }
+        else
+        {
+            PlayClose();
+            Debug.Log($"[MainHUD] Sem gosma para {item.foodName} ({item.price}).");
+        }
+    }
+
+    private void Update()
+    {
+        if (slimeManager == null || _slimeButton == null)
+            return;
+        _moodTimer -= Time.deltaTime;
+        if (_moodTimer > 0f)
+            return;
+        _moodTimer = 0.5f;
+        RefreshMood();
+    }
+
+    /// <summary>Aplica texto/cor do humor da euforia no botao do slime (§18).</summary>
+    public void RefreshMood()
+    {
+        if (slimeManager == null || _slimeButton == null)
+            return;
+        int tier = slimeManager.GetEuphoriaMoodTier();
+        if (tier == _lastMoodTier)
+            return;
+        _lastMoodTier = tier;
+        _slimeButton.text = SlimeManager.MoodTexts[tier];
+        _slimeButton.style.backgroundColor = new StyleColor(SlimeManager.MoodColors[tier]);
     }
 
     // API publica para ligar a logica do jogo depois.
@@ -616,15 +738,46 @@ public class MainHUDController : MonoBehaviour
         SetRing("HygieneFill", hygiene);
     }
 
+    private readonly Dictionary<string, StatRingFill> _ringFills = new();
+    private readonly Dictionary<string, Color> _ringColors = new()
+    {
+        { "HungerFill", new Color(1f, 0.667f, 0.471f) },
+        { "FunFill", new Color(0.549f, 0.745f, 1f) },
+        { "HygieneFill", new Color(0.549f, 0.902f, 0.863f) },
+    };
+    private readonly Dictionary<string, string> _ringPct = new()
+    {
+        { "HungerFill", "HungerPct" },
+        { "FunFill", "FunPct" },
+        { "HygieneFill", "HygienePct" },
+    };
+
     private void SetRing(string fillName, float value)
     {
         var root = GetComponent<UIDocument>()?.rootVisualElement;
-        var fill = root?.Q<VisualElement>(fillName);
-        if (fill == null)
+        if (root == null)
             return;
-        float s = 0.25f + 0.75f * Mathf.Clamp01(value);
-        fill.style.scale = new StyleScale(new Scale(new Vector2(s, s)));
-        fill.style.opacity = value <= 0.01f ? 0f : 1f;
+        if (!_ringFills.TryGetValue(fillName, out var ring) || ring == null || ring.panel == null)
+        {
+            var host = root.Q<VisualElement>(fillName);
+            if (host == null)
+                return;
+            host.Clear();
+            host.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0f));
+            host.pickingMode = PickingMode.Ignore;
+            ring = new StatRingFill();
+            ring.style.width = new StyleLength(new Length(100f, LengthUnit.Percent));
+            ring.style.height = new StyleLength(new Length(100f, LengthUnit.Percent));
+            host.Add(ring);
+            _ringFills[fillName] = ring;
+        }
+        ring.SetFill(value, _ringColors[fillName]);
+        if (_ringPct.TryGetValue(fillName, out var pctName))
+        {
+            var pct = root.Q<Label>(pctName);
+            if (pct != null)
+                pct.text = $"{Mathf.RoundToInt(Mathf.Clamp01(value) * 100f)}%";
+        }
     }
 
     private void ToggleMute()

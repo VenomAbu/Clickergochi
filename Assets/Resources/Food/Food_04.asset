@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6e71455b541a3f49bbb01856d4fe1b3, type: 3}
+  m_Name: Food_04
+  m_EditorClassIdentifier: Assembly-CSharp::FoodItemData
+  order: 4
+  foodName: Suco
+  iconEmoji: "\U0001F9C3"
+  price: 15
+  hungerRestore: 0.2
+  buffDurationMinutes: 0
+  gooMultiplier: 1
+  activeProductionMultiplier: 1
+  idleProductionMultiplier: 1

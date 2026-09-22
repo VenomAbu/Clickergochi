@@ -1,184 +1,148 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/_Project/UI/MainSceneDocument.uss?fileID=7433441132597879392&amp;guid=64bf2ef9d1ffbfb4aa8efe403800d28f&amp;type=3#MainSceneDocument"/>
+    <Style src="MainSceneDocument.uss" />
     <ui:VisualElement name="Container" class="container">
         <ui:VisualElement name="MainScreen" class="main-screen">
+            <ui:VisualElement name="CritterLayer" class="critter-layer" />
             <ui:VisualElement name="TopArea" class="top-area">
                 <ui:VisualElement name="LevelBar" class="level-bar">
-                    <ui:VisualElement name="LevelFill" class="level-fill"/>
+                    <ui:VisualElement name="LevelFill" class="level-fill" />
                 </ui:VisualElement>
                 <ui:VisualElement name="TopControls" class="top-controls">
-                    <ui:Button name="MuteButton" text="🔊" class="mute-btn"/>
+                    <ui:Button name="MuteButton" class="mute-btn" text="&#128266;" />
                     <ui:VisualElement name="LevelBlock" class="level-block">
-                        <ui:Label name="LevelText" text="Nv 1 • 40%" class="level-text"/>
+                        <ui:Label name="LevelText" class="level-text" text="Nv 1 &#8226; 40%" />
                         <ui:VisualElement name="SlimeCounter" class="slime-counter">
-                            <ui:VisualElement name="SlimeDot" class="slime-dot"/>
-                            <ui:Label name="SlimeCountLabel" text="x 0" class="slime-count"/>
+                            <ui:VisualElement name="SlimeDot" class="slime-dot" />
+                            <ui:Label name="SlimeCountLabel" class="slime-count" text="x 0" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="StatsColumn" class="stats-column">
                         <ui:VisualElement name="StatHunger" class="stat-ring ring-hunger">
-                            <ui:VisualElement name="HungerFill" class="stat-fill fill-hunger"/>
-                            <ui:Label text="🍴" class="stat-icon"/>
+                            <ui:VisualElement name="HungerFill" class="stat-fill fill-hunger" />
+                            <ui:Label class="stat-icon" text="&#127860;" />
+                        <ui:Label name="HungerPct" class="stat-pct" text="50%" />
                         </ui:VisualElement>
                         <ui:VisualElement name="StatFun" class="stat-ring ring-fun">
-                            <ui:VisualElement name="FunFill" class="stat-fill fill-fun"/>
-                            <ui:Label text="🎮" class="stat-icon"/>
+                            <ui:VisualElement name="FunFill" class="stat-fill fill-fun" />
+                            <ui:Label class="stat-icon" text="&#127918;" />
+                        <ui:Label name="FunPct" class="stat-pct" text="50%" />
                         </ui:VisualElement>
                         <ui:VisualElement name="StatHygiene" class="stat-ring ring-hygiene">
-                            <ui:VisualElement name="HygieneFill" class="stat-fill fill-hygiene"/>
-                            <ui:Label text="🧼" class="stat-icon"/>
+                            <ui:VisualElement name="HygieneFill" class="stat-fill fill-hygiene" />
+                            <ui:Label class="stat-icon" text="&#129532;" />
+                        <ui:Label name="HygienePct" class="stat-pct" text="50%" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="MiddleArea" class="middle-area">
                 <ui:VisualElement name="FurnitureRow" class="furniture-row">
-                    <ui:Button name="Furniture0" text="🛏&#10;Cama" class="furniture-btn"/>
-                    <ui:Button name="Furniture1" text="🛕&#10;Sofá" class="furniture-btn"/>
-                    <ui:Button name="Furniture2" text="🪵&#10;Planta" class="furniture-btn"/>
+                    <ui:Button name="Furniture0" class="furniture-btn" text="&#128719;&#10;Cama" />
+                    <ui:Button name="Furniture1" class="furniture-btn" text="&#128725;&#10;Sof&#225;" />
+                    <ui:Button name="Furniture2" class="furniture-btn" text="&#129717;&#10;Planta" />
                 </ui:VisualElement>
-                <ui:Button name="SlimeButton" text=":)" class="slime-btn"/>
+                <ui:Button name="SlimeButton" class="slime-btn" text="&#128168;" />
             </ui:VisualElement>
             <ui:VisualElement name="BottomNav" class="bottom-nav">
-                <ui:Button name="ShopButton" text="🛍&#10;Loja" class="nav-btn"/>
-                <ui:Button name="StickerButton" text="⭐&#10;Stickers" class="nav-btn"/>
-                <ui:Button name="FoodButton" text="🍎&#10;Comidas" class="nav-btn"/>
+                <ui:Button name="ShopButton" class="nav-btn" text="&#128717;&#10;Loja" />
+                <ui:Button name="StickerButton" class="nav-btn" text="&#11088;&#10;Stickers" />
+                <ui:Button name="FoodButton" class="nav-btn" text="&#127822;&#10;Comidas" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ShopScreen" class="screen hidden">
-            <ui:Label name="ShopTitle" text="Loja" class="shop-title"/>
+            <ui:Label name="ShopTitle" class="shop-title" text="Loja" />
             <ui:VisualElement class="slime-counter">
-                <ui:VisualElement class="slime-dot"/>
-                <ui:Label name="ShopSlimeLabel" text="x 0" class="slime-count"/>
+                <ui:VisualElement class="slime-dot" />
+                <ui:Label name="ShopSlimeLabel" class="slime-count" text="x 0" />
             </ui:VisualElement>
             <ui:VisualElement name="ShopOptions" class="shop-options">
-                <ui:Button name="Option0" text="🎁 Pacote de Stickers" class="shop-option-btn"/>
-                <ui:Button name="Option1" text="🎨 Skin dos Slimes" class="shop-option-btn"/>
-                <ui:Button name="Option2" text="🛕 Skin dos Móveis" class="shop-option-btn"/>
+                <ui:Button name="Option0" class="shop-option-btn" text="&#127873; Pacote de Stickers" />
+                <ui:Button name="Option1" class="shop-option-btn" text="&#127912; Skin dos Slimes" />
+                <ui:Button name="Option2" class="shop-option-btn" text="&#128725; Skin dos M&#243;veis" />
             </ui:VisualElement>
-            <ui:Button name="ShopBack" text="← Voltar" class="shop-back-btn"/>
+            <ui:Button name="ShopBack" class="shop-back-btn" text="&#8592; Voltar" />
         </ui:VisualElement>
         <ui:VisualElement name="ShopDetailScreen" class="screen hidden">
-            <ui:Label name="DetailTitle" text="Detalhe" class="shop-title"/>
+            <ui:Label name="DetailTitle" class="shop-title" text="Detalhe" />
             <ui:VisualElement class="slime-counter">
-                <ui:VisualElement class="slime-dot"/>
-                <ui:Label name="DetailSlimeLabel" text="x 0" class="slime-count"/>
+                <ui:VisualElement class="slime-dot" />
+                <ui:Label name="DetailSlimeLabel" class="slime-count" text="x 0" />
             </ui:VisualElement>
             <ui:VisualElement class="shop-options">
-                <ui:Label name="DetailPlaceholder" text="Conteúdo em breve..." class="detail-placeholder"/>
+                <ui:Label name="DetailPlaceholder" class="detail-placeholder" text="Conte&#250;do em breve..." />
             </ui:VisualElement>
-            <ui:Button name="DetailBack" text="← Voltar" class="shop-back-btn"/>
+            <ui:Button name="DetailBack" class="shop-back-btn" text="&#8592; Voltar" />
         </ui:VisualElement>
         <ui:VisualElement name="StickersScreen" class="screen hidden">
-            <ui:Label name="StickersTitle" text="Stickers!!" class="shop-title"/>
+            <ui:Label name="StickersTitle" class="shop-title" text="Stickers!!" />
             <ui:VisualElement class="slime-counter">
-                <ui:VisualElement class="slime-dot"/>
-                <ui:Label name="StickersSlimeLabel" text="x 0" class="slime-count"/>
+                <ui:VisualElement class="slime-dot" />
+                <ui:Label name="StickersSlimeLabel" class="slime-count" text="x 0" />
             </ui:VisualElement>
-            <ui:ScrollView name="StickersScroll" show-horizontal-scroller="false" show-vertical-scroller="true" class="sticker-scroll">
+            <ui:ScrollView name="StickersScroll" class="sticker-scroll" show-horizontal-scroller="false" show-vertical-scroller="true">
                 <ui:VisualElement name="StickersGrid" class="sticker-grid">
-                    <ui:Button name="Sticker0" text="⭐&#10;Estrela" class="sticker-card"/>
-                    <ui:Button name="Sticker1" text="🌈&#10;Arco-íris" class="sticker-card"/>
-                    <ui:Button name="Sticker2" text="🔥&#10;Foguinho" class="sticker-card"/>
-                    <ui:Button name="Sticker3" text="🍀&#10;Trevo" class="sticker-card"/>
-                    <ui:Button name="Sticker4" text="🎈&#10;Balão" class="sticker-card"/>
-                    <ui:Button name="Sticker5" text="🎵&#10;Musiquinha" class="sticker-card"/>
-                    <ui:Button name="Sticker6" text="🐾&#10;Patinha" class="sticker-card"/>
-                    <ui:Button name="Sticker7" text="💎&#10;Diamante" class="sticker-card"/>
-                    <ui:Button name="Sticker8" text="🍩&#10;Rosquinha" class="sticker-card"/>
-                    <ui:Button name="Sticker9" text="🚀&#10;Foguete" class="sticker-card"/>
-                    <ui:Button name="Sticker10" text="🌟&#10;Estrelinha" class="sticker-card"/>
-                    <ui:Button name="Sticker11" text="💫&#10;Redemoinho" class="sticker-card"/>
+                    <ui:Button name="Sticker0" class="sticker-card" text="&#11088;&#10;Estrela" />
+                    <ui:Button name="Sticker1" class="sticker-card" text="&#127752;&#10;Arco-&#237;ris" />
+                    <ui:Button name="Sticker2" class="sticker-card" text="&#128293;&#10;Foguinho" />
+                    <ui:Button name="Sticker3" class="sticker-card" text="&#127808;&#10;Trevo" />
+                    <ui:Button name="Sticker4" class="sticker-card" text="&#127880;&#10;Bal&#227;o" />
+                    <ui:Button name="Sticker5" class="sticker-card" text="&#127925;&#10;Musiquinha" />
+                    <ui:Button name="Sticker6" class="sticker-card" text="&#128062;&#10;Patinha" />
+                    <ui:Button name="Sticker7" class="sticker-card" text="&#128142;&#10;Diamante" />
+                    <ui:Button name="Sticker8" class="sticker-card" text="&#127849;&#10;Rosquinha" />
+                    <ui:Button name="Sticker9" class="sticker-card" text="&#128640;&#10;Foguete" />
+                    <ui:Button name="Sticker10" class="sticker-card" text="&#127775;&#10;Estrelinha" />
+                    <ui:Button name="Sticker11" class="sticker-card" text="&#128171;&#10;Redemoinho" />
                 </ui:VisualElement>
             </ui:ScrollView>
-            <ui:Button name="StickersBack" text="← Voltar" class="shop-back-btn"/>
+            <ui:Button name="StickersBack" class="shop-back-btn" text="&#8592; Voltar" />
         </ui:VisualElement>
         <ui:VisualElement name="FoodScreen" class="screen hidden">
-            <ui:Label name="FoodTitle" text="Alimento" class="shop-title"/>
+            <ui:Label name="FoodTitle" class="shop-title" text="Alimento" />
             <ui:VisualElement class="slime-counter">
-                <ui:VisualElement class="slime-dot"/>
-                <ui:Label name="FoodSlimeLabel" text="x 0" class="slime-count"/>
+                <ui:VisualElement class="slime-dot" />
+                <ui:Label name="FoodSlimeLabel" class="slime-count" text="x 0" />
             </ui:VisualElement>
-            <ui:ScrollView name="FoodScroll" show-horizontal-scroller="false" show-vertical-scroller="true" class="food-scroll">
+            <ui:ScrollView name="FoodScroll" class="food-scroll" show-horizontal-scroller="false" show-vertical-scroller="true">
                 <ui:VisualElement name="FoodList" class="food-list">
-                    <ui:VisualElement class="food-card">
-                        <ui:Label text="🍎" class="food-img"/>
-                        <ui:VisualElement class="food-info">
-                            <ui:Label text="Maçã" class="food-name"/>
-                            <ui:Label text="10 slimes" class="food-price"/>
-                        </ui:VisualElement>
-                        <ui:Button name="Buy0" text="Comprar" class="buy-btn"/>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="food-card">
-                        <ui:Label text="🍕" class="food-img"/>
-                        <ui:VisualElement class="food-info">
-                            <ui:Label text="Pizza" class="food-name"/>
-                            <ui:Label text="25 slimes" class="food-price"/>
-                        </ui:VisualElement>
-                        <ui:Button name="Buy1" text="Comprar" class="buy-btn"/>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="food-card">
-                        <ui:Label text="🍰" class="food-img"/>
-                        <ui:VisualElement class="food-info">
-                            <ui:Label text="Bolo" class="food-name"/>
-                            <ui:Label text="40 slimes" class="food-price"/>
-                        </ui:VisualElement>
-                        <ui:Button name="Buy2" text="Comprar" class="buy-btn"/>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="food-card">
-                        <ui:Label text="🍦" class="food-img"/>
-                        <ui:VisualElement class="food-info">
-                            <ui:Label text="Sorvete" class="food-name"/>
-                            <ui:Label text="30 slimes" class="food-price"/>
-                        </ui:VisualElement>
-                        <ui:Button name="Buy3" text="Comprar" class="buy-btn"/>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="food-card">
-                        <ui:Label text="🥤" class="food-img"/>
-                        <ui:VisualElement class="food-info">
-                            <ui:Label text="Suco" class="food-name"/>
-                            <ui:Label text="15 slimes" class="food-price"/>
-                        </ui:VisualElement>
-                        <ui:Button name="Buy4" text="Comprar" class="buy-btn"/>
-                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:ScrollView>
-            <ui:Button name="FoodBack" text="← Voltar" class="shop-back-btn"/>
+            <ui:Button name="FoodBack" class="shop-back-btn" text="&#8592; Voltar" />
         </ui:VisualElement>
         <ui:VisualElement name="FurniturePopup" class="overlay hidden">
             <ui:VisualElement class="popup-card">
-                <ui:Button name="CloseButton" text="✖" class="popup-close-btn"/>
-                <ui:Label name="FurnitureTitle" text="Cama" class="popup-title"/>
-                <ui:VisualElement class="popup-spacer"/>
+                <ui:Button name="CloseButton" class="popup-close-btn" text="&#10006;" />
+                <ui:Label name="FurnitureTitle" class="popup-title" text="Cama" />
+                <ui:VisualElement class="popup-spacer" />
                 <ui:VisualElement class="popup-actions-row">
-                    <ui:Button name="UpgradeButton" text="⬆ Upgrade" class="popup-btn-small popup-btn-main"/>
-                    <ui:Button name="SkinButton" text="🎨 Trocar Skin" class="popup-btn-small"/>
+                    <ui:Button name="UpgradeButton" class="popup-btn-small popup-btn-main" text="&#11014; Upgrade" />
+                    <ui:Button name="SkinButton" class="popup-btn-small" text="&#127912; Trocar Skin" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="SkinPopup" class="overlay hidden">
             <ui:VisualElement class="popup-card">
-                <ui:Label name="SkinTitle" text="Cama" class="popup-title"/>
+                <ui:Label name="SkinTitle" class="popup-title" text="Cama" />
                 <ui:VisualElement name="Carousel" class="carousel">
-                    <ui:Button name="SkinLeft" text="◀" class="arrow-btn"/>
-                    <ui:Button name="Skin0" text="Skin 1" class="skin-card"/>
-                    <ui:Button name="Skin1" text="Skin 2" class="skin-card skin-selected"/>
-                    <ui:Button name="Skin2" text="Skin 3" class="skin-card"/>
-                    <ui:Button name="SkinRight" text="▶" class="arrow-btn"/>
+                    <ui:Button name="SkinLeft" class="arrow-btn" text="&#9664;" />
+                    <ui:Button name="Skin0" class="skin-card" text="Skin 1" />
+                    <ui:Button name="Skin1" class="skin-card skin-selected" text="Skin 2" />
+                    <ui:Button name="Skin2" class="skin-card" text="Skin 3" />
+                    <ui:Button name="SkinRight" class="arrow-btn" text="&#9654;" />
                 </ui:VisualElement>
-                <ui:Button name="SkinBackButton" text="← Voltar" class="popup-btn"/>
+                <ui:Button name="SkinBackButton" class="popup-btn" text="&#8592; Voltar" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="StickerPopup" class="overlay hidden">
             <ui:VisualElement class="popup-card sticker-popup-card">
-                <ui:Button name="StickerCloseButton" text="✖" class="popup-close-btn"/>
+                <ui:Button name="StickerCloseButton" class="popup-close-btn" text="&#10006;" />
                 <ui:VisualElement class="sticker-header-row">
                     <ui:VisualElement class="sticker-thumb">
-                        <ui:Label name="StickerThumbLabel" text="⭐" class="sticker-thumb-icon"/>
+                        <ui:Label name="StickerThumbLabel" class="sticker-thumb-icon" text="&#11088;" />
                     </ui:VisualElement>
-                    <ui:Label name="StickerNameLabel" text="Estrela" class="sticker-name"/>
+                    <ui:Label name="StickerNameLabel" class="sticker-name" text="Estrela" />
                 </ui:VisualElement>
-                <ui:Label name="StickerDescLabel" text="Descrição do sticker..." class="sticker-desc"/>
+                <ui:Label name="StickerDescLabel" class="sticker-desc" text="Descri&#231;&#227;o do sticker..." />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

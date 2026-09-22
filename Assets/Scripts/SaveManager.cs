@@ -4,7 +4,16 @@ using System.IO;
 public class SaveManager : MonoBehaviour
 {
     private static SaveManager _instance;
-    public static SaveManager Instance => _instance;
+    public static SaveManager Instance
+    {
+        get
+        {
+            // Auto-recupera se o estatico se perdeu (troca de cena/domain reload).
+            if (_instance == null)
+                _instance = FindFirstObjectByType<SaveManager>();
+            return _instance;
+        }
+    }
 
     private SaveData saveData;
     private string savePath;
