@@ -155,21 +155,49 @@ public class CockroachSceneManager : MonoBehaviour
 
     private void HandleClicks()
     {
-        Mouse mouse = Mouse.current;
-        if (mouse == null || !mouse.leftButton.wasPressedThisFrame)
+        if (!TryGetPointerPressPosition(out Vector2 screenPosition))
             return;
 
         Camera camera = Camera.main;
         if (camera == null)
             return;
 
-        Ray ray = camera.ScreenPointToRay(mouse.position.ReadValue());
+        Ray ray = camera.ScreenPointToRay(screenPosition);
         RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, 100f);
         if (hit.collider == null)
             return;
 
         CockroachUnit roach = hit.collider.GetComponent<CockroachUnit>();
         roach?.RegisterHit();
+    }
+
+    private static bool TryGetPointerPressPosition(out Vector2 screenPosition)
+    {
+        // No Android, o mouse pode existir como dispositivo virtual, mas os
+        // toques chegam pelo Touchscreen. Tratar os dois evita depender
+        // de mouse.leftButton para o comando de acertar a barata.
+        Touchscreen touchscreen = Touchscreen.current;
+        if (touchscreen != null)
+        {
+            foreach (var touch in touchscreen.touches)
+            {
+                if (!touch.press.wasPressedThisFrame)
+                    continue;
+
+                screenPosition = touch.position.ReadValue();
+                return true;
+            }
+        }
+
+        Mouse mouse = Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        {
+            screenPosition = mouse.position.ReadValue();
+            return true;
+        }
+
+        screenPosition = default;
+        return false;
     }
 
     public void OnCockroachKilled(CockroachUnit roach)

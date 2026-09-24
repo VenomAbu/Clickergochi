@@ -428,12 +428,12 @@ public class MainHUDController : MonoBehaviour
         RefreshMood();
     }
 
-    /// <summary>Aplica texto/cor do humor da euforia no botao do slime (§18).</summary>
+    /// <summary>Aplica texto/cor do humor dos cuidados no botão do slime.</summary>
     public void RefreshMood()
     {
         if (slimeManager == null || _slimeButton == null)
             return;
-        int tier = slimeManager.GetEuphoriaMoodTier();
+        int tier = slimeManager.GetCareMoodTier();
         if (tier == _lastMoodTier)
             return;
         _lastMoodTier = tier;

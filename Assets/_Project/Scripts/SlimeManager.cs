@@ -34,6 +34,14 @@ public class SlimeManager : MonoBehaviour
     [Header("Euforia (carga 100->0% em 4h; bonus x1.00-x2.00 por tier)")]
     [SerializeField] private float euphoriaDurationHours = 4f;
 
+    [Header("Humor dos cuidados")]
+    [Tooltip("Menor cuidado necessario para o slime ficar muito feliz (:)).")]
+    [SerializeField, Range(0f, 1f)] private float moodExcellentThreshold = 0.75f;
+    [Tooltip("Menor cuidado necessario para ficar feliz (:P).")]
+    [SerializeField, Range(0f, 1f)] private float moodGoodThreshold = 0.50f;
+    [Tooltip("Menor cuidado necessario para ficar neutro (:0).")]
+    [SerializeField, Range(0f, 1f)] private float moodOkayThreshold = 0.25f;
+
     private readonly Dictionary<string, float> gooMultipliers = new();
     private const string FunBonusId = "fun_bonus";
     private const string EuphoriaId = "euphoria";
@@ -451,6 +459,33 @@ public class SlimeManager : MonoBehaviour
             return 0f;
         double total = TimeSpan.FromHours(Mathf.Max(0.01f, euphoriaDurationHours)).TotalSeconds;
         return Mathf.Clamp01((float)(EuphoriaRemaining().TotalSeconds / total));
+    }
+
+    /// <summary>
+    /// Retorna o humor visual dos cuidados. O pior entre fome, diversao e
+    /// higiene define o humor, para que o slime nao fique feliz enquanto ainda
+    /// existe uma necessidade basica em zero.
+    /// </summary>
+    public int GetCareMoodTier()
+    {
+        float lowestCare = Mathf.Min(
+            Mathf.Clamp01(Hunger),
+            Mathf.Min(Mathf.Clamp01(Fun), Mathf.Clamp01(Hygiene)));
+
+        float excellent = Mathf.Clamp01(moodExcellentThreshold);
+        float good = Mathf.Clamp01(moodGoodThreshold);
+        float okay = Mathf.Clamp01(moodOkayThreshold);
+
+        // Mantem a ordem dos limiares mesmo se o Inspector for editado com
+        // valores invertidos.
+        excellent = Mathf.Max(excellent, good);
+        excellent = Mathf.Max(excellent, okay);
+        good = Mathf.Max(good, okay);
+
+        if (lowestCare >= excellent) return 4;
+        if (lowestCare >= good) return 3;
+        if (lowestCare >= okay) return 2;
+        return lowestCare > 0f ? 1 : 0;
     }
 
     public int GetEuphoriaMoodTier()
