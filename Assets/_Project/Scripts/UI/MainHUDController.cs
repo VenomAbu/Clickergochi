@@ -105,6 +105,8 @@ public class MainHUDController : MonoBehaviour
 
     private AudioSource _audio;
     private readonly Dictionary<string, AudioClip> _synthCache = new();
+    private SaveManager _subscribedSaveManager;
+    private float _syncTimer;
 
     private void OnEnable()
     {
@@ -145,6 +147,7 @@ public class MainHUDController : MonoBehaviour
 
         if (slimeManager == null)
             slimeManager = FindFirstObjectByType<SlimeManager>();
+        SubscribeToState();
 
         // Tela principal: clique real vai para o SlimeManager (Fase 1).
         var slimeBtn = root.Q<Button>("SlimeButton");
@@ -182,7 +185,8 @@ public class MainHUDController : MonoBehaviour
         if (_muteButton != null)
             _muteButton.clicked += ToggleMute;
 
-        // Baratas: sons e refresh via sistema de audio existente.
+        // Baratas: só a cena original usa este caminho. Em TesteDanillo
+        // o CockroachManager não existe; as baratas são GameObjects.
         var roaches = FindFirstObjectByType<CockroachManager>();
         if (roaches != null)
         {
@@ -268,11 +272,53 @@ public class MainHUDController : MonoBehaviour
             WireFeel(btn, btn == slimeBtn);
 
         ShowScreen("MainScreen");
-        RefreshCounters();
-        RefreshStats();
+        if (slimeManager != null)
+            PullFromManager();
+        else
+        {
+            RefreshCounters();
+            RefreshStats();
+        }
         RefreshSkins();
         ApplyMuteIcon();
         RefreshMood();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeFromState();
+    }
+
+    private void SubscribeToState()
+    {
+        UnsubscribeFromState();
+        if (slimeManager != null)
+            slimeManager.StateChanged += HandleSlimeStateChanged;
+
+        _subscribedSaveManager = SaveManager.Instance;
+        if (_subscribedSaveManager != null)
+            _subscribedSaveManager.SaveDataChanged += HandleSaveDataChanged;
+    }
+
+    private void UnsubscribeFromState()
+    {
+        if (slimeManager != null)
+            slimeManager.StateChanged -= HandleSlimeStateChanged;
+        if (_subscribedSaveManager != null)
+            _subscribedSaveManager.SaveDataChanged -= HandleSaveDataChanged;
+        _subscribedSaveManager = null;
+    }
+
+    private void HandleSlimeStateChanged()
+    {
+        if (isActiveAndEnabled)
+            PullFromManager();
+    }
+
+    private void HandleSaveDataChanged(SaveData data)
+    {
+        if (isActiveAndEnabled)
+            PullFromManager();
     }
 
     /// <summary>Puxa gosma e barras do SlimeManager para a UI (Fase 1-2).</summary>
@@ -288,7 +334,19 @@ public class MainHUDController : MonoBehaviour
     {
         if (slimeManager == null)
             return;
-        slimeCount = Mathf.FloorToInt(slimeManager.Goo);
+
+        SaveManager saveManager = SaveManager.Instance;
+        SaveData save = saveManager != null ? saveManager.GetSaveData() : null;
+        if (save != null)
+        {
+            level = Mathf.Max(1, save.objectLevel);
+            slimeCount = Mathf.FloorToInt(save.goo);
+        }
+        else
+        {
+            slimeCount = Mathf.FloorToInt(slimeManager.Goo);
+        }
+
         hunger = slimeManager.Hunger;
         fun = slimeManager.Fun;
         hygiene = slimeManager.Hygiene;
@@ -353,6 +411,14 @@ public class MainHUDController : MonoBehaviour
 
     private void Update()
     {
+        _syncTimer -= Time.unscaledDeltaTime;
+        if (_syncTimer <= 0f)
+        {
+            _syncTimer = 0.25f;
+            if (slimeManager != null)
+                PullFromManager();
+        }
+
         if (slimeManager == null || _slimeButton == null)
             return;
         _moodTimer -= Time.deltaTime;
@@ -376,15 +442,32 @@ public class MainHUDController : MonoBehaviour
     }
 
     // API publica para ligar a logica do jogo depois.
-    public void SetSlimeCount(int v) { slimeCount = v; RefreshCounters(); }
+    public void SetSlimeCount(int value)
+    {
+        if (slimeManager != null)
+        {
+            float current = slimeManager.Goo;
+            slimeManager.AddGoo(value - Mathf.FloorToInt(current));
+            return;
+        }
+        slimeCount = value;
+        RefreshCounters();
+    }
+
     public void SetLevel(float progress, int lvl)
     {
         levelProgress = Mathf.Clamp01(progress);
         level = lvl;
         RefreshCounters();
     }
+
     public void SetStats(float h, float f, float hy)
     {
+        if (slimeManager != null)
+        {
+            slimeManager.SetCare(h, f, hy);
+            return;
+        }
         hunger = Mathf.Clamp01(h);
         fun = Mathf.Clamp01(f);
         hygiene = Mathf.Clamp01(hy);
