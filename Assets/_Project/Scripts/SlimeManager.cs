@@ -15,11 +15,11 @@ public class SlimeManager : MonoBehaviour
 
     [Header("Decaimento dos cuidados (por hora)")]
     [Tooltip("Quantidade de pontos (0 a 1) que a Diversão perde a cada hora real.")]
-    [SerializeField, Min(0f)] private float funDecayPerHour = 0.10f;
+    [SerializeField, Min(0f)] private float funDecayPerHour = 0.1f;
     [Tooltip("Quantidade de pontos (0 a 1) que a Fome perde a cada hora real. Deve ser menor que a diversão.")]
-    [SerializeField, Min(0f)] private float hungerDecayPerHour = 0.04f;
+    [SerializeField, Min(0f)] private float hungerDecayPerHour = 0.7f;
     [Tooltip("Quantidade de pontos (0 a 1) que a Higiene perde a cada hora real. Deve ser o menor valor.")]
-    [SerializeField, Min(0f)] private float hygieneDecayPerHour = 0.02f;
+    [SerializeField, Min(0f)] private float hygieneDecayPerHour = 0.5f;
     [Tooltip("Intervalo de atualização do decaimento durante a partida.")]
     [SerializeField, Min(0.1f)] private float decayUpdateIntervalSeconds = 1f;
     [Tooltip("Intervalo para solicitar uma gravação dos valores que mudaram apenas por decaimento.")]
