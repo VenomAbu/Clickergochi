@@ -162,6 +162,8 @@ MonoBehaviour:
   closeClip: {fileID: 0}
   buyClip: {fileID: 0}
   uiVolume: 0.5
+  musicClip: {fileID: 8300000, guid: 7e4c5fd53b8fa5b49ae64f537e953bb5, type: 3}
+  musicVolume: 0.25
 --- !u!114 &74530534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -859,6 +861,9 @@ MonoBehaviour:
   funBonusClickMultiplier: 2
   funBonusDurationSeconds: 30
   euphoriaDurationHours: 4
+  moodExcellentThreshold: 0.75
+  moodGoodThreshold: 0.5
+  moodOkayThreshold: 0.25
 --- !u!4 &1632827375
 Transform:
   m_ObjectHideFlags: 0

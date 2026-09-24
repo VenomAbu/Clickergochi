@@ -30,6 +30,10 @@ public class MainHUDController : MonoBehaviour
     public AudioClip buyClip;
     [Range(0f, 1f)] public float uiVolume = 0.5f;
 
+    [Header("Música de fundo")]
+    public AudioClip musicClip;
+    [Range(0f, 1f)] public float musicVolume = 0.25f;
+
     private Label _levelText;
     private VisualElement _levelFill;
     private Button _muteButton;
@@ -104,9 +108,26 @@ public class MainHUDController : MonoBehaviour
     private IVisualElementScheduledItem _feelTimer;
 
     private AudioSource _audio;
+    private AudioSource _musicSource;
+    private GameObject _musicSourceObject;
     private readonly Dictionary<string, AudioClip> _synthCache = new();
     private SaveManager _subscribedSaveManager;
     private float _syncTimer;
+
+    private void OnValidate()
+    {
+        musicVolume = Mathf.Clamp01(musicVolume);
+        if (_musicSource != null)
+            _musicSource.volume = musicVolume;
+    }
+
+    private void Start()
+    {
+        // Repete a tentativa depois de o ciclo de vida da UI terminar de ser
+        // inicializado; alguns dispositivos/headless environments initialize
+        // o audio depois do OnEnable.
+        StartBackgroundMusic();
+    }
 
     private void OnEnable()
     {
@@ -128,6 +149,7 @@ public class MainHUDController : MonoBehaviour
         _levelText = root.Q<Label>("LevelText");
         _levelFill = root.Q<VisualElement>("LevelFill");
         _muteButton = root.Q<Button>("MuteButton");
+        StartBackgroundMusic();
         _furniturePopup = root.Q<VisualElement>("FurniturePopup");
         _skinPopup = root.Q<VisualElement>("SkinPopup");
         _stickerPopup = root.Q<VisualElement>("StickerPopup");
@@ -287,6 +309,7 @@ public class MainHUDController : MonoBehaviour
     private void OnDisable()
     {
         UnsubscribeFromState();
+        StopBackgroundMusic();
     }
 
     private void SubscribeToState()
@@ -649,6 +672,47 @@ public class MainHUDController : MonoBehaviour
             shrink = false
         });
         EnsureFeelTicking();
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        musicVolume = Mathf.Clamp01(volume);
+        if (_musicSource != null)
+            _musicSource.volume = musicVolume;
+    }
+
+    private AudioSource GetMusicSource()
+    {
+        if (_musicSource != null)
+            return _musicSource;
+
+        _musicSourceObject = new GameObject("BackgroundMusic");
+        _musicSourceObject.transform.SetParent(transform, false);
+        _musicSource = _musicSourceObject.AddComponent<AudioSource>();
+        _musicSource.playOnAwake = false;
+        _musicSource.loop = true;
+        _musicSource.spatialBlend = 0f;
+        _musicSource.volume = musicVolume;
+        return _musicSource;
+    }
+
+    private void StartBackgroundMusic()
+    {
+        if (!Application.isPlaying || musicClip == null)
+            return;
+
+        AudioSource source = GetMusicSource();
+        source.clip = musicClip;
+        source.loop = true;
+        source.volume = musicVolume;
+        if (!source.isPlaying)
+            source.Play();
+    }
+
+    private void StopBackgroundMusic()
+    {
+        if (_musicSource != null && _musicSource.isPlaying)
+            _musicSource.Stop();
     }
 
     // ---- Sons suaves (clipe do inspector ou sintetizado) ----

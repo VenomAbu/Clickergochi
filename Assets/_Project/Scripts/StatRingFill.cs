@@ -40,7 +40,21 @@ public class StatRingFill : VisualElement
         painter.Fill();
         if (fill <= 0f)
             return;
+
         painter.fillColor = fillColor;
+
+        // Em 100%, o caminho setorial volta exatamente ao ponto inicial.
+        // O Painter2D pode interpretar esse arco de 360 graus com a linha
+        // ate o centro como um caminho degenerado (ele aparece deformado ao
+        // atingir o maximo). Nesse caso, desenhamos um circulo completo.
+        if (fill >= 0.9999f)
+        {
+            painter.BeginPath();
+            painter.Arc(center, radius, 0f, 360f);
+            painter.Fill();
+            return;
+        }
+
         painter.BeginPath();
         painter.MoveTo(center);
         painter.Arc(center, radius, -90f, -90f + 360f * fill);
