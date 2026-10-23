@@ -48,19 +48,37 @@ public class MainHUDController : MonoBehaviour
     private Label _stickerNameLabel;
     private Label _stickerDescLabel;
     private string _currentFurniture = "Cama";
+    private FurnitureManager _furniture;
+    private ConfirmPopupUI _confirmPopup;
+    private ParachuteEventManager _parachute;
+    private FurnitureShopUI _furnitureShop;
+    private Label _furnitureLevelLabel;
+    private Label _furnitureEffectLabel;
+    private Label _furnitureCostLabel;
+    private Button _upgradeButton;
     private Button[] _skinCards;
     private Button _slimeButton;
     private int _lastMoodTier = -1;
     private float _moodTimer;
+    private bool _euphoriaActive;
     private readonly List<Label> _slimeLabels = new();
     private readonly List<VisualElement> _screens = new();
     private readonly List<Button> _stickerCards = new();
 
     private readonly List<string> _skins = new() { "Skin 1", "Skin 2", "Skin 3", "Skin 4", "Skin 5" };
     private int _skinIndex = 1;
-    private readonly string[] _furnitureNames = { "Cama", "Sofá", "Planta" };
-    private readonly string[] _shopOptions = { "Pacote de Stickers", "Skin dos Slimes", "Skin dos Móveis" };
-    private readonly List<FoodItemData> foods = new();
+    private readonly string[] _furnitureNames = { "Cama", "Guarda-roupas", "Cômoda" };
+    private readonly string[] _shopOptions = { "Móveis", "Pacote de Stickers", "Skin dos Slimes", "Skin dos Móveis" };
+    private readonly List<FoodEntry> foods = new();
+    private readonly List<Button> _foodBuyButtons = new();
+
+    /// <summary>Par comida+variante vendavel (um card por raridade na loja).</summary>
+    private readonly struct FoodEntry
+    {
+        public readonly FoodItemData Food;
+        public readonly FoodTier Tier;
+        public FoodEntry(FoodItemData food, FoodTier tier) { Food = food; Tier = tier; }
+    }
 
     private readonly string[] _stickerThumbs =
     {
@@ -159,6 +177,9 @@ public class MainHUDController : MonoBehaviour
         _stickerThumbLabel = root.Q<Label>("StickerThumbLabel");
         _stickerNameLabel = root.Q<Label>("StickerNameLabel");
         _stickerDescLabel = root.Q<Label>("StickerDescLabel");
+        _furnitureLevelLabel = root.Q<Label>("FurnitureLevelLabel");
+        _furnitureEffectLabel = root.Q<Label>("FurnitureEffectLabel");
+        _furnitureCostLabel = root.Q<Label>("FurnitureCostLabel");
 
         foreach (var labelName in new[] { "SlimeCountLabel", "ShopSlimeLabel", "DetailSlimeLabel", "StickersSlimeLabel", "FoodSlimeLabel" })
         {
@@ -171,12 +192,42 @@ public class MainHUDController : MonoBehaviour
             slimeManager = FindFirstObjectByType<SlimeManager>();
         SubscribeToState();
 
+        // Progressao de comodo/moveis (GDD) + popup de confirmacao de compra.
+        _furniture = FurnitureManager.Instance;
+        _furniture.StateChanged += HandleFurnitureStateChanged;
+        _confirmPopup = new ConfirmPopupUI(root.Q<VisualElement>("ConfirmPopup"));
+        _confirmPopup.Canceled += PlayClose;
+
+        // Evento Caixa de Paraquedas: som de premio ao capturar.
+        _parachute = ParachuteEventManager.Instance;
+        if (_parachute != null)
+            _parachute.Claimed += HandleParachuteClaimed;
+        _furnitureShop = new FurnitureShopUI(
+            root.Q<VisualElement>("DetailContent"),
+            root.Q<Label>("DetailPlaceholder"),
+            _furniture,
+            slimeManager,
+            _confirmPopup,
+            PlayBuy);
+
         // Tela principal: clique real vai para o SlimeManager (Fase 1).
         var slimeBtn = root.Q<Button>("SlimeButton");
         _slimeButton = slimeBtn;
+        // Borda de euforia: limpa a cada enable; reaplica em ate 0,5s se ativa.
+        _euphoriaActive = false;
+        slimeBtn?.RemoveFromClassList("euphoria-active");
+        // Contagem no PointerDown (TrickleDown), nao no `clicked`: o Clickable
+        // do Button so computa clique no UP com ContainsPointer() — em rajada
+        // rapida, up "fora" da area (botao ainda encolhido) ou frame com dois
+        // pares down+up colapsados derrubavam 1-2 cliques. Todo cliqueer conta
+        // na pressao: cada down = 1 clique, sem depender do soltar.
         if (slimeBtn != null)
-            slimeBtn.clicked += () =>
+            slimeBtn.RegisterCallback<PointerDownEvent>(evt =>
             {
+                // Exclui so o botao direito; toque (Android) vem com button
+                // negativo e precisa contar normalmente.
+                if (evt.button == 1)
+                    return;
                 if (slimeManager != null)
                     SyncFromManager();
                 else
@@ -184,7 +235,9 @@ public class MainHUDController : MonoBehaviour
                     slimeCount++;
                     RefreshCounters();
                 }
-            };
+                PlaySlime();
+                SlimeBurst(slimeBtn);
+            }, TrickleDown.TrickleDown);
 
         for (int i = 0; i < 3; i++)
         {
@@ -221,8 +274,9 @@ public class MainHUDController : MonoBehaviour
         if (close != null)
             close.clicked += () => { PlayClose(); Show(_furniturePopup, false); };
         var upgrade = root.Q<Button>("UpgradeButton");
+        _upgradeButton = upgrade;
         if (upgrade != null)
-            upgrade.clicked += () => { PlayBuy(); Debug.Log($"[MainHUD] Upgrade {_currentFurniture} (demo, sem logica)."); };
+            upgrade.clicked += OnFurnitureUpgradeClicked;
         var skin = root.Q<Button>("SkinButton");
         if (skin != null)
             skin.clicked += OpenSkinPopup;
@@ -245,8 +299,8 @@ public class MainHUDController : MonoBehaviour
                 _skinCards[idx].clicked += () => SelectVisibleSkin(idx);
         }
 
-        // Loja: 3 opcoes -> tela de detalhe.
-        for (int i = 0; i < 3; i++)
+        // Loja: opcoes -> tela de detalhe.
+        for (int i = 0; i < _shopOptions.Length; i++)
         {
             int idx = i;
             var option = root.Q<Button>($"Option{idx}");
@@ -309,7 +363,19 @@ public class MainHUDController : MonoBehaviour
     private void OnDisable()
     {
         UnsubscribeFromState();
+        if (_furniture != null)
+            _furniture.StateChanged -= HandleFurnitureStateChanged;
+        if (_confirmPopup != null)
+            _confirmPopup.Canceled -= PlayClose;
+        if (_parachute != null)
+            _parachute.Claimed -= HandleParachuteClaimed;
+        _parachute = null;
         StopBackgroundMusic();
+    }
+
+    private void HandleParachuteClaimed(float amount)
+    {
+        PlayBuy();
     }
 
     private void SubscribeToState()
@@ -360,15 +426,22 @@ public class MainHUDController : MonoBehaviour
 
         SaveManager saveManager = SaveManager.Instance;
         SaveData save = saveManager != null ? saveManager.GetSaveData() : null;
-        if (save != null)
+        if (_furniture != null)
+        {
+            // A barra do topo acompanha o nivel do Comodo (GDD) e o
+            // progresso de gosma para o proximo nivel.
+            level = _furniture.ComodoLevel;
+            float nextCost = _furniture.ComodoUpgradeCost();
+            levelProgress = nextCost <= 0f
+                ? 1f
+                : Mathf.Clamp01(slimeManager.Goo / nextCost);
+        }
+        else if (save != null)
         {
             level = Mathf.Max(1, save.objectLevel);
-            slimeCount = Mathf.FloorToInt(save.goo);
         }
-        else
-        {
-            slimeCount = Mathf.FloorToInt(slimeManager.Goo);
-        }
+
+        slimeCount = Mathf.FloorToInt(save != null ? save.goo : slimeManager.Goo);
 
         hunger = slimeManager.Hunger;
         fun = slimeManager.Fun;
@@ -376,6 +449,8 @@ public class MainHUDController : MonoBehaviour
         RefreshCounters();
         RefreshStats();
         RefreshMood();
+        RefreshFoodBuyButtons();
+        _furnitureShop?.UpdateStates();
     }
 
     private void BuildFoodList()
@@ -386,50 +461,93 @@ public class MainHUDController : MonoBehaviour
             return;
         list.Clear();
         foods.Clear();
+        _foodBuyButtons.Clear();
+
         var all = Resources.LoadAll<FoodItemData>("Food");
         System.Array.Sort(all, (x, y) => x.order.CompareTo(y.order));
-        foods.AddRange(all);
+        foreach (var food in all)
+        {
+            if (food.tiers == null)
+                continue;
+            // Um card por raridade vendida da comida.
+            foreach (var tier in food.tiers)
+                foods.Add(new FoodEntry(food, tier));
+        }
+
         for (int i = 0; i < foods.Count; i++)
         {
             int idx = i;
-            var item = foods[idx];
+            FoodEntry entry = foods[idx];
             var card = new VisualElement();
             card.AddToClassList("food-card");
-            var img = new Label(item.iconEmoji);
+            var img = new Label(entry.Food.iconEmoji);
             img.AddToClassList("food-img");
             var info = new VisualElement();
             info.AddToClassList("food-info");
-            var name = new Label(item.foodName);
+            var name = new Label(entry.Food.foodName);
             name.AddToClassList("food-name");
-            var price = new Label($"{item.price} slimes");
+            var rarity = new Label(entry.Tier.rarity.ToString());
+            rarity.AddToClassList("food-rarity");
+            rarity.AddToClassList("rarity-" + entry.Tier.rarity.ToString().ToLowerInvariant());
+            var effect = new Label(entry.Tier.Describe());
+            effect.AddToClassList("food-effect");
+            var price = new Label($"{entry.Tier.price} slimes");
             price.AddToClassList("food-price");
             info.Add(name);
+            info.Add(rarity);
+            info.Add(effect);
             info.Add(price);
             var buy = new Button(() => BuyFood(idx)) { text = "Comprar", name = $"Buy{idx}" };
             buy.AddToClassList("buy-btn");
+            _foodBuyButtons.Add(buy);
             card.Add(img);
             card.Add(info);
             card.Add(buy);
             list.Add(card);
         }
+        RefreshFoodBuyButtons();
+    }
+
+    /// <summary>Regra do TP3: sem comer com a Fome em 100%.</summary>
+    private void RefreshFoodBuyButtons()
+    {
+        bool canEat = FoodBonusManager.Instance.CanEat;
+        foreach (Button btn in _foodBuyButtons)
+            if (btn != null)
+                btn.SetEnabled(canEat);
     }
 
     private void BuyFood(int index)
     {
-        if (slimeManager == null || index < 0 || index >= foods.Count)
+        if (index < 0 || index >= foods.Count)
             return;
-        var item = foods[index];
-        if (slimeManager.SpendGoo(item.price))
-        {
-            slimeManager.AddHunger(item.hungerRestore);
-            PlayBuy();
-            PullFromManager();
-        }
-        else
+
+        FoodEntry entry = foods[index];
+        FoodBonusManager bonus = FoodBonusManager.Instance;
+        if (bonus == null || !bonus.CanEat)
         {
             PlayClose();
-            Debug.Log($"[MainHUD] Sem gosma para {item.foodName} ({item.price}).");
+            return;
         }
+
+        void DoBuy()
+        {
+            if (FoodBonusManager.Instance.TryEat(entry.Food, entry.Tier))
+                PlayBuy();
+            else
+                PlayClose();
+            PullFromManager();
+        }
+
+        // Toda compra pede confirmacao (mesmo fluxo dos moveis).
+        if (_confirmPopup != null)
+            _confirmPopup.Show(
+                entry.Food.foodName,
+                $"{entry.Tier.rarity} • {entry.Tier.Describe()}\nPor {entry.Tier.price} slimes?",
+                "Comprar",
+                DoBuy);
+        else
+            DoBuy();
     }
 
     private void Update()
@@ -449,6 +567,31 @@ public class MainHUDController : MonoBehaviour
             return;
         _moodTimer = 0.5f;
         RefreshMood();
+        RefreshEuphoriaBorder();
+    }
+
+    /// <summary>
+    /// Indicador de Euforia ativa: borda dourada no slime enquanto durar.
+    /// </summary>
+    private void RefreshEuphoriaBorder()
+    {
+        if (slimeManager == null || _slimeButton == null)
+            return;
+
+        bool euphoric = slimeManager.IsEuphoric;
+        if (euphoric == _euphoriaActive)
+            return;
+        _euphoriaActive = euphoric;
+
+        if (euphoric)
+        {
+            _slimeButton.AddToClassList("euphoria-active");
+            Debug.Log("[MainHUD] Euforia ativa: borda dourada no slime.");
+        }
+        else
+        {
+            _slimeButton.RemoveFromClassList("euphoria-active");
+        }
     }
 
     /// <summary>Aplica texto/cor do humor dos cuidados no botão do slime.</summary>
@@ -502,21 +645,30 @@ public class MainHUDController : MonoBehaviour
     {
         if (b == null)
             return;
-        b.RegisterCallback<PointerDownEvent>(evt => StartScaleTween(b, CurrentScale(b), 0.88f, 110f, EaseOutQuad));
-        b.RegisterCallback<PointerUpEvent>(evt => StartScaleTween(b, CurrentScale(b), 1f, 260f, EaseOutBack));
-        b.RegisterCallback<PointerLeaveEvent>(evt => StartScaleTween(b, CurrentScale(b), 1f, 160f, EaseOutQuad));
-        b.clicked += () =>
+        // TrickleDown e obrigatorio aqui: o Clickable do Button para a
+        // propagacao dos PointerDown/Up no BubbleUp quando o botao esquerdo
+        // e pressionado (na fase BubbleUp o tween nunca rodaria e so o botao
+        // direito, que o Clickable ignora, animava). Guard por exclusao do
+        // botao direito (== 1), nao por `== 0`: em toque (Android) `button`
+        // vem negativo — nenhum botao de mouse mudou de estado — e um guard
+        // "== 0" ignoraria todos os toques do celular.
+        b.RegisterCallback<PointerDownEvent>(evt =>
         {
-            if (isSlime)
-            {
-                PlaySlime();
-                SlimeBurst(b);
-            }
-            else
-            {
-                PlayClick();
-            }
-        };
+            if (evt.button == 1)
+                return;
+            StartScaleTween(b, CurrentScale(b), 0.88f, 110f, EaseOutQuad);
+        }, TrickleDown.TrickleDown);
+        b.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (evt.button == 1)
+                return;
+            StartScaleTween(b, CurrentScale(b), 1f, 260f, EaseOutBack);
+        }, TrickleDown.TrickleDown);
+        b.RegisterCallback<PointerLeaveEvent>(evt => StartScaleTween(b, CurrentScale(b), 1f, 160f, EaseOutQuad), TrickleDown.TrickleDown);
+        // O slime ja faz som + SlimeBurst no PointerDown (contagem na pressao);
+        // disparar de novo no `clicked` (UP) dobraria tudo por clique.
+        if (!isSlime)
+            b.clicked += PlayClick;
     }
 
     private static float CurrentScale(VisualElement el)
@@ -846,12 +998,14 @@ public class MainHUDController : MonoBehaviour
         Show(_furniturePopup, false);
         Show(_skinPopup, false);
         Show(_stickerPopup, false);
+        _confirmPopup?.Hide();
     }
 
     private void OpenShopDetail(string optionName)
     {
         if (_detailTitle != null)
             _detailTitle.text = optionName;
+        _furnitureShop?.Show(optionName == _shopOptions[0]);
         PlayOpen();
         ShowScreen("ShopDetailScreen");
     }
@@ -945,6 +1099,7 @@ public class MainHUDController : MonoBehaviour
         _currentFurniture = furnitureName;
         if (_furnitureTitle != null)
             _furnitureTitle.text = furnitureName;
+        RefreshFurniturePopup();
         PlayOpen();
         Show(_skinPopup, false);
         Show(_furniturePopup, true);
@@ -992,5 +1147,98 @@ public class MainHUDController : MonoBehaviour
         if (el == null)
             return;
         el.EnableInClassList("hidden", !visible);
+    }
+
+    // ---- Comodo e moveis (GDD) ----
+
+    private void HandleFurnitureStateChanged()
+    {
+        if (!isActiveAndEnabled)
+            return;
+        RefreshFurniturePopup();
+        _furnitureShop?.UpdateStates();
+        PullFromManager();
+    }
+
+    /// <summary>Atualiza nivel/efeito/custo/botao do popup do movel aberto.</summary>
+    private void RefreshFurniturePopup()
+    {
+        if (_furniture == null)
+            return;
+
+        FurnitureKind kind = FurnitureShopUI.KindFromName(_currentFurniture);
+        int level = _furniture.FurnitureLevel(kind);
+        int max = _furniture.FurnitureMaxLevel(kind);
+        int unlock = _furniture.UnlockLevel(kind);
+
+        if (max <= 0)
+        {
+            if (_furnitureLevelLabel != null)
+                _furnitureLevelLabel.text = "Bloqueada";
+            if (_furnitureEffectLabel != null)
+                _furnitureEffectLabel.text = $"Desbloqueia no Cômodo Lv.{unlock}";
+            if (_furnitureCostLabel != null)
+                _furnitureCostLabel.text = "";
+            if (_upgradeButton != null)
+            {
+                _upgradeButton.text = "🔒 Bloqueada";
+                _upgradeButton.SetEnabled(false);
+            }
+            return;
+        }
+
+        if (_furnitureLevelLabel != null)
+            _furnitureLevelLabel.text = $"Nv {level} / {max}";
+        if (_furnitureEffectLabel != null)
+            _furnitureEffectLabel.text = FurnitureShopUI.BuildEffectText(kind, level);
+
+        float cost = _furniture.FurnitureUpgradeCost(kind);
+        if (cost < 0f)
+        {
+            if (_furnitureCostLabel != null)
+                _furnitureCostLabel.text = "Nível máximo!";
+            if (_upgradeButton != null)
+            {
+                _upgradeButton.text = "🏆 Máximo";
+                _upgradeButton.SetEnabled(false);
+            }
+            return;
+        }
+
+        float goo = slimeManager != null ? slimeManager.Goo : 0f;
+        if (_furnitureCostLabel != null)
+            _furnitureCostLabel.text = $"Custo: {FurnitureShopUI.FormatGoo(cost)} gosma";
+        if (_upgradeButton != null)
+        {
+            bool affordable = goo >= cost;
+            _upgradeButton.text = affordable
+                ? "⬆ Evoluir"
+                : $"Faltam {FurnitureShopUI.FormatGoo(cost - goo)}";
+            _upgradeButton.SetEnabled(affordable);
+        }
+    }
+
+    private void OnFurnitureUpgradeClicked()
+    {
+        if (_furniture == null || _confirmPopup == null)
+            return;
+
+        FurnitureKind kind = FurnitureShopUI.KindFromName(_currentFurniture);
+        float cost = _furniture.FurnitureUpgradeCost(kind);
+        if (cost < 0f)
+            return;
+
+        string name = _currentFurniture;
+        int next = _furniture.FurnitureLevel(kind) + 1;
+        _confirmPopup.Show(
+            $"Evoluir {name}?",
+            $"Passar para o Nv {next} por {FurnitureShopUI.FormatGoo(cost)} gosma?",
+            "Evoluir",
+            () =>
+            {
+                if (_furniture.TryUpgradeFurniture(kind))
+                    PlayBuy();
+                RefreshFurniturePopup();
+            });
     }
 }

@@ -370,6 +370,8 @@ public static class TesteDanielUGUIBBuilder
         for (int i = 0; i < foods.Length; i++)
         {
             FoodItemData item = foods[i];
+            // Caminho legado (UGUI): preco da primeira variante (raridade base).
+            int foodPrice = item.tiers != null && item.tiers.Length > 0 ? item.tiers[0].price : 0;
             GameObject card = CreatePanel("Food_" + i, list.transform, White, false);
             SetTopCenter(card.GetComponent<RectTransform>(), new Vector2(560f, 96f), new Vector2(0f, -i * 110f));
             GameObject icon = CreateImage("FoodImage", card.transform, LightPurple, uiSprite, false, false);
@@ -378,7 +380,7 @@ public static class TesteDanielUGUIBBuilder
             AddText("Initial", icon.transform, initial, 30, Navy, TextAlignmentOptions.Center).GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             refs.foodNameTexts[i] = AddText("FoodName", card.transform, item.foodName, 22, Navy, TextAlignmentOptions.Left);
             SetCenter(refs.foodNameTexts[i].GetComponent<RectTransform>(), new Vector2(-55f, 18f), new Vector2(280f, 30f));
-            refs.foodPriceTexts[i] = AddText("FoodPrice", card.transform, item.price + " slimes", 19, Green, TextAlignmentOptions.Left);
+            refs.foodPriceTexts[i] = AddText("FoodPrice", card.transform, foodPrice + " slimes", 19, Green, TextAlignmentOptions.Left);
             SetCenter(refs.foodPriceTexts[i].GetComponent<RectTransform>(), new Vector2(-55f, -18f), new Vector2(280f, 26f));
             refs.foodBuyButtons[i] = CreateButton("Buy", card.transform, Green, new Vector2(140f, 60f), new Vector2(205f, 0f));
             AddText("Label", refs.foodBuyButtons[i].transform, "Comprar", 20, White, TextAlignmentOptions.Center);

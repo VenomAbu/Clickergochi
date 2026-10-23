@@ -336,6 +336,63 @@
     font-size: 21px;
     color: rgb(90, 160, 90);
 }
+.food-rarity {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    background-color: rgb(150, 140, 170);
+    border-radius: 6px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    align-self: flex-start;
+}
+.food-rarity.rarity-caseira {
+    background-color: rgb(140, 140, 150);
+}
+.food-rarity.rarity-artesanal {
+    background-color: rgb(60, 130, 200);
+}
+.food-rarity.rarity-gourmet {
+    background-color: rgb(200, 150, 50);
+}
+.food-effect {
+    font-size: 12px;
+    color: rgb(110, 100, 140);
+    white-space: normal;
+    margin-bottom: 2px;
+}
+/* Evento aleatorio: Caixa de Paraquedas. */
+.parachute-box {
+    align-items: center;
+    justify-content: flex-end;
+}
+.parachute-chute {
+    font-size: 34px;
+    unity-text-align: middle-center;
+}
+.parachute-cargo {
+    font-size: 44px;
+    unity-text-align: middle-center;
+    margin-top: -6px;
+}
+.parachute-float {
+    font-size: 24px;
+    -unity-font-style: bold;
+    unity-text-align: middle-center;
+    color: rgb(70, 170, 80);
+}
+.parachute-float-miss {
+    font-size: 34px;
+    color: rgb(210, 100, 90);
+}
+/* Euforia ativa: borda dourada no slime. */
+.slime-btn.euphoria-active {
+    border-color: rgb(255, 202, 70);
+}
 .buy-btn {
     width: 140px;
     height: 60px;
@@ -490,4 +547,93 @@
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     padding: 0;
+}
+/* ---- LOJA: categoria Moveis (cartao do Comodo + moveis) ---- */
+.detail-scroll {
+    flex-grow: 1;
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 10px;
+}
+.detail-content {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+.room-card {
+    width: 100%;
+    max-width: 560px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 28px;
+    border-width: 3px;
+    border-color: rgb(180, 160, 220);
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+.room-title {
+    font-size: 27px;
+    color: rgb(60, 50, 90);
+    -unity-font-style: bold;
+}
+.room-line {
+    font-size: 20px;
+    color: rgb(100, 90, 130);
+    margin-top: 4px;
+    text-align: center;
+    white-space: normal;
+}
+.room-btn {
+    width: 280px;
+    height: 64px;
+    border-radius: 32px;
+    font-size: 23px;
+    margin-top: 12px;
+    background-color: rgb(150, 220, 120);
+    border-width: 3px;
+    border-color: rgb(100, 180, 90);
+    color: rgb(255, 255, 255);
+}
+.card-effect {
+    font-size: 19px;
+    color: rgb(100, 90, 130);
+    margin-top: 2px;
+    white-space: normal;
+}
+.card-locked {
+    opacity: 0.55;
+}
+/* ---- POPUP de compra ---- */
+.confirm-card {
+    height: 340px;
+}
+.confirm-message {
+    width: 100%;
+    font-size: 23px;
+    color: rgb(90, 80, 120);
+    text-align: center;
+    white-space: normal;
+    margin-top: 6px;
+}
+.popup-info-level {
+    font-size: 27px;
+    color: rgb(60, 50, 90);
+    -unity-font-style: bold;
+}
+.popup-info-effect {
+    width: 100%;
+    font-size: 21px;
+    color: rgb(100, 90, 130);
+    text-align: center;
+    white-space: normal;
+    margin-top: 4px;
+}
+.popup-info-cost {
+    font-size: 22px;
+    color: rgb(90, 160, 90);
+    margin-top: 4px;
 }

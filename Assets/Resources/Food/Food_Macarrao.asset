@@ -10,14 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6e71455b541a3f49bbb01856d4fe1b3, type: 3}
-  m_Name: Food_00
+  m_Name: Macarrão Cremoso
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemData
-  order: 0
-  foodName: "Ma\xE7\xE3"
-  iconEmoji: "\U0001F34E"
-  price: 10
-  hungerRestore: 0.15
-  buffDurationMinutes: 0
-  gooMultiplier: 1
-  activeProductionMultiplier: 1
-  idleProductionMultiplier: 1
+  order: 8
+  foodName: Macarrão Cremoso
+  iconEmoji: "\U0001F35D"
+  tiers:
+  - rarity: 1
+    price: 110
+    hungerRestore: 0.45
+    effect: 8
+    effectValue: 0.12
+    effectDurationMinutes: 15
+  - rarity: 2
+    price: 250
+    hungerRestore: 0.45
+    effect: 8
+    effectValue: 0.25
+    effectDurationMinutes: 15

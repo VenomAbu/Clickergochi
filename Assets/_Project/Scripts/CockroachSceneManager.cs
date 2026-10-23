@@ -15,6 +15,8 @@ public class CockroachSceneManager : MonoBehaviour
 
     [Header("Configuracao")]
     [Min(1)] public int maxCritters = 3;
+    [Tooltip("Chance base de um evento ocorrer a cada ciclo. 1 = sempre (comportamento original).")]
+    [Range(0f, 1f)] public float baseEventChance = 1f;
     public float moveSpeedMin = 1f;
     public float moveSpeedMax = 5f;
     [Min(1)] public int hitsRequired = 5;
@@ -262,6 +264,15 @@ public class CockroachSceneManager : MonoBehaviour
             }
             if (candidate == null)
                 break;
+
+            // Eventos aleatorios: chance base multiplicada pelo bônus de
+            // comida (Macarrao Cremoso). Falhou = nao ocorre neste ciclo;
+            // o proximo Maintain (0.5s) tenta de novo.
+            float chance = Mathf.Clamp01(baseEventChance
+                * (1f + FoodBonusManager.Instance.EventChanceBonus));
+            if (UnityEngine.Random.value > chance)
+                break;
+
             candidate.ResetCockroach();
             candidate.gameObject.SetActive(true);
             active.Add(candidate);

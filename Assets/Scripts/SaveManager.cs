@@ -128,6 +128,9 @@ public class SaveManager : MonoBehaviour
                 saveData = JsonUtility.FromJson<SaveData>(json);
                 if (saveData == null)
                     saveData = new SaveData();
+                // Saves antigos nao trazem os campos novos (comodo/moveis);
+                // Normalize aplica os defaults seguros.
+                saveData.Normalize();
                 Debug.Log($"Game loaded from: {savePath}");
             }
             catch (Exception exception)

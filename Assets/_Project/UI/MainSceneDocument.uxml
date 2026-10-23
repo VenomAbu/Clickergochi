@@ -38,8 +38,8 @@
             <ui:VisualElement name="MiddleArea" class="middle-area">
                 <ui:VisualElement name="FurnitureRow" class="furniture-row">
                     <ui:Button name="Furniture0" text="🛏&#10;Cama" class="furniture-btn"/>
-                    <ui:Button name="Furniture1" text="🛕&#10;Sofá" class="furniture-btn"/>
-                    <ui:Button name="Furniture2" text="🪵&#10;Planta" class="furniture-btn"/>
+                    <ui:Button name="Furniture1" text="👕&#10;Guarda" class="furniture-btn"/>
+                    <ui:Button name="Furniture2" text="🪞&#10;Cômoda" class="furniture-btn"/>
                 </ui:VisualElement>
                 <ui:Button name="SlimeButton" text="💨" class="slime-btn"/>
             </ui:VisualElement>
@@ -56,9 +56,10 @@
                 <ui:Label name="ShopSlimeLabel" text="x 0" class="slime-count"/>
             </ui:VisualElement>
             <ui:VisualElement name="ShopOptions" class="shop-options">
-                <ui:Button name="Option0" text="🎁 Pacote de Stickers" class="shop-option-btn"/>
-                <ui:Button name="Option1" text="🎨 Skin dos Slimes" class="shop-option-btn"/>
-                <ui:Button name="Option2" text="🛕 Skin dos Móveis" class="shop-option-btn"/>
+                <ui:Button name="Option0" text="🛏 Móveis" class="shop-option-btn"/>
+                <ui:Button name="Option1" text="🎁 Pacote de Stickers" class="shop-option-btn"/>
+                <ui:Button name="Option2" text="🎨 Skin dos Slimes" class="shop-option-btn"/>
+                <ui:Button name="Option3" text="🛕 Skin dos Móveis" class="shop-option-btn"/>
             </ui:VisualElement>
             <ui:Button name="ShopBack" text="← Voltar" class="shop-back-btn"/>
         </ui:VisualElement>
@@ -68,9 +69,11 @@
                 <ui:VisualElement class="slime-dot"/>
                 <ui:Label name="DetailSlimeLabel" text="x 0" class="slime-count"/>
             </ui:VisualElement>
-            <ui:VisualElement class="shop-options">
-                <ui:Label name="DetailPlaceholder" text="Conteúdo em breve..." class="detail-placeholder"/>
-            </ui:VisualElement>
+            <ui:ScrollView name="DetailScroll" show-horizontal-scroller="false" show-vertical-scroller="true" class="detail-scroll">
+                <ui:VisualElement name="DetailContent" class="detail-content">
+                    <ui:Label name="DetailPlaceholder" text="Conteúdo em breve..." class="detail-placeholder"/>
+                </ui:VisualElement>
+            </ui:ScrollView>
             <ui:Button name="DetailBack" text="← Voltar" class="shop-back-btn"/>
         </ui:VisualElement>
         <ui:VisualElement name="StickersScreen" class="screen hidden">
@@ -112,6 +115,9 @@
             <ui:VisualElement class="popup-card">
                 <ui:Button name="CloseButton" text="✖" class="popup-close-btn"/>
                 <ui:Label name="FurnitureTitle" text="Cama" class="popup-title"/>
+                <ui:Label name="FurnitureLevelLabel" text="Nv 0" class="popup-info-level"/>
+                <ui:Label name="FurnitureEffectLabel" text="Sem efeito" class="popup-info-effect"/>
+                <ui:Label name="FurnitureCostLabel" text="" class="popup-info-cost"/>
                 <ui:VisualElement class="popup-spacer"/>
                 <ui:VisualElement class="popup-actions-row">
                     <ui:Button name="UpgradeButton" text="⬆ Upgrade" class="popup-btn-small popup-btn-main"/>
@@ -142,6 +148,17 @@
                     <ui:Label name="StickerNameLabel" text="Estrela" class="sticker-name"/>
                 </ui:VisualElement>
                 <ui:Label name="StickerDescLabel" text="Descrição do sticker..." class="sticker-desc"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ConfirmPopup" class="overlay hidden">
+            <ui:VisualElement class="popup-card confirm-card">
+                <ui:Label name="ConfirmTitle" text="Confirmar compra" class="popup-title"/>
+                <ui:Label name="ConfirmMessage" text="..." class="confirm-message"/>
+                <ui:VisualElement class="popup-spacer"/>
+                <ui:VisualElement class="popup-actions-row">
+                    <ui:Button name="ConfirmNoButton" text="✖ Cancelar" class="popup-btn-small"/>
+                    <ui:Button name="ConfirmYesButton" text="✔ Confirmar" class="popup-btn-small popup-btn-main"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

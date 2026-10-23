@@ -341,9 +341,13 @@ public class TesteDanielUGUIController : MonoBehaviour
         if (slimeManager == null || index < 0 || index >= foodItems?.Length)
             return;
         FoodItemData item = foodItems[index];
-        if (item == null || !slimeManager.SpendGoo(item.price))
+        // Caminho legado (UGUI): usa a primeira variante (raridade base).
+        FoodTier tier = item != null && item.tiers != null && item.tiers.Length > 0
+            ? item.tiers[0]
+            : null;
+        if (tier == null || !slimeManager.SpendGoo(tier.price))
             return;
-        slimeManager.AddHunger(item.hungerRestore);
+        slimeManager.AddHunger(tier.hungerRestore);
         Play(slimeClip);
         Refresh();
     }

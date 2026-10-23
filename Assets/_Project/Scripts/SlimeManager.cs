@@ -33,6 +33,8 @@ public class SlimeManager : MonoBehaviour
 
     [Header("Euforia (carga 100->0% em 4h; bonus x1.00-x2.00 por tier)")]
     [SerializeField] private float euphoriaDurationHours = 4f;
+    [Tooltip("Menor cuidado para a Euforia disparar. O decaimento continuo derruba 100% para 99,9% em segundos; 0.995 = '100%' na tela e uns 2,5 min de janela para completar os outros medidores.")]
+    [SerializeField, Range(0.9f, 1f)] private float euphoriaTriggerThreshold = 0.995f;
 
     [Header("Humor dos cuidados")]
     [Tooltip("Menor cuidado necessario para o slime ficar muito feliz (:)).")]
@@ -79,10 +81,25 @@ public class SlimeManager : MonoBehaviour
     /// <summary>Disparado quando goo, fome, diversão, higiene ou humor mudam.</summary>
     public event Action StateChanged;
 
+    private static SlimeManager _instance;
+
+    /// <summary>Instancia encontrada na cena (sem criar GameObjects).</summary>
+    public static SlimeManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = FindFirstObjectByType<SlimeManager>();
+            return _instance;
+        }
+    }
+
     public float Goo => Save().goo;
     public float Hunger => Save().hunger;
     public float Fun => Save().fun;
     public float Hygiene => Save().hygiene;
+    /// <summary>Gosma base por clique do Inspector (1 = cliques simples).</summary>
+    public float BaseGooPerClick => baseGooPerClick;
     public bool FunBonusActive => funBonusClicksLeft > 0 && funBonusTimer > 0f;
     public int FunBonusClicksLeft => funBonusClicksLeft;
 
@@ -118,6 +135,7 @@ public class SlimeManager : MonoBehaviour
 
     private void OnEnable()
     {
+        _instance = this;
         SubscribeToSaveManager();
         InitializeCareDecay();
         RefreshEuphoriaMultiplier();
@@ -176,6 +194,10 @@ public class SlimeManager : MonoBehaviour
         {
             decayCheckTimer = Mathf.Max(0.1f, decayUpdateIntervalSeconds);
             ApplyTimeDecay(DateTime.UtcNow, true);
+            // Rede de seguranca: dispara a Euforia em ate ~1s apos os tres
+            // cuidados chegarem a ~100%, mesmo que o caminho que encheu a
+            // ultima barra nao chame CheckEuphoriaTrigger explicitamente.
+            CheckEuphoriaTrigger();
         }
 
         if (funBonusClicksLeft > 0)
@@ -316,12 +338,44 @@ public class SlimeManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>Clique na slime. Retorna a gosma ganha com multiplicadores.</summary>
+    /// <summary>
+    /// Clique na slime. Segue as regras do GDD:
+    /// clique-base = baseGooPerClick x nivel do Comodo;
+    /// clique normal = clique-base x (1 + bonus do Guarda-roupas);
+    /// clique critico = clique-base x multiplicador critico (5x, sem o bonus
+    /// do Guarda-roupas). Multiplicadores globais (euforia, diversao) valem
+    /// nos dois casos.
+    /// </summary>
     public float RegisterClick()
     {
         ApplyPendingCareDecay();
         SaveData data = Save();
-        float gain = baseGooPerClick * CurrentMultiplier();
+
+        float comodoLevel = 1f;
+        float wardrobeBonus = 0f;
+        float critChance = 0f;
+        float critMultiplier = 5f;
+        FurnitureManager furniture = FurnitureManager.Instance;
+        if (furniture != null)
+        {
+            comodoLevel = furniture.ComodoLevel;
+            wardrobeBonus = furniture.WardrobeBonusFraction;
+            critChance = furniture.DresserCritChance;
+            critMultiplier = furniture.CritMultiplier;
+        }
+
+        // Omelete: +chance de critico temporaria somada a da Comoda.
+        FoodBonusManager foodBonus = FoodBonusManager.Instance;
+        if (foodBonus != null)
+            critChance = Mathf.Clamp01(critChance + foodBonus.CritChanceBonus);
+
+        float cliqueBase = baseGooPerClick * comodoLevel;
+        bool critical = critChance > 0f && UnityEngine.Random.value < critChance;
+        float gain = critical
+            ? cliqueBase * critMultiplier
+            : cliqueBase * (1f + wardrobeBonus);
+        gain *= CurrentMultiplier();
+
         data.goo += gain;
 
         if (data.fun < 1f)
@@ -350,6 +404,24 @@ public class SlimeManager : MonoBehaviour
         data.hunger = Mathf.Clamp01(data.hunger + amount);
         CheckEuphoriaTrigger();
         Commit();
+    }
+
+    /// <summary>
+    /// Valor de um clique normal sem critico e sem multiplicadores globais
+    /// (euforia/diversao). Usado pelo Cookie ("gosma equivalente a X
+    /// cliques").
+    /// </summary>
+    public float StandardClickGoo()
+    {
+        float comodoLevel = 1f;
+        float wardrobeBonus = 0f;
+        FurnitureManager furniture = FurnitureManager.Instance;
+        if (furniture != null)
+        {
+            comodoLevel = furniture.ComodoLevel;
+            wardrobeBonus = furniture.WardrobeBonusFraction;
+        }
+        return baseGooPerClick * comodoLevel * (1f + wardrobeBonus);
     }
 
     public void AddHygiene(float amount)
@@ -398,6 +470,20 @@ public class SlimeManager : MonoBehaviour
         SaveData data = Save();
         data.goo = Mathf.Max(0f, data.goo + amount);
         Commit();
+    }
+
+    /// <summary>
+    /// Credita gosma passiva (producao da Cama) sem gravar no disco a cada
+    /// chamada. A UI recebe StateChanged na hora; o chamador pede a
+    /// persistencia em um intervalo maior para nao saturar o disco.
+    /// </summary>
+    public void AddGooPassive(float amount)
+    {
+        if (amount <= 0f)
+            return;
+        SaveData data = Save();
+        data.goo = Mathf.Max(0f, data.goo + amount);
+        NotifyStateChanged();
     }
 
     /// <summary>Tenta gastar gosma. Retorna false se não houver saldo.</summary>
@@ -522,10 +608,17 @@ public class SlimeManager : MonoBehaviour
         SaveData data = Save();
         if (IsEuphoric)
             return;
-        if (data.hunger < 1f || data.fun < 1f || data.hygiene < 1f)
+        // Tolerancia: o decaimento continuo derruba uma barra de 100% para
+        // 99,9% em segundos — exigir >= 1.0 exato nos tres cuidados tornava
+        // o gatilho praticamente impossivel no jogo natural. A folga
+        // (0.995 = "100%" na tela) da ~2,5 min para completar os outros.
+        float threshold = Mathf.Clamp(euphoriaTriggerThreshold, 0.9f, 1f);
+        if (data.hunger < threshold || data.fun < threshold || data.hygiene < threshold)
             return;
         data.euphoriaEndUtc = DateTime.UtcNow.AddHours(euphoriaDurationHours).ToString("o");
         RefreshEuphoriaMultiplier();
+        Debug.Log("[Slime] Euforia iniciada automaticamente (3 cuidados ~100%).");
+        Commit();
     }
 
     private void ActivateFunBonus()

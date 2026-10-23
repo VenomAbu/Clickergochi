@@ -10,14 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6e71455b541a3f49bbb01856d4fe1b3, type: 3}
-  m_Name: Food_03
+  m_Name: Panquecas com Mel
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemData
-  order: 3
-  foodName: Sorvete
-  iconEmoji: "\U0001F366"
-  price: 30
-  hungerRestore: 0.4
-  buffDurationMinutes: 0
-  gooMultiplier: 1
-  activeProductionMultiplier: 1
-  idleProductionMultiplier: 1
+  order: 7
+  foodName: Panquecas com Mel
+  iconEmoji: "\U0001F95E"
+  tiers:
+  - rarity: 1
+    price: 120
+    hungerRestore: 0.4
+    effect: 7
+    effectValue: 2
+    effectDurationMinutes: 0
+  - rarity: 2
+    price: 280
+    hungerRestore: 0.4
+    effect: 7
+    effectValue: 3
+    effectDurationMinutes: 0
