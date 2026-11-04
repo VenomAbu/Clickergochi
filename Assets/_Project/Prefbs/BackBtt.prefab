@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1493255804008403231}
   - component: {fileID: 6368983954743910394}
   - component: {fileID: 5055537310588354389}
+  - component: {fileID: 1784740995176076751}
   m_Layer: 5
   m_Name: BackBtt
   m_TagString: Untagged
@@ -120,7 +121,46 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6368983954743910394}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: VerticalNavegationController, Assembly-CSharp
+        m_MethodName: BackBtt
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1784740995176076751}
+        m_TargetAssemblyTypeName: UIFeelGeral, Assembly-CSharp
+        m_MethodName: PlayStretchAndSquash
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1784740995176076751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763270723151396957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40d4d7c0aaa9ce44bad5462304eef2ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIFeelGeral
+  squashScale: 0.85
+  stretchScale: 1.1
+  animationDuration: 0.15
 --- !u!1 &5445222837956285525
 GameObject:
   m_ObjectHideFlags: 0
