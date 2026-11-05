@@ -37,6 +37,9 @@ public class RoomController : MonoBehaviour
     private bool isMuted;
     private Coroutine bubbleCoroutine;
 
+    [Header("Navigation")]
+    [SerializeField] private VerticalNavegationController verticalNavigation;
+
 
 
     private void Awake()
@@ -95,7 +98,6 @@ public class RoomController : MonoBehaviour
 
         levelBar.fillAmount = Mathf.Clamp01(percentage);
     }
-
     // =========================================
     // OPEN PANELS
     // =========================================
@@ -117,8 +119,19 @@ public class RoomController : MonoBehaviour
 
     private void OpenPanel(GameObject panel)
     {
-        if (panel != null)
-            panel.SetActive(true);
+        if (panel == null)
+            return;
+
+        if (verticalNavigation != null)
+        {
+            verticalNavigation.OpenPanel(panel);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "RoomController: VerticalNavigation não configurado."
+            );
+        }
     }
 
     // =========================================

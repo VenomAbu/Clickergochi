@@ -16,6 +16,9 @@ public class VerticalNavegationController : MonoBehaviour
     [SerializeField] private GameObject packPanel;
     [SerializeField] private GameObject furnitureSkinPanel;
 
+    [Header("Transitions")]
+    [SerializeField] private UITransitionController transitionController;
+
     private void Awake()
     {
         CloseAllPanels();
@@ -30,8 +33,18 @@ public class VerticalNavegationController : MonoBehaviour
         if (panel == null)
             return;
 
-        CloseAllPanels();
+        if (transitionController != null)
+        {
+            transitionController.OpenVerticalPanel(
+                panel,
+                verticalPanels
+            );
 
+            return;
+        }
+
+        // Fallback caso o controlador de transições não esteja configurado.
+        CloseAllPanels();
         panel.SetActive(true);
     }
 
@@ -72,6 +85,12 @@ public class VerticalNavegationController : MonoBehaviour
 
     public void BackBtt()
     {
+        if (transitionController != null)
+        {
+            transitionController.ReturnToHorizontal(verticalPanels);
+            return;
+        }
+
         CloseAllPanels();
 
         if (horizontalNavigation == null)
@@ -79,11 +98,11 @@ public class VerticalNavegationController : MonoBehaviour
             Debug.LogWarning(
                 "VerticalNavegationController: HorizontalNavigation não configurado."
             );
+
             return;
         }
 
-        GameObject currentHorizontalPanel =
-            horizontalNavigation.GetCurrentPanel();
+        GameObject currentHorizontalPanel = horizontalNavigation.GetCurrentPanel();
 
         if (currentHorizontalPanel != null)
             currentHorizontalPanel.SetActive(true);
@@ -95,11 +114,9 @@ public class VerticalNavegationController : MonoBehaviour
 
     public void BackBttToShop()
     {
-        CloseAllPanels();
-
         if (shopPanel != null)
         {
-            shopPanel.SetActive(true);
+            OpenPanel(shopPanel);
         }
         else
         {

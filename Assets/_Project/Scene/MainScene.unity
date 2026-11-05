@@ -1683,6 +1683,7 @@ MonoBehaviour:
   slimeSkinPanel: {fileID: 230216272}
   packPanel: {fileID: 165970463}
   furnitureSkinPanel: {fileID: 1951608025}
+  transitionController: {fileID: 167647506}
 --- !u!1 &161720990
 GameObject:
   m_ObjectHideFlags: 0
@@ -1814,7 +1815,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ac3cfa9e3ebc41e428a180f5d39a0eb9, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1840,6 +1841,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 165970463}
   m_CullTransparentMesh: 1
+--- !u!1 &167647505
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 167647507}
+  - component: {fileID: 167647506}
+  m_Layer: 0
+  m_Name: TransitionController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &167647506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 167647505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fff2f9aedcd38be44b61edc4b4a73bf0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UITransitionController
+  horizontalNavigation: {fileID: 473518127}
+  useSlideTransition: 1
+  slideDistance: 250
+  openDuration: 0.35
+  closeDuration: 0.25
+  startScale: 0.75
+  closeScale: 0.78
+  vignetteProperty: _Opacity
+  vignetteMaxOpacity: 1
+  vignetteFadeDuration: 0.25
+--- !u!4 &167647507
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 167647505}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 883.6015, y: -0.00004, z: 8338.696}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &168497966 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2079260743937409952, guid: 2e34e6cefced96740a82e488f37dec8e, type: 3}
@@ -3073,7 +3128,6 @@ GameObject:
   m_Component:
   - component: {fileID: 224179772}
   - component: {fileID: 224179775}
-  - component: {fileID: 224179774}
   - component: {fileID: 224179773}
   m_Layer: 0
   m_Name: SlimeCamera
@@ -3141,14 +3195,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &224179774
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 224179771}
-  m_Enabled: 1
 --- !u!20 &224179775
 Camera:
   m_ObjectHideFlags: 0
@@ -3327,7 +3373,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ac3cfa9e3ebc41e428a180f5d39a0eb9, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -5961,7 +6007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ac3cfa9e3ebc41e428a180f5d39a0eb9, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -10470,6 +10516,7 @@ MonoBehaviour:
   hygieneBubble: {fileID: 1289108274}
   hungerBubble: {fileID: 281669821}
   bubbleDuration: 1.5
+  verticalNavigation: {fileID: 0}
 --- !u!114 &891810816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12215,7 +12262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ac3cfa9e3ebc41e428a180f5d39a0eb9, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -12715,6 +12762,7 @@ MonoBehaviour:
   hygieneBubble: {fileID: 1289108274}
   hungerBubble: {fileID: 281669821}
   bubbleDuration: 1.5
+  verticalNavigation: {fileID: 0}
 --- !u!114 &1132252554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14878,7 +14926,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1670742539}
         m_TargetAssemblyTypeName: RoomController, Assembly-CSharp
-        m_MethodName: OpenShop
+        m_MethodName: OpenFood
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -17464,6 +17512,7 @@ MonoBehaviour:
   hygieneBubble: {fileID: 1289108274}
   hungerBubble: {fileID: 281669821}
   bubbleDuration: 1.5
+  verticalNavigation: {fileID: 151285002}
 --- !u!1 &1673042543
 GameObject:
   m_ObjectHideFlags: 0
@@ -20230,7 +20279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ac3cfa9e3ebc41e428a180f5d39a0eb9, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -21965,7 +22014,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ac3cfa9e3ebc41e428a180f5d39a0eb9, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -22909,3 +22958,4 @@ SceneRoots:
   - {fileID: 1507419945}
   - {fileID: 719315018}
   - {fileID: 819564573}
+  - {fileID: 167647507}
