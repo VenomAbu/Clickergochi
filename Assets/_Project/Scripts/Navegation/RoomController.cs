@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,6 +37,12 @@ public class RoomController : MonoBehaviour
 
     private bool isMuted;
     private Coroutine bubbleCoroutine;
+
+    /// <summary>Dispara quando o mute e alternado (true = mudo).</summary>
+    public event Action<bool> MuteChanged;
+
+    /// <summary>Estado atual do mudo.</summary>
+    public bool IsMuted => isMuted;
 
     [Header("Navigation")]
     [SerializeField] private VerticalNavegationController verticalNavigation;
@@ -87,6 +94,21 @@ public class RoomController : MonoBehaviour
     // LEVEL BAR
     // =========================================
 
+    /// <summary>
+    /// Alimenta os medidores com os cuidados do slime (0-1).
+    /// Ordem interna de measureImages: [HapinessFill, HungerFill, HygieneFill].
+    /// </summary>
+    public void SetMeasures(float hunger, float fun, float hygiene)
+    {
+        if (measureValues == null || measureValues.Length < 3)
+            return;
+
+        measureValues[0] = Mathf.Clamp01(fun) * 100f;
+        measureValues[1] = Mathf.Clamp01(hunger) * 100f;
+        measureValues[2] = Mathf.Clamp01(hygiene) * 100f;
+        UpdateAllMensure();
+    }
+
     public void UpdateLevelBar(float value)
     {
         if (levelBar == null)
@@ -98,6 +120,16 @@ public class RoomController : MonoBehaviour
 
         levelBar.fillAmount = Mathf.Clamp01(percentage);
     }
+
+    /// <summary>Progresso 0-1 direto no fill (independe de levelBarTotal).</summary>
+    public void SetLevelProgress(float progress01)
+    {
+        if (levelBar == null)
+            return;
+
+        levelBar.fillAmount = Mathf.Clamp01(progress01);
+    }
+
     // =========================================
     // OPEN PANELS
     // =========================================
@@ -129,7 +161,7 @@ public class RoomController : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "RoomController: VerticalNavigation não configurado."
+                "RoomController: VerticalNavigation nï¿½o configurado."
             );
         }
     }
@@ -142,6 +174,7 @@ public class RoomController : MonoBehaviour
     {
         isMuted = !isMuted;
         UpdateMuteVisual();
+        MuteChanged?.Invoke(isMuted);
     }
 
     private void UpdateMuteVisual()
