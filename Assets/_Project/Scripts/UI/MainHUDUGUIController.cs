@@ -44,7 +44,6 @@ public class MainHUDUGUIController : MonoBehaviour
     public Color euphoriaColor = new Color(1f, 0.7921569f, 0.2745098f); // rgb(255,202,70)
 
     // ---- estado interno ----
-    private int _slimeCount;
     private int _level = 1;
     private float _levelProgress;
     private bool _muted;
@@ -137,9 +136,21 @@ public class MainHUDUGUIController : MonoBehaviour
         if (slimeManager == null)
             slimeManager = SlimeManager.Instance;
         if (slimeCounter == null)
-            slimeCounter = FindComponentByName<TMP_Text>("SlimeConter");
+        {
+            // O TMP do contador esta no filho "text" do SlimeConter (o pai so
+            // tem Image) — o GetComponent direto no pai retornava null e o
+            // texto ficava sempre vazio.
+            Transform counterRoot = FindTransformByName("SlimeConter");
+            if (counterRoot != null)
+                slimeCounter = counterRoot.GetComponentInChildren<TMP_Text>(true);
+        }
         if (levelLabel == null)
-            levelLabel = FindComponentByName<TMP_Text>("LvlTMP");
+        {
+            // Busca APENAS dentro do HUD: o "LvlTMP" da cena e o do popup de
+            // movel (unico existente) — antes o HUD escrevia "Nv X" dentro do
+            // popup, sobrescrevendo o nivel do movel.
+            levelLabel = FindInChildrenByName<TMP_Text>("LvlTMP");
+        }
         if (slimeRoot == null)
         {
             Transform t = FindTransformByName("Slimes3D");
@@ -190,12 +201,13 @@ public class MainHUDUGUIController : MonoBehaviour
             Debug.LogWarning("[MainHUDUGUI] SlimeManager nao encontrado na cena.", this);
         if (_roomControllers.Length == 0)
             Debug.LogWarning("[MainHUDUGUI] Nenhum RoomController na cena.", this);
-        if (slimeCounter == null || levelLabel == null)
+        if (slimeCounter == null)
         {
             Debug.LogWarning(
-                "[MainHUDUGUI] Elementos do HUD nao encontrados: " +
-                $"counter={(slimeCounter != null)}, level={(levelLabel != null)}", this);
+                "[MainHUDUGUI] SlimeConter do HUD nao encontrado.", this);
         }
+        // levelLabel e opcional: a cena ainda nao tem rotulo de nivel no HUD
+        // (sem ele o HUD simplesmente nao escreve "Nv X" em lugar nenhum).
 
         CollectOutlines();
     }
@@ -211,6 +223,16 @@ public class MainHUDUGUIController : MonoBehaviour
         return null;
     }
 
+    private T FindInChildrenByName<T>(string name) where T : Component
+    {
+        foreach (var c in GetComponentsInChildren<T>(true))
+        {
+            if (c.name == name)
+                return c;
+        }
+        return null;
+    }
+
     private static List<Transform> FindTransformsByName(string name)
     {
         var result = new List<Transform>();
@@ -221,12 +243,6 @@ public class MainHUDUGUIController : MonoBehaviour
                 result.Add(t);
         }
         return result;
-    }
-
-    private static T FindComponentByName<T>(string name) where T : Component
-    {
-        Transform t = FindTransformByName(name);
-        return t != null ? t.GetComponent<T>() : null;
     }
 
     private void CollectOutlines()
@@ -305,10 +321,13 @@ public class MainHUDUGUIController : MonoBehaviour
             _level = Mathf.Max(1, save.objectLevel);
         }
 
-        _slimeCount = Mathf.FloorToInt(save != null ? save.goo : slimeManager.Goo);
-
         if (slimeCounter != null)
-            slimeCounter.text = $"x {_slimeCount}";
+        {
+            // Numeracao compacta de clicker (1.23K, 45.6M...) direto do saldo
+            // em float, sem estourar int em valores gigantes.
+            slimeCounter.text = FurnitureShopUI.FormatCompact(
+                save != null ? save.goo : slimeManager.Goo);
+        }
         if (levelLabel != null)
             levelLabel.text = $"Nv {_level}";
 

@@ -12,6 +12,9 @@ public class FurnitureData : ScriptableObject
     public string itemName;
     public Sprite itemImage;
 
+    [Tooltip("Qual movel real da fase de jogo este asset representa.")]
+    public FurnitureKind kind = FurnitureKind.Bed;
+
     [TextArea(3, 6)]
     public string description;
 

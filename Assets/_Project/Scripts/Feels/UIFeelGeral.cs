@@ -19,6 +19,12 @@ public class UIFeelGeral : MonoBehaviour
 
     public void PlayStretchAndSquash()
     {
+        // Botao de fechar: o popup ja foi desativado na mesma chamada do
+        // onClick (ClosePopup roda antes), entao nao da pra iniciar corrotina
+        // — sem esse guarda o Unity loga "Coroutine couldn't be started".
+        if (!gameObject.activeInHierarchy)
+            return;
+
         if (animationCoroutine != null)
             StopCoroutine(animationCoroutine);
 

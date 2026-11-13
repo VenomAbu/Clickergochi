@@ -7,6 +7,8 @@ public class RoomController : MonoBehaviour
 {
     [Header("Measurements")]
     [SerializeField] private Image[] measureImages = new Image[3];
+    [Tooltip("Cor do preenchimento dos medidores. Mais clara que o fundo: quanto mais cheio, mais claro o indicador fica.")]
+    [SerializeField] private Color measureFillColor = new Color(1f, 1f, 1f, 0.537f);
     [SerializeField] private float[] measureValues = new float[3];
     [SerializeField]
    
@@ -87,6 +89,9 @@ public class RoomController : MonoBehaviour
 
             measureImages[i].fillAmount =
                 Mathf.Clamp01(percentage);
+            // Preenchimento claro (o antigo era marrom escuro e escurecia o
+            // indicador quando cheio): cheio = indicador mais claro.
+            measureImages[i].color = measureFillColor;
         }
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -359,6 +360,41 @@ public class FurnitureShopUI
         if (value >= 9e18d)
             return value.ToString("0.###E+0");
         return ((long)value).ToString("N0");
+    }
+
+    private static readonly string[] CompactSuffixes =
+        { "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" };
+
+    /// <summary>
+    /// Numeracao compacta padrao de clicker: 999, 1.23K, 45.6M, 789B, 12.3T...
+    /// Evita numero gigante no HUD quando a gosma passa dos milhares.
+    /// </summary>
+    public static string FormatCompact(double value)
+    {
+        if (double.IsNaN(value) || value < 0d)
+            value = 0d;
+
+        if (value < 1000d)
+            return ((long)value).ToString();
+
+        double scaled = value;
+        int idx = -1;
+        while (scaled >= 1000d && idx < CompactSuffixes.Length - 1)
+        {
+            scaled /= 1000d;
+            idx++;
+        }
+
+        // 999.999 arredonda para "1000K" — vira "1M" no proximo sufixo.
+        scaled = Math.Round(scaled, 2);
+        if (scaled >= 1000d && idx < CompactSuffixes.Length - 1)
+        {
+            scaled /= 1000d;
+            idx++;
+        }
+
+        return scaled.ToString("0.##", CultureInfo.CurrentCulture) +
+               CompactSuffixes[idx];
     }
 
     public static string FormatPercent(double fraction)
