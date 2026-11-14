@@ -10,11 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 529d86f89fa31d04ca11595bb98a442e, type: 3}
-  m_Name: Bed
+  m_Name: Dresser
   m_EditorClassIdentifier: Assembly-CSharp::FurnitureData
-  itemName: Bed
-  itemImage: {fileID: 2122107185238573207, guid: 8ddcfe663271cc6468530221152bc97f, type: 3}
-  description: Cama de cama
-  level: 2
-  price: 1000
-  skins: []
+  itemName: Dresser
+  itemImage: {fileID: 0}
+  kind: 2
+  description: ""
+  level: 0
+  price: 0
+  skins:
+  - {fileID: 11400000, guid: b170a1ae671c43f4ac68103b91013157, type: 2}
+  - {fileID: 11400000, guid: 4465bb51ae894fb796b25484b64ad041, type: 2}
+  - {fileID: 11400000, guid: 7523a98bf61245a89ccafeeb1360d989, type: 2}

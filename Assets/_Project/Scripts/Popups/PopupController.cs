@@ -34,12 +34,26 @@ public class PopupController : MonoBehaviour
     /// <summary>Sprites dos moveis descobertos nos comodos (para o popup).</summary>
     private readonly Dictionary<FurnitureKind, Sprite> kindSprites = new();
 
+    /// <summary>Imagens dos moveis por kind (todas as instancias nos comodos).</summary>
+    private readonly Dictionary<FurnitureKind, List<Image>> kindImages = new();
+
+    /// <summary>Sprite equipado por kind (preview do popup e comodo).</summary>
+    private readonly Dictionary<FurnitureKind, Sprite> equippedSprites = new();
+
+    /// <summary>Skins placeholder geradas em runtime ate a arte chegar.</summary>
+    private readonly Dictionary<FurnitureKind, List<FurnitureSkinData>> placeholderSkins = new();
+
+    /// <summary>FurnitureData por kind (Resources/Furniture, carregado uma vez).</summary>
+    private Dictionary<FurnitureKind, FurnitureData> furnitureByKind;
+
     /// <summary>Popup aberto agora no modo movel.</summary>
     public FurnitureKind CurrentKind => currentKind;
 
-    /// <summary>Sprite do movel no comodo, quando descoberto.</summary>
+    /// <summary>Sprite do movel no comodo: a skin equipada, ou o original.</summary>
     public Sprite SpriteFor(FurnitureKind kind)
-        => kindSprites.TryGetValue(kind, out Sprite sprite) ? sprite : null;
+        => equippedSprites.TryGetValue(kind, out Sprite sprite) ? sprite
+        : kindSprites.TryGetValue(kind, out sprite) ? sprite
+        : null;
 
     private void Awake()
     {
@@ -52,6 +66,7 @@ public class PopupController : MonoBehaviour
     {
         WireFurnitureButtons();
         FoodShopUGUIController.Install();
+        SkinShopUGUIController.Install();
     }
 
     private void OnDestroy()
@@ -126,10 +141,22 @@ public class PopupController : MonoBehaviour
                 if (!kindSprites.ContainsKey(kind))
                     kindSprites.Add(kind, image.sprite);
 
+                if (!kindImages.TryGetValue(kind, out List<Image> images))
+                {
+                    images = new List<Image>();
+                    kindImages[kind] = images;
+                }
+                if (!images.Contains(image))
+                    images.Add(image);
+
                 FurnitureKind captured = kind;
                 button.onClick.AddListener(() => OpenFurniturePopup(captured));
             }
         }
+
+        // Skin gravada no save aplicada aos moveis dos comodos (0 = o
+        // sprite original em saves antigos).
+        ApplySavedSkins();
     }
 
     /// <summary>bed/cama, closet/wardrobe/guarda, desk/dresser/comoda.</summary>
@@ -217,8 +244,15 @@ public class PopupController : MonoBehaviour
 
         CloseAllInternal(false);
 
+        if (currentFurniture == null || currentFurniture.kind != currentKind)
+            currentFurniture = FurnitureFor(currentKind);
+
         if (skinMovelController != null)
-            skinMovelController.SetFurnitureData(currentFurniture);
+        {
+            List<FurnitureSkinData> skins = ResolveSkins(currentKind);
+            skinMovelController.SetSkins(
+                currentKind, skins, GetSkinIndex(currentKind, skins.Count));
+        }
 
         popupSkinMovel.SetActive(true);
         PlayOpen();
@@ -231,6 +265,256 @@ public class PopupController : MonoBehaviour
     public void BackToFurniturePopup()
     {
         OpenFurniturePopup(currentKind);
+    }
+
+    // =========================================
+    // SKINS DOS MOVEIS
+    // =========================================
+
+    /// <summary>
+    /// Lista de skins do movel: os assets em Resources/Furniture quando
+    /// existirem; senao placeholders em runtime (padrao + variantes
+    /// tingidas) para o fluxo funcionar antes da arte chegar.
+    /// </summary>
+    public List<FurnitureSkinData> ResolveSkins(FurnitureKind kind)
+    {
+        FurnitureData furniture = FurnitureFor(kind);
+        if (furniture != null &&
+            furniture.skins != null && furniture.skins.Count > 0)
+            return furniture.skins;
+
+        return PlaceholdersFor(kind);
+    }
+
+    private FurnitureData FurnitureFor(FurnitureKind kind)
+    {
+        if (furnitureByKind == null)
+        {
+            furnitureByKind = new Dictionary<FurnitureKind, FurnitureData>();
+            foreach (FurnitureData furniture in
+                Resources.LoadAll<FurnitureData>("Furniture"))
+            {
+                if (!furnitureByKind.ContainsKey(furniture.kind))
+                    furnitureByKind.Add(furniture.kind, furniture);
+            }
+        }
+
+        furnitureByKind.TryGetValue(kind, out FurnitureData found);
+        return found;
+    }
+
+    /// <summary>
+    /// Placeholders: padrao + duas variantes tingidas do sprite atual do
+    /// movel. Somem sozinhas quando o asset ganhar skins reais.
+    /// </summary>
+    private List<FurnitureSkinData> PlaceholdersFor(FurnitureKind kind)
+    {
+        if (placeholderSkins.TryGetValue(kind,
+            out List<FurnitureSkinData> cached))
+            return cached;
+
+        kindSprites.TryGetValue(kind, out Sprite original);
+
+        var skins = new List<FurnitureSkinData>
+        {
+            MakeSkin("Padrão", original)
+        };
+
+        if (original != null)
+        {
+            skins.Add(MakeSkin("Verde",
+                TintSprite(original, new Color(0.30f, 0.95f, 0.35f), 0.65f)));
+            skins.Add(MakeSkin("Azul",
+                TintSprite(original, new Color(0.35f, 0.55f, 1f), 0.65f)));
+        }
+
+        placeholderSkins[kind] = skins;
+        return skins;
+    }
+
+    private static FurnitureSkinData MakeSkin(string skinName, Sprite sprite)
+    {
+        var skin = ScriptableObject.CreateInstance<FurnitureSkinData>();
+        skin.skinName = skinName;
+        skin.skinImage = sprite;
+        return skin;
+    }
+
+    /// <summary>Copia o sprite e mistura as cores na cor dada (placeholder).</summary>
+    private static Sprite TintSprite(Sprite source, Color tint, float amount)
+    {
+        Texture2D sourceTexture = source.texture;
+        int width = sourceTexture.width;
+        int height = sourceTexture.height;
+
+        RenderTexture temporary = RenderTexture.GetTemporary(width, height, 0);
+        RenderTexture previous = RenderTexture.active;
+        Graphics.Blit(sourceTexture, temporary);
+        RenderTexture.active = temporary;
+
+        var readable = new Texture2D(
+            width, height, TextureFormat.RGBA32, false);
+        readable.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        readable.Apply();
+
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(temporary);
+
+        Color[] pixels = readable.GetPixels();
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            Color pixel = pixels[i];
+            pixels[i] = new Color(
+                Mathf.Lerp(pixel.r, tint.r, amount),
+                Mathf.Lerp(pixel.g, tint.g, amount),
+                Mathf.Lerp(pixel.b, tint.b, amount),
+                pixel.a);
+        }
+        readable.SetPixels(pixels);
+        readable.Apply();
+
+        return Sprite.Create(
+            readable,
+            new Rect(0, 0, width, height),
+            source.pivot,
+            source.pixelsPerUnit);
+    }
+
+    /// <summary>Index equipado no save, limitado a lista atual (0 = padrao).</summary>
+    private int GetSkinIndex(FurnitureKind kind, int skinCount)
+    {
+        SaveManager manager = SaveManager.Instance;
+        SaveData save = manager != null ? manager.GetSaveData() : null;
+        if (save == null || save.furnitureSkinIndex == null ||
+            (int)kind >= save.furnitureSkinIndex.Length)
+            return 0;
+
+        int index = save.furnitureSkinIndex[(int)kind];
+        return index >= 0 && index < skinCount ? index : 0;
+    }
+
+    // =========================================
+    // COMPRA / POSSE DAS SKINS (GDD: toda compra confirma)
+    // =========================================
+
+    /// <summary>
+    /// Skin comprada? Padrao (preco0 ou sem id) e sempre livre; as demais
+    /// precisam do id gravado em SaveData.ownedSkins.
+    /// </summary>
+    public static bool IsSkinOwned(FurnitureSkinData skin)
+    {
+        if (skin == null)
+            return false;
+        if (skin.skinPrice <= 0 || string.IsNullOrEmpty(skin.skinId))
+            return true;
+
+        SaveManager manager = SaveManager.Instance;
+        SaveData save = manager != null ? manager.GetSaveData() : null;
+        return save != null && save.ownedSkins != null &&
+               save.ownedSkins.Contains(skin.skinId);
+    }
+
+    /// <summary>
+    /// Compra a skin com gosma (SlimeManager.SpendGoo valida o saldo e
+    /// grava). Retorna false se ja for dono ou nao tiver gosma.
+    /// </summary>
+    public static bool BuySkin(FurnitureSkinData skin)
+    {
+        if (skin == null || skin.skinPrice <= 0 ||
+            string.IsNullOrEmpty(skin.skinId) || IsSkinOwned(skin))
+            return false;
+
+        SlimeManager slime = SlimeManager.Instance;
+        if (slime == null || !slime.SpendGoo(skin.skinPrice))
+            return false;
+
+        SaveManager manager = SaveManager.Instance;
+        SaveData save = manager != null ? manager.GetSaveData() : null;
+        if (save == null)
+            return false;
+
+        if (save.ownedSkins == null)
+            save.ownedSkins = new List<string>();
+        save.ownedSkins.Add(skin.skinId);
+        manager.RequestSave();
+        return true;
+    }
+
+    /// <summary>Equipa a skin escolhida no carrossel (grava e aplica).</summary>
+    public void EquipSkin(FurnitureKind kind, int index)
+    {
+        List<FurnitureSkinData> skins = ResolveSkins(kind);
+        if (skins == null || index < 0 || index >= skins.Count)
+            return;
+
+        // Trava: so equipa quem comprou (feedback de bloqueio no popup e
+        // na loja — o click em skin comprada cai aqui).
+        if (!IsSkinOwned(skins[index]))
+        {
+            MainHUDUGUIController.Instance?.PlayClose();
+            return;
+        }
+
+        SaveManager manager = SaveManager.Instance;
+        SaveData save = manager != null ? manager.GetSaveData() : null;
+        if (save != null)
+        {
+            if (save.furnitureSkinIndex == null)
+                save.furnitureSkinIndex = new int[0];
+
+            int slot = (int)kind;
+            if (save.furnitureSkinIndex.Length <= slot)
+            {
+                var grown = new int[slot + 1];
+                for (int i = 0; i < save.furnitureSkinIndex.Length; i++)
+                    grown[i] = save.furnitureSkinIndex[i];
+                save.furnitureSkinIndex = grown;
+            }
+
+            save.furnitureSkinIndex[slot] = index;
+            manager.RequestSave();
+        }
+
+        ApplySkin(kind);
+        MainHUDUGUIController.Instance?.PlayBuy();
+    }
+
+    private void ApplySavedSkins()
+    {
+        foreach (FurnitureKind kind in kindImages.Keys)
+            ApplySkin(kind);
+    }
+
+    private void ApplySkin(FurnitureKind kind)
+    {
+        if (!kindImages.TryGetValue(kind, out List<Image> images) ||
+            images.Count == 0)
+            return;
+
+        List<FurnitureSkinData> skins = ResolveSkins(kind);
+        int index = GetSkinIndex(kind, skins.Count);
+
+        // Save antigo pode apontar para skin que ainda nao foi comprada
+        // (teste anterior): o comodo volta para o padrao ate comprar.
+        if (index > 0 && !IsSkinOwned(skins[index]))
+            index = 0;
+
+        Sprite sprite = null;
+        if (index >= 0 && index < skins.Count && skins[index] != null)
+            sprite = skins[index].skinImage;
+        if (sprite == null &&
+            kindSprites.TryGetValue(kind, out Sprite original))
+            sprite = original;
+
+        if (sprite == null)
+            return;
+
+        equippedSprites[kind] = sprite;
+        foreach (Image image in images)
+        {
+            if (image != null)
+                image.sprite = sprite;
+        }
     }
 
     // =========================================

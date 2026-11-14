@@ -166,7 +166,7 @@ public class RoomController : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "RoomController: VerticalNavigation n�o configurado."
+                "RoomController: VerticalNavigation não configurado."
             );
         }
     }

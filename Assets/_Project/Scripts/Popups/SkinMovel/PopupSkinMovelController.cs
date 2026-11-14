@@ -19,25 +19,44 @@ public class PopupSkinMovelController : MonoBehaviour
     [SerializeField] private PopupController popupController;
 
     private FurnitureData currentFurniture;
+    private FurnitureKind currentKind = FurnitureKind.Bed;
     private List<FurnitureSkinData> availableSkins;
 
     private int currentSkinIndex;
+    private bool middleWired;
 
     // =========================================
     // INITIALIZATION
     // =========================================
 
+    /// <summary>
+    /// Define as skins do movel e a atualmente equipada. E o caminho real
+    /// do fluxo (o PopupController resolve a lista e o save).
+    /// </summary>
+    public void SetSkins(
+        FurnitureKind kind,
+        List<FurnitureSkinData> skins,
+        int selectedIndex)
+    {
+        currentKind = kind;
+        availableSkins = skins;
+        currentSkinIndex = selectedIndex >= 0 &&
+            skins != null && selectedIndex < skins.Count
+            ? selectedIndex
+            : 0;
+
+        EnsureMiddleClickable();
+        UpdateCarousel();
+    }
+
+    /// <summary>Compatibilidade com o wiring antigo baseado em FurnitureData.</summary>
     public void SetFurnitureData(FurnitureData furnitureData)
     {
         currentFurniture = furnitureData;
-
-        availableSkins = currentFurniture != null
-            ? currentFurniture.skins
-            : null;
-
-        currentSkinIndex = 0;
-
-        UpdateCarousel();
+        SetSkins(
+            furnitureData != null ? furnitureData.kind : FurnitureKind.Bed,
+            furnitureData != null ? furnitureData.skins : null,
+            0);
     }
 
     // =========================================
@@ -95,8 +114,11 @@ public class PopupSkinMovelController : MonoBehaviour
         // Skin selecionada.
         if (selectedSkin != null)
         {
-            nameTMP.text = selectedSkin.skinName;
-            SetImage(skinImage, selectedSkin.skinImage);
+            // Bloqueada: nome + aviso; o equip e travado no EquipSkin.
+            nameTMP.text = PopupController.IsSkinOwned(selectedSkin)
+                ? selectedSkin.skinName
+                : $"{selectedSkin.skinName} - Bloqueada";
+            SetImage(skinImage, selectedSkin);
         }
         else
         {
@@ -104,23 +126,14 @@ public class PopupSkinMovelController : MonoBehaviour
             SetImage(skinImage, null);
         }
 
-        // Prévia da skin anterior.
-        SetImage(
-            leftSkin,
-            previousSkin != null ? previousSkin.skinImage : null
-        );
+        // PrÃ©via da skin anterior.
+        SetImage(leftSkin, previousSkin);
 
-        // Prévia da skin selecionada.
-        SetImage(
-            middleSkin,
-            selectedSkin != null ? selectedSkin.skinImage : null
-        );
+        // PrÃ©via da skin selecionada.
+        SetImage(middleSkin, selectedSkin);
 
-        // Prévia da próxima skin.
-        SetImage(
-            rightSkin,
-            nextSkin != null ? nextSkin.skinImage : null
-        );
+        // PrÃ©via da prÃ³xima skin.
+        SetImage(rightSkin, nextSkin);
     }
 
     private int GetCircularIndex(int index)
@@ -136,19 +149,30 @@ public class PopupSkinMovelController : MonoBehaviour
                availableSkins.Count > 0;
     }
 
-    private void SetImage(Image target, Sprite sprite)
+    /// <summary>Cor dos previews de skin ainda nao comprada (travada).</summary>
+    private static readonly Color LockedColor =
+        new Color(0.42f, 0.42f, 0.42f, 1f);
+
+    private void SetImage(Image target, FurnitureSkinData skin)
     {
         if (target == null)
             return;
 
-        target.sprite = sprite;
-        target.enabled = sprite != null;
+        bool visible = skin != null && skin.skinImage != null;
+        target.sprite = visible ? skin.skinImage : null;
+        target.enabled = visible;
+
+        // Escurece o preview de quem nao comprou (a cor base da cena e
+        // branca; escrita absoluta = idempotente entre plays).
+        target.color = visible && !PopupController.IsSkinOwned(skin)
+            ? LockedColor
+            : Color.white;
     }
 
     private void ClearCarousel()
     {
         if (nameTMP != null)
-            nameTMP.text = "Nenhuma skin disponível";
+            nameTMP.text = "Nenhuma skin disponÃ­vel";
 
         SetImage(skinImage, null);
         SetImage(leftSkin, null);
@@ -159,6 +183,47 @@ public class PopupSkinMovelController : MonoBehaviour
     // =========================================
     // BUTTONS
     // =========================================
+
+    /// <summary>
+    /// Clicar no card do meio (skin selecionada) equipa na hora â€” sem
+    /// botao extra, o proprio preview e o gatilho.
+    /// </summary>
+    public void EquipSelected()
+    {
+        if (!HasAvailableSkins() || popupController == null)
+            return;
+
+        popupController.EquipSkin(currentKind, currentSkinIndex);
+    }
+
+    private void EnsureMiddleClickable()
+    {
+        if (middleWired || middleSkin == null)
+            return;
+
+        middleWired = true;
+
+        // A Image do card precisa de raycast para o clique chegar.
+        middleSkin.raycastTarget = true;
+
+        // O card do meio (Main) nao tem Button na cena â€” adiciona em
+        // runtime; o clique na Image do card sobe para o botao do pai.
+        Button button = middleSkin.GetComponentInParent<Button>(true);
+        if (button == null)
+        {
+            Transform card = middleSkin.transform.parent;
+            GameObject target = card != null
+                ? card.gameObject
+                : middleSkin.gameObject;
+            button = target.AddComponent<Button>();
+        }
+
+        button.transition = Selectable.Transition.None;
+        // Remove-then-add mantem o gancho unico mesmo com a scene
+        // persistindo entre plays (sem reload de scene no Editor).
+        button.onClick.RemoveListener(EquipSelected);
+        button.onClick.AddListener(EquipSelected);
+    }
 
     public void BackToFurniturePopup()
     {

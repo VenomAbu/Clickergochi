@@ -48,6 +48,15 @@ public class SaveData
     // Panquecas: +stickers no proximo pacote de stickers.
     public int pendingStickerPackBonus;
 
+    // Skin equipada em cada movel (index na lista de skins do
+    // FurnitureData; 0 = padrao). Saves antigos nao tem o campo e abrem
+    // com o sprite original, sem desbloqueios automaticos.
+    public int[] furnitureSkinIndex;
+
+    // Ids das skins de moveis compradas (FurnitureSkinData.skinId).
+    // O padrao (index0) nunca entra: e sempre livre.
+    public List<string> ownedSkins;
+
     public SaveData()
     {
         clickCount = 0;
@@ -69,6 +78,8 @@ public class SaveData
         nextFurnitureDiscount = 0f;
         nextComodoDiscount = 0f;
         pendingStickerPackBonus = 0;
+        furnitureSkinIndex = Array.Empty<int>();
+        ownedSkins = new List<string>();
     }
 
     /// <summary>
@@ -92,6 +103,25 @@ public class SaveData
         nextFurnitureDiscount = Math.Min(1f, Math.Max(0f, nextFurnitureDiscount));
         nextComodoDiscount = Math.Min(1f, Math.Max(0f, nextComodoDiscount));
         pendingStickerPackBonus = Math.Max(0, pendingStickerPackBonus);
+        if (furnitureSkinIndex == null)
+            furnitureSkinIndex = Array.Empty<int>();
+        else
+        {
+            for (int i = 0; i < furnitureSkinIndex.Length; i++)
+                furnitureSkinIndex[i] = Math.Max(0, furnitureSkinIndex[i]);
+        }
+        if (ownedSkins == null)
+            ownedSkins = new List<string>();
+        else
+        {
+            // Remove ids nulos/duplicados vindos de save editado a mao.
+            for (int i = ownedSkins.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrEmpty(ownedSkins[i]) ||
+                    ownedSkins.IndexOf(ownedSkins[i]) != i)
+                    ownedSkins.RemoveAt(i);
+            }
+        }
     }
 }
 

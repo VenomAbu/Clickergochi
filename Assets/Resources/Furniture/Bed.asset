@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529d86f89fa31d04ca11595bb98a442e, type: 3}
+  m_Name: Bed
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureData
+  itemName: Bed
+  itemImage: {fileID: 2122107185238573207, guid: 8ddcfe663271cc6468530221152bc97f, type: 3}
+  description: Cama de cama
+  level: 2
+  price: 1000
+  skins:
+  - {fileID: 11400000, guid: 81f0027102ca4d5486142beeeea25d1b, type: 2}
+  - {fileID: 11400000, guid: a5ca9cc0a04d441ab4e2152716faba22, type: 2}
+  - {fileID: 11400000, guid: 2ed9e918bc344db0b27bc410c5df655a, type: 2}
