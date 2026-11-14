@@ -67,6 +67,7 @@ public class PopupController : MonoBehaviour
         WireFurnitureButtons();
         FoodShopUGUIController.Install();
         SkinShopUGUIController.Install();
+        StickerAlbumUGUIController.Install();
     }
 
     private void OnDestroy()

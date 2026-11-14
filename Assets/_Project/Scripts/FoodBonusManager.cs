@@ -186,8 +186,12 @@ public class FoodBonusManager : MonoBehaviour
 
     private static void AddTimedBuff(SaveData data, FoodTier tier)
     {
+        // Rato Chef (sticker): estende o tempo de todos os efeitos de
+        // comida como fator multiplicativo por cima.
+        float seconds = Mathf.Max(0f, tier.effectDurationMinutes) * 60f
+            * (1f + StickerManager.FoodDurationFraction);
         string endUtc = DateTime.UtcNow
-            .AddMinutes(Mathf.Max(0f, tier.effectDurationMinutes))
+            .AddSeconds(seconds)
             .ToString("O");
         data.foodBuffs.Add(new ActiveFoodBuff
         {

@@ -187,7 +187,12 @@ public class FurnitureManager : MonoBehaviour
         if (baseCost < 0f)
             return -1f;
         FoodBonusManager food = FoodBonusManager.Instance;
-        return food != null ? baseCost * (1f - food.PeekComodoDiscount) : baseCost;
+        float cost = food != null
+            ? baseCost * (1f - food.PeekComodoDiscount)
+            : baseCost;
+        // Desconto permanente do sticker Caixa de Papelao com Gatinho,
+        // aplicado por cima do desconto de comida.
+        return cost * (1f - StickerManager.ComodoDiscountFraction);
     }
 
     /// <summary>Nivel do comodo que desbloqueia o movel (2, 5 ou 10).</summary>
@@ -266,10 +271,13 @@ public class FurnitureManager : MonoBehaviour
             return -1f;
         float baseCost = Mathf.Ceil(BaseCosts[kind == FurnitureKind.Bed ? 0 : kind == FurnitureKind.Wardrobe ? 1 : 2]
             * Mathf.Pow(1.4f, level));
-        // Desconto do Sanduiche (nao acumula; apenas um por aprimoramento).
+        // Desconto do Sanduiche (nao acumula; apenas um por aprimoramento) e
+        // desconto permanente do Martelo (sticker), aplicado por cima.
         FoodBonusManager food = FoodBonusManager.Instance;
         float discount = food != null ? food.PeekFurnitureDiscount : 0f;
-        return Mathf.Max(1f, Mathf.Ceil(baseCost * (1f - discount)));
+        float cost = baseCost * (1f - discount)
+            * (1f - StickerManager.FurnitureDiscountFraction);
+        return Mathf.Max(1f, Mathf.Ceil(cost));
     }
 
     public bool TryUpgradeFurniture(FurnitureKind kind)
@@ -306,9 +314,26 @@ public class FurnitureManager : MonoBehaviour
     /// <summary>Gosma por segundo produzida pela Cama no nivel atual.</summary>
     public static float BedGooRate(int level) => level <= 0 ? 0f : 5f * Mathf.Pow(2f, level - 1);
 
-    /// <summary>Gosma por segundo produzida pela Cama (inclui bônus AFK de comida).</summary>
+    /// <summary>
+    /// Gosma por segundo produzida pela Cama (inclui bônus AFK de comida e
+    /// de stickers: Capivara Tranquila sempre, Bolo de Morango durante a
+    /// Euforia). Cada bonus entra como fator multiplicativo por cima.
+    /// </summary>
     public float BedGooPerSecond
-        => BedGooRate(FurnitureLevel(FurnitureKind.Bed)) * (1f + FoodBonusManager.Instance.AfkBonusFraction);
+    {
+        get
+        {
+            float rate = BedGooRate(FurnitureLevel(FurnitureKind.Bed))
+                * (1f + FoodBonusManager.Instance.AfkBonusFraction)
+                * (1f + StickerManager.AfkGooBonusFraction);
+
+            SlimeManager slime = SlimeManager.Instance;
+            if (slime != null && slime.IsEuphoric)
+                rate *= 1f + StickerManager.EuforiaAfkBonusFraction;
+
+            return rate;
+        }
+    }
 
     /// <summary>Bonus fracionario do Guarda-roupas (0.20 = +20%). GDD: 100*(1.2^n - 1)%.</summary>
     public static float WardrobeBonusAt(int level) => level <= 0 ? 0f : Mathf.Pow(1.2f, level) - 1f;

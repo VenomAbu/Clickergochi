@@ -365,15 +365,22 @@ public class SlimeManager : MonoBehaviour
         }
 
         // Omelete: +chance de critico temporaria somada a da Comoda.
+        // Dino (sticker): +chance critica permanente, somada a mesma.
         FoodBonusManager foodBonus = FoodBonusManager.Instance;
         if (foodBonus != null)
             critChance = Mathf.Clamp01(critChance + foodBonus.CritChanceBonus);
+        critChance = Mathf.Clamp01(critChance + StickerManager.CritChanceBonusFraction);
 
-        float cliqueBase = baseGooPerClick * comodoLevel;
+        // Walkman (sticker): +no clique-base do Comodo. Controle Retro
+        // (sticker): +gosma por clique — aplicados sobre os bonus de
+        // moveis/comodo, nao somados a eles.
+        float cliqueBase = baseGooPerClick * comodoLevel
+            * (1f + StickerManager.ClickBaseBonusFraction);
         bool critical = critChance > 0f && UnityEngine.Random.value < critChance;
         float gain = critical
             ? cliqueBase * critMultiplier
             : cliqueBase * (1f + wardrobeBonus);
+        gain *= 1f + StickerManager.ClickGooBonusFraction;
         gain *= CurrentMultiplier();
 
         data.goo += gain;
@@ -421,7 +428,10 @@ public class SlimeManager : MonoBehaviour
             comodoLevel = furniture.ComodoLevel;
             wardrobeBonus = furniture.WardrobeBonusFraction;
         }
-        return baseGooPerClick * comodoLevel * (1f + wardrobeBonus);
+        return baseGooPerClick * comodoLevel
+            * (1f + StickerManager.ClickBaseBonusFraction)
+            * (1f + wardrobeBonus)
+            * (1f + StickerManager.ClickGooBonusFraction);
     }
 
     public void AddHygiene(float amount)
@@ -624,7 +634,9 @@ public class SlimeManager : MonoBehaviour
     private void ActivateFunBonus()
     {
         funBonusClicksLeft = funBonusClickCount;
-        funBonusTimer = funBonusDurationSeconds;
+        // Bichinho Virtual (sticker): estende o tempo do bônus.
+        funBonusTimer = funBonusDurationSeconds
+            * (1f + StickerManager.FunBonusDurationFraction);
         RegisterMultiplier(FunBonusId, funBonusClickMultiplier);
     }
 

@@ -23,7 +23,9 @@ public class PopupStickerController : MonoBehaviour
         stickerImage.sprite = stickerData.stickerImage;
         stickerImage.enabled = stickerData.stickerImage != null;
 
-        descriptionTMP.text = stickerData.description;
+        descriptionTMP.text =
+            "Raridade: " + stickerData.GetRarityLabel() + "\n\n" +
+            stickerData.description;
     }
 
     public void ClosePopup()

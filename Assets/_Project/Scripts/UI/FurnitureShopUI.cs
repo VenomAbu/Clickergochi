@@ -412,7 +412,9 @@ public class FurnitureShopUI
     private float BaseClickValue()
     {
         float baseClick = slime != null ? slime.BaseGooPerClick : 1f;
-        return baseClick * (furniture != null ? furniture.ComodoLevel : 1f);
+        // Walkman (sticker) soma no clique-base do Comodo, como no clique real.
+        return baseClick * (furniture != null ? furniture.ComodoLevel : 1f)
+            * (1f + StickerManager.ClickBaseBonusFraction);
     }
 
     /// <summary>Mapeia o nome usado nos botoes da tela principal para o tipo.</summary>

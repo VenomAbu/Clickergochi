@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
+  m_Name: BoloDeMorango
+  m_EditorClassIdentifier: Assembly-CSharp::StickerData
+  stickerName: "Bolo de Morango"
+  stickerImage: {fileID: 0}
+  description: "Um bolo de aniversário de morango.\n\nEfeito (AFK Supremo): Aumenta a geração AFK de gosma em +500% enquanto o bônus de Euforia estiver ativo."
+  order: 10
+  rarity: 2
+  blocked: 0
+  effectKind: 9
+  valueComum: 0
+  valueEpico: 0
+  valueLendario: 5

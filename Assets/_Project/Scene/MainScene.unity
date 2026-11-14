@@ -10738,6 +10738,7 @@ MonoBehaviour:
   - {fileID: 52636284}
   - {fileID: 229522919}
   - {fileID: 1033014203}
+  measureFillColor: {r: 1, g: 1, b: 1, a: 0.23529412}
   measureValues:
   - 0
   - 20
@@ -12985,6 +12986,7 @@ MonoBehaviour:
   - {fileID: 52636284}
   - {fileID: 229522919}
   - {fileID: 1033014203}
+  measureFillColor: {r: 1, g: 1, b: 1, a: 0.23529412}
   measureValues:
   - 0
   - 20
@@ -17856,6 +17858,7 @@ MonoBehaviour:
   - {fileID: 52636284}
   - {fileID: 229522919}
   - {fileID: 1033014203}
+  measureFillColor: {r: 1, g: 1, b: 1, a: 0.23529412}
   measureValues:
   - 0
   - 20
