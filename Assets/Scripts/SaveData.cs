@@ -57,6 +57,14 @@ public class SaveData
     // O padrao (index0) nunca entra: e sempre livre.
     public List<string> ownedSkins;
 
+    // Ids das skins de slime compradas (SlimeSkinData.skinId). O padrao
+    // (preco 0) nunca entra: e sempre livre. Saves antigos nao tem o
+    // campo e abrem com o slime padrao, sem desbloqueios automaticos.
+    public List<string> ownedSlimeSkins;
+
+    // Skin de slime equipada (SlimeSkinData.skinId); vazio = padrao.
+    public string slimeSkinId;
+
     public SaveData()
     {
         clickCount = 0;
@@ -80,6 +88,8 @@ public class SaveData
         pendingStickerPackBonus = 0;
         furnitureSkinIndex = Array.Empty<int>();
         ownedSkins = new List<string>();
+        ownedSlimeSkins = new List<string>();
+        slimeSkinId = "";
     }
 
     /// <summary>
@@ -120,6 +130,19 @@ public class SaveData
                 if (string.IsNullOrEmpty(ownedSkins[i]) ||
                     ownedSkins.IndexOf(ownedSkins[i]) != i)
                     ownedSkins.RemoveAt(i);
+            }
+        }
+        if (slimeSkinId == null)
+            slimeSkinId = "";
+        if (ownedSlimeSkins == null)
+            ownedSlimeSkins = new List<string>();
+        else
+        {
+            for (int i = ownedSlimeSkins.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrEmpty(ownedSlimeSkins[i]) ||
+                    ownedSlimeSkins.IndexOf(ownedSlimeSkins[i]) != i)
+                    ownedSlimeSkins.RemoveAt(i);
             }
         }
     }

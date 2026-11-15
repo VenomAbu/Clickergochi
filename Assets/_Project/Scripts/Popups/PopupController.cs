@@ -68,6 +68,7 @@ public class PopupController : MonoBehaviour
         FoodShopUGUIController.Install();
         SkinShopUGUIController.Install();
         StickerAlbumUGUIController.Install();
+        SlimeSkinShopUGUIController.Install();
     }
 
     private void OnDestroy()
