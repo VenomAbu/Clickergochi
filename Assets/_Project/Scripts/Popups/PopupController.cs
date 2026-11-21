@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -12,7 +13,7 @@ using UnityEngine.UI;
 ///   antigo da cena (o SO vira apenas origem de kind/sprites);
 /// - no Start() ligamos todos os botoes de movel dos 3 comodos (Cama =
 ///   bed, Guarda-roupas = closet, Comoda = desk) ao popup;
-/// - monta o ConfirmPopupUGUI de compra (GDD/TP3: toda compra confirma).
+/// - controla o PopUpConfirm de compra (GDD/TP3: toda compra confirma).
 /// </summary>
 public class PopupController : MonoBehaviour
 {
@@ -27,6 +28,10 @@ public class PopupController : MonoBehaviour
     [SerializeField] private PopupMovelController movelController;
     [SerializeField] private PopupSkinMovelController skinMovelController;
     [SerializeField] private PopupStickerController stickerController;
+    [SerializeField] private PopUpConfirmController popupConfirm;
+
+    [Header("Transição")]
+    [SerializeField] private UITransitionController transitionController;
 
     private FurnitureData currentFurniture;
     private FurnitureKind currentKind = FurnitureKind.Bed;
@@ -58,8 +63,10 @@ public class PopupController : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        if (transitionController == null)
+            transitionController = FindFirstObjectByType<UITransitionController>();
         CloseAllInternal(false);
-        BuildConfirmPopup();
+        BindConfirmPopup();
     }
 
     private void Start()
@@ -81,25 +88,48 @@ public class PopupController : MonoBehaviour
     // CONFIRMACAO DE COMPRA (GDD / TP3)
     // =========================================
 
-    private void BuildConfirmPopup()
+    /// <summary>
+    /// Liga o popup de confirmacao que ja existe na cena (PopUpConfirm),
+    /// filho deste controller. Nada mais e montado em runtime.
+    /// </summary>
+    private void BindConfirmPopup()
     {
-        if (popupMovel == null)
+        if (popupConfirm == null)
+            popupConfirm = GetComponentInChildren<PopUpConfirmController>(true);
+        if (popupConfirm == null)
             return;
 
-        // Reaproveita a fonte, o fundo e os botoes da propria cena para o
-        // popup ficar com a mesma identidade visual (montado em runtime,
-        // sem exigir edicao da cena).
-        TMP_Text sampleText = popupMovel.GetComponentInChildren<TMP_Text>(true);
-        Transform bgTransform = popupMovel.transform.Find("PopUpBG");
-        Transform upgradeTransform = popupMovel.transform.Find("UpgrateBtt");
-        Transform skinTransform = popupMovel.transform.Find("SkinBtt");
+        popupConfirm.Bind(this);
+        popupConfirm.Hide(false);
+    }
 
-        ConfirmPopupUGUI.EnsureBuilt(
-            transform,
-            sampleText != null ? sampleText.font : null,
-            bgTransform != null ? bgTransform.GetComponent<Image>() : null,
-            upgradeTransform != null ? upgradeTransform.GetComponent<Image>() : null,
-            skinTransform != null ? skinTransform.GetComponent<Image>() : null);
+    /// <summary>Abre o popup de confirmacao de compra.</summary>
+    public void ShowConfirm(
+        string title,
+        string message,
+        string confirmText,
+        Action confirm,
+        Sprite icon = null)
+    {
+        if (popupConfirm == null)
+        {
+            // Seguranca: se o popup nao estiver referenciado, executa a
+            // acao direto para nao travar a compra.
+            confirm?.Invoke();
+            return;
+        }
+        popupConfirm.Show(title, message, confirmText, confirm, icon);
+    }
+
+    /// <summary>Fecha o popup de confirmacao sem executar a acao.</summary>
+    public void CloseConfirm()
+    {
+        CloseConfirm(true);
+    }
+
+    public void CloseConfirm(bool animate)
+    {
+        popupConfirm?.Hide(animate);
     }
 
     // =========================================
@@ -223,7 +253,7 @@ public class PopupController : MonoBehaviour
         if (movelController != null)
             movelController.SetFurniture(kind);
 
-        popupMovel.SetActive(true);
+        OpenPanel(popupMovel);
         PlayOpen();
     }
 
@@ -256,7 +286,7 @@ public class PopupController : MonoBehaviour
                 currentKind, skins, GetSkinIndex(currentKind, skins.Count));
         }
 
-        popupSkinMovel.SetActive(true);
+        OpenPanel(popupSkinMovel);
         PlayOpen();
     }
 
@@ -533,8 +563,7 @@ public class PopupController : MonoBehaviour
         if (stickerController != null)
             stickerController.SetStickerData(stickerData);
 
-        if (popupSticker != null)
-            popupSticker.SetActive(true);
+        OpenPanel(popupSticker);
 
         PlayOpen();
     }
@@ -545,28 +574,53 @@ public class PopupController : MonoBehaviour
 
     public void CloseAllPopups()
     {
-        CloseAllInternal(true);
+        CloseAllInternal(true, true);
     }
 
-    private void CloseAllInternal(bool playSound)
+    private void OpenPanel(GameObject panel)
+    {
+        if (panel == null)
+            return;
+
+        if (transitionController != null)
+        {
+            transitionController.OpenPopup(panel);
+            return;
+        }
+
+        panel.SetActive(true);
+        panel.transform.SetAsLastSibling();
+    }
+
+    private void ClosePanel(GameObject panel, bool animate)
+    {
+        if (panel == null || !panel.activeSelf)
+            return;
+
+        if (animate && transitionController != null)
+        {
+            transitionController.ClosePopup(panel);
+            return;
+        }
+
+        panel.SetActive(false);
+    }
+
+    private void CloseAllInternal(bool playSound, bool animate = false)
     {
         bool anyOpen =
             (popupMovel != null && popupMovel.activeSelf) ||
             (popupSkinMovel != null && popupSkinMovel.activeSelf) ||
-            (popupSticker != null && popupSticker.activeSelf);
+            (popupSticker != null && popupSticker.activeSelf) ||
+            (popupConfirm != null && popupConfirm.IsVisible);
 
         // Seguranca: nunca deixa o popup de confirmacao aberto "solto" por
         // cima do jogo apos fechar os demais popups.
-        ConfirmPopupUGUI.Instance?.Hide();
+        CloseConfirm(animate);
 
-        if (popupMovel != null)
-            popupMovel.SetActive(false);
-
-        if (popupSkinMovel != null)
-            popupSkinMovel.SetActive(false);
-
-        if (popupSticker != null)
-            popupSticker.SetActive(false);
+        ClosePanel(popupMovel, animate);
+        ClosePanel(popupSkinMovel, animate);
+        ClosePanel(popupSticker, animate);
 
         if (playSound && anyOpen)
             PlayClose();

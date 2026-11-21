@@ -91,7 +91,8 @@ public class FoodItemData : ScriptableObject
     [Tooltip("Ordem na loja (menor aparece primeiro).")]
     public int order;
     public string foodName = "Comida";
-    public string iconEmoji = "🍎";
+    [Tooltip("Sprite exibido no objeto FoodIcon do card da loja.")]
+    public Sprite icon;
     [Tooltip("Uma entrada por raridade vendida desta comida.")]
     public FoodTier[] tiers = Array.Empty<FoodTier>();
 }

@@ -10,27 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6e71455b541a3f49bbb01856d4fe1b3, type: 3}
-  m_Name: Pudim de Frutas
+  m_Name: Cookie
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemData
-  order: 3
-  foodName: Pudim de Frutas
-  iconEmoji: "\U0001F36E"
+  order: 2
+  foodName: Cookie
+  icon: {fileID: 4514493484883177031, guid: 720b11b3f4a2778429b616ba85db2352, type: 3}
   tiers:
   - rarity: 0
-    price: 30
-    hungerRestore: 0.3
-    effect: 3
-    effectValue: 5
+    price: 25
+    hungerRestore: 0.15
+    effect: 2
+    effectValue: 50
     effectDurationMinutes: 0
   - rarity: 1
-    price: 70
-    hungerRestore: 0.3
-    effect: 3
-    effectValue: 15
+    price: 60
+    hungerRestore: 0.15
+    effect: 2
+    effectValue: 150
     effectDurationMinutes: 0
   - rarity: 2
-    price: 150
-    hungerRestore: 0.3
-    effect: 3
-    effectValue: 30
+    price: 140
+    hungerRestore: 0.15
+    effect: 2
+    effectValue: 300
     effectDurationMinutes: 0

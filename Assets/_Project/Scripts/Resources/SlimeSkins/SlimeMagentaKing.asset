@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8f2d4c19e6a44738c5f0a2d7e91b36f, type: 3}
   m_Name: SlimeMagentaKing
   m_EditorClassIdentifier: Assembly-CSharp::SlimeSkinData
-  skinName: "Slime Magenta"
-  skinImage: {fileID: 0}
-  skinId: "magenta_king"
+  skinName: Slime Magenta
+  skinImage: {fileID: 1256981739461233994, guid: d36b0f23195852144a5ba8c84257c2af, type: 3}
+  skinId: magenta_king
   skinPrice: 750
   order: 1
-  sceneObjectName: "Slime Magenta King"
+  sceneObjectName: Slime Magenta King

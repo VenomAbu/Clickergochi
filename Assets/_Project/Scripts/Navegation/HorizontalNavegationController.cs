@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class HorizontalNavegationController : MonoBehaviour,
     IBeginDragHandler,
@@ -17,8 +18,14 @@ public class HorizontalNavegationController : MonoBehaviour,
     [SerializeField] private float transitionDuration = 0.35f;
 
     [Header("Swipe Settings")]
-    [SerializeField, Range(0.1f, 0.8f)]
-    private float dragCommitThreshold = 0.25f;
+    [SerializeField, Range(0.1f, 0.8f)] private float dragCommitThreshold = 0.25f;
+    [SerializeField] private HorizontalEdgeFadeController edgeFadeController;
+
+    [Header("Viewport Clipping")]
+    [Tooltip("Recorta o BG quadrado de cada sala na largura real do Canvas/dispositivo. " +
+             "Sem isso o BG de 2048px invade a tela de 1536px e a proxima sala aparece antes do swipe.")]
+    [SerializeField] private bool clipRoomBackgrounds = true;
+    [SerializeField] private RectMask2D viewportMask;
 
     private int currentPanelIndex;
 
@@ -35,6 +42,12 @@ public class HorizontalNavegationController : MonoBehaviour,
 
     private Coroutine transitionCoroutine;
 
+    private float lastViewportWidth = -1f;
+
+    /// <summary>
+    /// Largura visivel em unidades do Canvas. O Canvas acompanha o
+    /// dispositivo, entao este valor ja e a largura real da tela.
+    /// </summary>
     private float PanelWidth =>
         panelsViewport != null
             ? panelsViewport.rect.width
@@ -45,6 +58,16 @@ public class HorizontalNavegationController : MonoBehaviour,
         InitializeNavigation();
     }
 
+    private void Update()
+    {
+        // Rotacao ou mudanca de resolucao: recalcula o recorte.
+        if (!clipRoomBackgrounds || panelsViewport == null)
+            return;
+
+        if (Mathf.Abs(PanelWidth - lastViewportWidth) > 0.5f)
+            ApplyViewportClipping();
+    }
+
     private void InitializeNavigation()
     {
         if (panelsViewport == null ||
@@ -52,7 +75,7 @@ public class HorizontalNavegationController : MonoBehaviour,
             navigationPanels.Length == 0)
         {
             Debug.LogError(
-                "HorizontalNavegationController: Configure os painéis e o Viewport."
+                "HorizontalNavegationController: Configure os painï¿½is e o Viewport."
             );
             return;
         }
@@ -79,10 +102,64 @@ public class HorizontalNavegationController : MonoBehaviour,
             );
         }
 
-        // Mantém as setas na frente do Viewport.
+        // Mantï¿½m as setas na frente do Viewport.
         if (navigationArrows != null)
             navigationArrows.SetAsLastSibling();
+
+        ApplyViewportClipping();
     }
+
+    // =========================================
+    // VIEWPORT CLIPPING
+    // =========================================
+
+    /// <summary>
+    /// Usa a largura real do Canvas para recortar o BG quadrado de cada
+    /// sala. O viewport ganha um RectMask2D e cada sala outro, limitando o
+    /// BG (2048px) a area visivel (ex.: 1536px). Assim, ao deslocar a
+    /// proxima sala por PanelWidth, ela comeca totalmente fora da tela.
+    /// </summary>
+    private void ApplyViewportClipping()
+    {
+        if (!clipRoomBackgrounds || panelsViewport == null ||
+            navigationPanels == null)
+            return;
+
+        float width = PanelWidth;
+        if (width <= 0f)
+            return;
+
+        lastViewportWidth = width;
+
+        if (viewportMask == null)
+            viewportMask = panelsViewport.GetComponent<RectMask2D>();
+        if (viewportMask == null)
+            viewportMask = panelsViewport.gameObject.AddComponent<RectMask2D>();
+        viewportMask.padding = Vector4.zero;
+        viewportMask.enabled = true;
+
+        foreach (RectTransform panel in navigationPanels)
+        {
+            if (panel == null)
+                continue;
+
+            RectMask2D mask = panel.GetComponent<RectMask2D>();
+            if (mask == null)
+                mask = panel.gameObject.AddComponent<RectMask2D>();
+
+            // Se o painel for maior que a tela, remove o excedente
+            // simetricamente. Se for menor, nao faz nada.
+            float overflow = Mathf.Max(0f, panel.rect.width - width) * 0.5f;
+            mask.padding = new Vector4(overflow, 0f, overflow, 0f);
+            mask.enabled = true;
+        }
+    }
+
+    /// <summary>Largura atual do viewport/Canvas (util para debug e testes).</summary>
+    public float GetViewportWidth() => PanelWidth;
+
+    /// <summary>Forca o recorte apos alterar o Canvas em tempo de execucao.</summary>
+    public void RefreshViewportClipping() => ApplyViewportClipping();
 
     // =========================================
     // ARROW NAVIGATION
@@ -107,7 +184,7 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         int nextIndex = currentPanelIndex + direction;
 
-        // Navegação circular.
+        // Navegaï¿½ï¿½o circular.
         if (nextIndex >= navigationPanels.Length)
             nextIndex = 0;
 
@@ -151,6 +228,9 @@ public class HorizontalNavegationController : MonoBehaviour,
         nextPanel.anchoredPosition = nextInitial;
         nextPanel.gameObject.SetActive(true);
 
+        if (edgeFadeController != null)
+            edgeFadeController.ShowFades(currentPanelIndex, nextIndex, direction);
+
         float elapsed = 0f;
 
         while (elapsed < transitionDuration)
@@ -162,6 +242,9 @@ public class HorizontalNavegationController : MonoBehaviour,
                 : 1f;
 
             float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            if (edgeFadeController != null)
+                edgeFadeController.SetProgress(t);
 
             currentPanel.anchoredPosition = Vector2.Lerp(
                 currentStart,
@@ -184,6 +267,9 @@ public class HorizontalNavegationController : MonoBehaviour,
         nextPanel.anchoredPosition = nextStart;
 
         currentPanelIndex = nextIndex;
+
+        if (edgeFadeController != null)
+            edgeFadeController.HideAll();
 
         isTransitioning = false;
         transitionCoroutine = null;
@@ -231,9 +317,13 @@ public class HorizontalNavegationController : MonoBehaviour,
         );
 
         if (Mathf.Abs(currentDragX) < 1f)
+        {
+            if (edgeFadeController != null)
+                edgeFadeController.SetProgress(0f);
             return;
+        }
 
-        // Esquerda = próximo.
+        // Esquerda = prï¿½ximo.
         // Direita = anterior.
         int newDirection = currentDragX < 0f ? 1 : -1;
 
@@ -287,7 +377,7 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         dragNextIndex = currentPanelIndex + direction;
 
-        // Navegação circular.
+        // Navegaï¿½ï¿½o circular.
         if (dragNextIndex >= navigationPanels.Length)
             dragNextIndex = 0;
 
@@ -303,6 +393,15 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         nextPanel.anchoredPosition = nextInitialPosition;
         nextPanel.gameObject.SetActive(true);
+
+        if (edgeFadeController != null)
+        {
+            edgeFadeController.ShowFades(
+                currentPanelIndex,
+                dragNextIndex,
+                direction
+            );
+        }
     }
 
     // =========================================
@@ -329,6 +428,14 @@ public class HorizontalNavegationController : MonoBehaviour,
         nextPanel.anchoredPosition =
             nextStart + Vector2.right *
             (dragDirection * PanelWidth + currentDragX);
+
+        if (edgeFadeController != null)
+        {
+            float progress = PanelWidth > 0f
+                ? Mathf.Clamp01(Mathf.Abs(currentDragX) / PanelWidth)
+                : 0f;
+            edgeFadeController.SetProgress(progress);
+        }
     }
 
     // =========================================
@@ -374,6 +481,10 @@ public class HorizontalNavegationController : MonoBehaviour,
         }
 
         float elapsed = 0f;
+        float startProgress = PanelWidth > 0f
+            ? Mathf.Clamp01(Mathf.Abs(currentDragX) / PanelWidth)
+            : 0f;
+        float targetProgress = shouldCommit ? 1f : 0f;
 
         while (elapsed < transitionDuration)
         {
@@ -384,6 +495,13 @@ public class HorizontalNavegationController : MonoBehaviour,
                 : 1f;
 
             float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            if (edgeFadeController != null)
+            {
+                edgeFadeController.SetProgress(
+                    Mathf.Lerp(startProgress, targetProgress, t)
+                );
+            }
 
             currentPanel.anchoredPosition = Vector2.Lerp(
                 currentPosition,
@@ -418,6 +536,11 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         dragDirection = 0;
         currentDragX = 0f;
+
+        if (edgeFadeController != null)
+        {
+            edgeFadeController.HideAll();
+        }
 
         isTransitioning = false;
         transitionCoroutine = null;

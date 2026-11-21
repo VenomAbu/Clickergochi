@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// TesteDanillo, SEM raridade: cada comida vende um card so, usando a
 /// variante do meio (tiers[1]) de preco/efeito. Monta os cards em runtime
 /// a partir do FoodCardPrefab que ja existe na cena (nenhuma edicao de
-/// cena) e toda compra pede confirmacao no ConfirmPopupUGUI (GDD/TP3).
+/// cena) e toda compra pede confirmacao no PopUpConfirm (GDD/TP3).
 /// </summary>
 public class FoodShopUGUIController : MonoBehaviour
 {
@@ -132,6 +132,15 @@ public class FoodShopUGUIController : MonoBehaviour
             $"{Mathf.RoundToInt(tier.hungerRestore * 100f)}%");
         SetText(card, "Text (TMP)", tier.price.ToString());
 
+        // O prefab ja traz um FoodIcon (Image). Se o ScriptableObject tiver
+        // sprite definido, troca o sprite Padrao pelo da comida desta card.
+        Transform iconTransform = FindByName(card, "FoodIcon");
+        Image foodIcon = iconTransform != null
+            ? iconTransform.GetComponent<Image>()
+            : null;
+        if (foodIcon != null && food.icon != null)
+            foodIcon.sprite = food.icon;
+
         Transform buyTransform = FindByName(card, "BuyBtt");
         Button buy = buyTransform != null
             ? buyTransform.GetComponent<Button>()
@@ -175,16 +184,17 @@ public class FoodShopUGUIController : MonoBehaviour
         }
 
         // Toda compra pede confirmacao (mesmo fluxo dos moveis).
-        ConfirmPopupUGUI confirm = ConfirmPopupUGUI.Instance;
-        if (confirm != null)
+        PopupController popup = PopupController.Instance;
+        if (popup != null)
         {
             int hungerPercent = Mathf.RoundToInt(card.Tier.hungerRestore * 100f);
-            confirm.Show(
+            popup.ShowConfirm(
                 card.Food.foodName,
                 $"{card.Tier.Describe()}\nRecupera {hungerPercent}% da Fome\n" +
                 $"Por {card.Tier.price} gosma?",
                 "Comprar",
-                DoBuy);
+                DoBuy,
+                card.Food.icon);
         }
         else
         {

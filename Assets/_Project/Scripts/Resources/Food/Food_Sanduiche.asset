@@ -10,21 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6e71455b541a3f49bbb01856d4fe1b3, type: 3}
-  m_Name: Panquecas com Mel
+  m_Name: "Sandu\xEDche de Queijo"
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemData
-  order: 7
-  foodName: Panquecas com Mel
-  iconEmoji: "\U0001F95E"
+  order: 4
+  foodName: "Sandu\xEDche de Queijo"
+  icon: {fileID: 8397184878321185352, guid: 720b11b3f4a2778429b616ba85db2352, type: 3}
   tiers:
+  - rarity: 0
+    price: 35
+    hungerRestore: 0.35
+    effect: 4
+    effectValue: 0.05
+    effectDurationMinutes: 0
   - rarity: 1
-    price: 120
-    hungerRestore: 0.4
-    effect: 7
-    effectValue: 2
+    price: 80
+    hungerRestore: 0.35
+    effect: 4
+    effectValue: 0.1
     effectDurationMinutes: 0
   - rarity: 2
-    price: 280
-    hungerRestore: 0.4
-    effect: 7
-    effectValue: 3
+    price: 180
+    hungerRestore: 0.35
+    effect: 4
+    effectValue: 0.2
     effectDurationMinutes: 0

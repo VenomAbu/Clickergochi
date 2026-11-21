@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8f2d4c19e6a44738c5f0a2d7e91b36f, type: 3}
   m_Name: SlimeSkinBlueKing
   m_EditorClassIdentifier: Assembly-CSharp::SlimeSkinData
-  skinName: "Slime Azul (Padrão)"
-  skinImage: {fileID: 0}
-  skinId: "blue_king"
+  skinName: "Slime Azul (Padr\xE3o)"
+  skinImage: {fileID: 3213079785493367381, guid: 6784b9c523edde143b619052acb5dd93, type: 3}
+  skinId: blue_king
   skinPrice: 0
   order: 0
-  sceneObjectName: "Slime Blue King"
+  sceneObjectName: Slime Blue King

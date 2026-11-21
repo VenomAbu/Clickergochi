@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8f2d4c19e6a44738c5f0a2d7e91b36f, type: 3}
   m_Name: SlimeGreenArrow
   m_EditorClassIdentifier: Assembly-CSharp::SlimeSkinData
-  skinName: "Slime Verde"
-  skinImage: {fileID: 0}
-  skinId: "green_arrow"
+  skinName: Slime Verde
+  skinImage: {fileID: -7499619221918500907, guid: 8831823ea73d7914e9e4bb472f398cf0, type: 3}
+  skinId: green_arrow
   skinPrice: 1500
   order: 2
-  sceneObjectName: "Slime Green Arrow"
+  sceneObjectName: Slime Green Arrow

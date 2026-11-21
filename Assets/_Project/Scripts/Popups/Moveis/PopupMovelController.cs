@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// Popup de movel da MainScene (UGUI). Adaptado do dummy do colega para os
 /// dados reais do FurnitureManager: mostra nivel/maximo, efeito atual e
 /// proximo nivel, custo em gosma e estados bloqueado/maximo/sem gosma.
-/// O upgrade pede confirmacao (ConfirmPopupUGUI) antes de comprar.
+/// O upgrade pede confirmacao (PopUpConfirm) antes de comprar.
 /// </summary>
 public class PopupMovelController : MonoBehaviour
 {
@@ -185,11 +185,21 @@ public class PopupMovelController : MonoBehaviour
         string message =
             $"Passar para o Nv {next} por {FurnitureShopUI.FormatGoo(cost)} gosma?";
 
-        ConfirmPopupUGUI confirm = ConfirmPopupUGUI.Instance;
-        if (confirm != null)
-            confirm.Show($"Evoluir {name}?", message, "Evoluir", ExecuteUpgrade);
+        PopupController popup = PopupController.Instance;
+        if (popup != null)
+        {
+            Sprite icon = popupController != null
+                ? popupController.SpriteFor(currentKind)
+                : null;
+            if (icon == null && currentFurniture != null)
+                icon = currentFurniture.itemImage;
+
+            popup.ShowConfirm($"Evoluir {name}?", message, "Evoluir", ExecuteUpgrade, icon);
+        }
         else
+        {
             ExecuteUpgrade();
+        }
     }
 
     private void ExecuteUpgrade()

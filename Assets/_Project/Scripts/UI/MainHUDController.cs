@@ -480,8 +480,10 @@ public class MainHUDController : MonoBehaviour
             FoodEntry entry = foods[idx];
             var card = new VisualElement();
             card.AddToClassList("food-card");
-            var img = new Label(entry.Food.iconEmoji);
+            var img = new UnityEngine.UIElements.Image();
             img.AddToClassList("food-img");
+            if (entry.Food.icon != null)
+                img.style.backgroundImage = new StyleBackground(entry.Food.icon);
             var info = new VisualElement();
             info.AddToClassList("food-info");
             var name = new Label(entry.Food.foodName);

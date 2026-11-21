@@ -378,8 +378,7 @@ MonoBehaviour:
   fun: 0.5
   hygiene: 0.5
   startAtMin: 0
-  triggerEuphoria: 0
-  clearEuphoria: 0
+  euphoria: 0
   addGooAmount: 100
   giveGoo: 0
   slimeManager: {fileID: 1632827374}

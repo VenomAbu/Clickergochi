@@ -10,27 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6e71455b541a3f49bbb01856d4fe1b3, type: 3}
-  m_Name: Sanduíche de Queijo
+  m_Name: Omelete de Cogumelos
   m_EditorClassIdentifier: Assembly-CSharp::FoodItemData
-  order: 4
-  foodName: Sanduíche de Queijo
-  iconEmoji: "\U0001F96A"
+  order: 6
+  foodName: Omelete de Cogumelos
+  icon: {fileID: 7118477742842030219, guid: 96d7e35fe269dcd41a536ed054277343, type: 3}
   tiers:
   - rarity: 0
-    price: 35
+    price: 45
     hungerRestore: 0.35
-    effect: 4
-    effectValue: 0.05
-    effectDurationMinutes: 0
+    effect: 6
+    effectValue: 0.02
+    effectDurationMinutes: 15
   - rarity: 1
-    price: 80
+    price: 100
     hungerRestore: 0.35
-    effect: 4
-    effectValue: 0.1
-    effectDurationMinutes: 0
+    effect: 6
+    effectValue: 0.05
+    effectDurationMinutes: 15
   - rarity: 2
-    price: 180
+    price: 220
     hungerRestore: 0.35
-    effect: 4
-    effectValue: 0.2
-    effectDurationMinutes: 0
+    effect: 6
+    effectValue: 0.1
+    effectDurationMinutes: 15

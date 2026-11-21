@@ -1,0 +1,296 @@
+fileFormatVersion: 2
+guid: 720b11b3f4a2778429b616ba85db2352
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1111773493912172004
+    second: "\xCDcones de Comida Fofa em 3D_0"
+  - first:
+      213: 4514493484883177031
+    second: "\xCDcones de Comida Fofa em 3D_1"
+  - first:
+      213: -6664648920822135915
+    second: "\xCDcones de Comida Fofa em 3D_2"
+  - first:
+      213: -7732488345912571285
+    second: "\xCDcones de Comida Fofa em 3D_3"
+  - first:
+      213: 799676784883164886
+    second: "\xCDcones de Comida Fofa em 3D_4"
+  - first:
+      213: -3792984763694111102
+    second: "\xCDcones de Comida Fofa em 3D_5"
+  - first:
+      213: -4163178032090729858
+    second: "\xCDcones de Comida Fofa em 3D_6"
+  - first:
+      213: -4651482317369487852
+    second: "\xCDcones de Comida Fofa em 3D_7"
+  - first:
+      213: -2593108108577427797
+    second: "\xCDcones de Comida Fofa em 3D_8"
+  - first:
+      213: -7133254306462344344
+    second: "\xCDcones de Comida Fofa em 3D_9"
+  - first:
+      213: 8397184878321185352
+    second: "\xCDcones de Comida Fofa em 3D_10"
+  - first:
+      213: 3167311099018748632
+    second: "\xCDcones de Comida Fofa em 3D_11"
+  - first:
+      213: 6610254791327253018
+    second: "\xCDcones de Comida Fofa em 3D_12"
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: "\xCDcones de Comida Fofa em 3D_0"
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 508
+        width: 610
+        height: 515
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e5745f2a10dd6f00800000000000000
+      internalID: 1111773493912172004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\xCDcones de Comida Fofa em 3D_1"
+      rect:
+        serializedVersion: 2
+        x: 844
+        y: 501
+        width: 560
+        height: 523
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74ee64bd7e3b6ae30800000000000000
+      internalID: 4514493484883177031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\xCDcones de Comida Fofa em 3D_9"
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 24
+        width: 575
+        height: 508
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86b59ca7007910d90800000000000000
+      internalID: -7133254306462344344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\xCDcones de Comida Fofa em 3D_10"
+      rect:
+        serializedVersion: 2
+        x: 839
+        y: 0
+        width: 595
+        height: 557
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 842bd99182bc88470800000000000000
+      internalID: 8397184878321185352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 19a1024aaca39a24cbbbea2f4d8c57ad
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      "\xCDcones de Comida Fofa em 3D_0": 1111773493912172004
+      "\xCDcones de Comida Fofa em 3D_1": 4514493484883177031
+      "\xCDcones de Comida Fofa em 3D_10": 8397184878321185352
+      "\xCDcones de Comida Fofa em 3D_11": 3167311099018748632
+      "\xCDcones de Comida Fofa em 3D_12": 6610254791327253018
+      "\xCDcones de Comida Fofa em 3D_2": -6664648920822135915
+      "\xCDcones de Comida Fofa em 3D_3": -7732488345912571285
+      "\xCDcones de Comida Fofa em 3D_4": 799676784883164886
+      "\xCDcones de Comida Fofa em 3D_5": -3792984763694111102
+      "\xCDcones de Comida Fofa em 3D_6": -4163178032090729858
+      "\xCDcones de Comida Fofa em 3D_7": -4651482317369487852
+      "\xCDcones de Comida Fofa em 3D_8": -2593108108577427797
+      "\xCDcones de Comida Fofa em 3D_9": -7133254306462344344
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

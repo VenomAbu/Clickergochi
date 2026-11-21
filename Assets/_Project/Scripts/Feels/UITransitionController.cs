@@ -27,6 +27,7 @@ public class UITransitionController : MonoBehaviour
 
     private Coroutine transitionCoroutine;
     private bool isTransitioning;
+    private readonly Dictionary<GameObject, Coroutine> popupCoroutines = new();
 
 
     // Abre um painel vertical, fechando qualquer outro painel vertical ativo.
@@ -40,7 +41,7 @@ public class UITransitionController : MonoBehaviour
         );
     }
 
-    // Ativa o painel horizontal atual e fecha os painéis verticais.
+    // Ativa o painel horizontal atual e fecha os painï¿½is verticais.
     public void ReturnToHorizontal(GameObject[] verticalPanels)
     {
         if (isTransitioning)
@@ -80,7 +81,7 @@ public class UITransitionController : MonoBehaviour
             vignetteFadeDuration
         );
 
-        // Agora fecha os outros painéis verticais.
+        // Agora fecha os outros painï¿½is verticais.
         if (verticalPanels != null)
         {
             foreach (GameObject panel in verticalPanels)
@@ -113,11 +114,11 @@ public class UITransitionController : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "UITransitionController: HorizontalNavigation não configurado."
+                "UITransitionController: HorizontalNavigation nï¿½o configurado."
             );
         }
 
-        // Fecha os painéis verticais com a animação de saída.
+        // Fecha os painï¿½is verticais com a animaï¿½ï¿½o de saï¿½da.
         if (verticalPanels != null)
         {
             foreach (GameObject panel in verticalPanels)
@@ -133,7 +134,166 @@ public class UITransitionController : MonoBehaviour
         transitionCoroutine = null;
     }
 
-    // ANIMAÇÃO DE ENTRADA
+    // ANIMAï¿½ï¿½O DE ENTRADA
+    // =========================================
+    // POPUPS (mesma animacao da navegacao vertical)
+    // =========================================
+
+    private const string PopupContentName = "TransitionContent";
+
+    /// <summary>
+    /// Abre o popup: o objeto raiz (fundo preto da tela inteira) e ligado
+    /// na hora, sem animacao. So o wrapper com os filhos e animado.
+    /// </summary>
+    public void OpenPopup(GameObject panel)
+    {
+        if (panel == null)
+            return;
+
+        StopPopupCoroutine(panel);
+        popupCoroutines[panel] = StartCoroutine(OpenPopupRoutine(panel));
+    }
+
+    /// <summary>
+    /// Fecha o popup: anima os filhos e so desliga o fundo preto no final,
+    /// tambem sem qualquer animacao no objeto raiz.
+    /// </summary>
+    public void ClosePopup(GameObject panel)
+    {
+        if (panel == null)
+            return;
+
+        StopPopupCoroutine(panel);
+        popupCoroutines[panel] = StartCoroutine(ClosePopupRoutine(panel));
+    }
+
+    private void StopPopupCoroutine(GameObject panel)
+    {
+        if (popupCoroutines.TryGetValue(panel, out Coroutine running) &&
+            running != null)
+        {
+            StopCoroutine(running);
+        }
+        popupCoroutines.Remove(panel);
+    }
+
+    /// <summary>
+    /// Cria (uma vez) um filho que agrupa todo o conteudo visual do popup.
+    /// O fundo preto continua na raiz e nunca e transformado pela animacao.
+    /// </summary>
+    private RectTransform EnsurePopupContent(GameObject overlay)
+    {
+        Transform existing = overlay.transform.Find(PopupContentName);
+        if (existing != null)
+            return existing as RectTransform;
+
+        GameObject content = new GameObject(PopupContentName, typeof(RectTransform));
+        RectTransform rect = (RectTransform)content.transform;
+        rect.SetParent(overlay.transform, false);
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        // Copia a ordem original antes de mexer na hierarquia: ao mover um
+        // filho ele sai do overlay e os indices seguintes mudam. Depois
+        // reparentiza na mesma ordem, senao a pilha de renderizacao inverte
+        // (o ultimo filho, que deve ficar a frente, acabaria atras).
+        var visualChildren = new List<Transform>();
+        for (int i = 0; i < overlay.transform.childCount; i++)
+        {
+            Transform child = overlay.transform.GetChild(i);
+            if (child != content.transform)
+                visualChildren.Add(child);
+        }
+
+        foreach (Transform child in visualChildren)
+            child.SetParent(content.transform, true);
+
+        content.transform.SetAsLastSibling();
+
+        return rect;
+    }
+
+    private IEnumerator OpenPopupRoutine(GameObject overlay)
+    {
+        RectTransform content = EnsurePopupContent(overlay);
+
+        // Fundo preto: aparece imediatamente, sem slide/scale/fade.
+        if (!overlay.activeSelf)
+        {
+            overlay.SetActive(true);
+            overlay.transform.SetAsLastSibling();
+        }
+
+        yield return AnimatePopupContent(content, true);
+        popupCoroutines.Remove(overlay);
+    }
+
+    private IEnumerator ClosePopupRoutine(GameObject overlay)
+    {
+        RectTransform content = EnsurePopupContent(overlay);
+
+        if (overlay.activeSelf)
+            yield return AnimatePopupContent(content, false);
+
+        // Fundo preto: some imediatamente, sem slide/scale/fade.
+        overlay.SetActive(false);
+        popupCoroutines.Remove(overlay);
+    }
+
+    private IEnumerator AnimatePopupContent(RectTransform content, bool entering)
+    {
+        if (content == null)
+            yield break;
+
+        CanvasGroup canvasGroup = GetCanvasGroup(content.gameObject);
+        float duration = entering ? openDuration : closeDuration;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = duration > 0f ? Mathf.Clamp01(elapsed / duration) : 1f;
+
+            if (entering)
+            {
+                float bounce = EaseOutBack(t);
+                content.localScale = Vector3.one * Mathf.LerpUnclamped(startScale, 1f, bounce);
+                if (useSlideTransition)
+                {
+                    float slide = EaseOutCubic(t);
+                    content.anchoredPosition = Vector2.Lerp(
+                        Vector2.down * slideDistance, Vector2.zero, slide);
+                }
+                canvasGroup.alpha = 1f;
+            }
+            else
+            {
+                float bounce = EaseInBack(t);
+                content.localScale = Vector3.one * Mathf.LerpUnclamped(1f, closeScale, bounce);
+                if (useSlideTransition)
+                {
+                    float slide = EaseInCubic(t);
+                    content.anchoredPosition = Vector2.Lerp(
+                        Vector2.zero, Vector2.down * slideDistance, slide);
+                }
+                canvasGroup.alpha = 1f - t;
+            }
+
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+            yield return null;
+        }
+
+        // Estado final do conteudo; o overlay raiz nunca e alterado.
+        content.localScale = Vector3.one;
+        content.anchoredPosition = Vector2.zero;
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+    }
+
     private IEnumerator EnterPanel(GameObject panel)
     {
         RectTransform rect = panel.GetComponent<RectTransform>();
@@ -141,7 +301,7 @@ public class UITransitionController : MonoBehaviour
         if (rect == null)
         {
             Debug.LogWarning(
-                $"UITransitionController: {panel.name} não possui RectTransform."
+                $"UITransitionController: {panel.name} nï¿½o possui RectTransform."
             );
 
             yield break;
@@ -153,7 +313,7 @@ public class UITransitionController : MonoBehaviour
         Vector2 targetPosition = rect.anchoredPosition;
         Vector3 targetScale = rect.localScale;
 
-        // Prepara o estado inicial da animação.
+        // Prepara o estado inicial da animaï¿½ï¿½o.
         rect.localScale = targetScale * startScale;
 
         if (useSlideTransition)
@@ -209,7 +369,7 @@ public class UITransitionController : MonoBehaviour
         canvasGroup.blocksRaycasts = true;
     }
 
-    // ANIMAÇÃO DE SAÍDA
+    // ANIMAï¿½ï¿½O DE SAï¿½DA
     private IEnumerator ExitPanel(GameObject panel)
     {
         RectTransform rect = panel.GetComponent<RectTransform>();
@@ -259,7 +419,7 @@ public class UITransitionController : MonoBehaviour
                 );
             }
 
-            // Fade durante a saída.
+            // Fade durante a saï¿½da.
             canvasGroup.alpha = 1f - t;
 
             yield return null;
@@ -296,7 +456,7 @@ public class UITransitionController : MonoBehaviour
             + c1 * Mathf.Pow(t - 1f, 2f);
     }
 
-    // Ease In Back: efeito contrário, antecipando a retração.
+    // Ease In Back: efeito contrï¿½rio, antecipando a retraï¿½ï¿½o.
     private float EaseInBack(float t)
     {
         const float c1 = 1.70158f;
@@ -328,7 +488,7 @@ public class UITransitionController : MonoBehaviour
         {
             Material material;
 
-            // Cria uma instância exclusiva para cada Image.
+            // Cria uma instï¿½ncia exclusiva para cada Image.
             if (!vignetteMaterials.TryGetValue(image, out material))
             {
                 Material originalMaterial = image.material;

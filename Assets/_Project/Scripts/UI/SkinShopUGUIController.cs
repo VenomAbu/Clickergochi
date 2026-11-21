@@ -240,15 +240,16 @@ public class SkinShopUGUIController : MonoBehaviour
         }
 
         // Toda compra pede confirmacao (mesmo fluxo da comida e moveis).
-        ConfirmPopupUGUI confirm = ConfirmPopupUGUI.Instance;
-        if (confirm != null)
+        PopupController popup = PopupController.Instance;
+        if (popup != null)
         {
-            confirm.Show(
+            popup.ShowConfirm(
                 skin.skinName,
                 $"Skin de {FurnitureShopUI.FurnitureName(kind)}\n" +
                 $"Por {skin.skinPrice} gosma?",
                 "Comprar",
-                DoBuy);
+                DoBuy,
+                skin.skinImage);
         }
         else
         {

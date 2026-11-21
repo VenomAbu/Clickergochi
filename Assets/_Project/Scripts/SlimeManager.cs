@@ -57,6 +57,13 @@ public class SlimeManager : MonoBehaviour
     private float decayCheckTimer;
     private float decaySaveTimer;
 
+    /// <summary>
+    /// Quando o painel de debug assume o controle, o gatilho automatico por
+    /// cuidados fica desligado para que desmarcar a euforia nao seja revertido
+    /// pelo proximo Update.
+    /// </summary>
+    private bool? manualEuphoriaOverride;
+
     /// <summary>Taxa de decaimento da Diversão por hora real.</summary>
     public float FunDecayPerHour
     {
@@ -475,6 +482,29 @@ public class SlimeManager : MonoBehaviour
         Commit();
     }
 
+    /// <summary>
+    /// Liga/desliga a euforia manualmente (usado pelo SlimeDebugPanel).
+    /// Enquanto existir override, CheckEuphoriaTrigger nao dispara sozinho,
+    /// mesmo com os tres cuidados em 100%.
+    /// </summary>
+    public void SetEuphoriaManual(bool active)
+    {
+        manualEuphoriaOverride = active;
+        if (active)
+        {
+            Save().euphoriaEndUtc = DateTime.UtcNow
+                .AddHours(Mathf.Max(0.01f, euphoriaDurationHours))
+                .ToString("o");
+            RefreshEuphoriaMultiplier();
+        }
+        else
+        {
+            Save().euphoriaEndUtc = string.Empty;
+            UnregisterMultiplier(EuphoriaId);
+        }
+        Commit();
+    }
+
     public void AddGoo(float amount)
     {
         SaveData data = Save();
@@ -615,6 +645,10 @@ public class SlimeManager : MonoBehaviour
 
     private void CheckEuphoriaTrigger()
     {
+        // O debug assume o controle: nao interfere mais no gatilho automatico.
+        if (manualEuphoriaOverride.HasValue)
+            return;
+
         SaveData data = Save();
         if (IsEuphoric)
             return;
