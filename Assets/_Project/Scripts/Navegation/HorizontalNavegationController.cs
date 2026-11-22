@@ -21,6 +21,12 @@ public class HorizontalNavegationController : MonoBehaviour,
     [SerializeField, Range(0.1f, 0.8f)] private float dragCommitThreshold = 0.25f;
     [SerializeField] private HorizontalEdgeFadeController edgeFadeController;
 
+    [Header("Slime na transicao")]
+    [Tooltip("Raiz Slimes3D. Se vazia, procurada pelo nome ou pelo MainHUD.")]
+    [SerializeField] private Transform slimeRoot;
+    [Tooltip("Estado do Animator tocado ao trocar de como.")]
+    [SerializeField] private string castSpellStateName = "Cast Spell";
+
     [Header("Viewport Clipping")]
     [Tooltip("Recorta o BG quadrado de cada sala na largura real do Canvas/dispositivo. " +
              "Sem isso o BG de 2048px invade a tela de 1536px e a proxima sala aparece antes do swipe.")]
@@ -195,6 +201,8 @@ public class HorizontalNavegationController : MonoBehaviour,
             navigationPanels[nextIndex] == null)
             return;
 
+        PlayActiveSlimeCastSpell();
+
         transitionCoroutine = StartCoroutine(
             AnimatePanelTransition(nextIndex, direction)
         );
@@ -348,6 +356,14 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         bool shouldCommit =
             Mathf.Abs(currentDragX) >= requiredDistance;
+
+        if (shouldCommit &&
+            dragNextIndex >= 0 &&
+            dragNextIndex < navigationPanels.Length &&
+            navigationPanels[dragNextIndex] != null)
+        {
+            PlayActiveSlimeCastSpell();
+        }
 
         transitionCoroutine = StartCoroutine(
             FinishDrag(shouldCommit)
@@ -544,6 +560,56 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         isTransitioning = false;
         transitionCoroutine = null;
+    }
+
+    // =========================================
+    // SLIME CAST SPELL
+    // =========================================
+
+    private void PlayActiveSlimeCastSpell()
+    {
+        Animator animator = GetActiveSlimeAnimator();
+        if (animator == null || string.IsNullOrEmpty(castSpellStateName))
+            return;
+
+        // Estado exato do controller de skins (Slime.controller).
+        animator.Play(castSpellStateName, 0, 0f);
+    }
+
+    private Animator GetActiveSlimeAnimator()
+    {
+        Transform root = slimeRoot;
+        if (root == null && MainHUDUGUIController.Instance != null)
+            root = MainHUDUGUIController.Instance.slimeRoot;
+        if (root == null)
+            root = FindTransformByName("Slimes3D");
+        if (root == null)
+            return null;
+
+        Animator[] animators = root.GetComponentsInChildren<Animator>(true);
+        for (int i = 0; i < animators.Length; i++)
+        {
+            Animator animator = animators[i];
+            if (animator != null &&
+                animator.gameObject.activeInHierarchy &&
+                animator.isActiveAndEnabled)
+                return animator;
+        }
+        return null;
+    }
+
+    private static Transform FindTransformByName(string name)
+    {
+        Transform[] all = FindObjectsByType<Transform>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+
+        for (int i = 0; i < all.Length; i++)
+        {
+            if (all[i].name == name)
+                return all[i];
+        }
+        return null;
     }
 
     // =========================================

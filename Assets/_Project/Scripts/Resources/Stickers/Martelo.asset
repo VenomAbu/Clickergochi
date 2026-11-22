@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: Martelo
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Martelo"
-  stickerImage: {fileID: 0}
-  description: "Um martelo comum.\n\nEfeito (Desconto no Upgrade dos Móveis): 15% de desconto em upgrades de móveis."
+  stickerName: Martelo
+  stickerImage: {fileID: 6875232967347962966, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um martelo comum.\n\nEfeito (Desconto no Upgrade dos M\xF3veis):
+    15% de desconto em upgrades de m\xF3veis."
   order: 3
   rarity: 0
   blocked: 0

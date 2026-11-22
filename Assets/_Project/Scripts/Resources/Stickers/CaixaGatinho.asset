@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: CaixaGatinho
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Caixa de Papelão com Gatinho"
-  stickerImage: {fileID: 0}
-  description: "Um gatinho dormindo dentro de uma caixa de papelão.\n\nEfeito (Desconto no Custo do Cômodo): -25% no custo de avanço do nível do Cômodo."
+  stickerName: Caixa com Gatinho
+  stickerImage: {fileID: 5053786716343652468, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um gatinho dormindo dentro de uma caixa de papel\xE3o.\n\nEfeito
+    (Desconto no Custo do C\xF4modo): -25% no custo de avan\xE7o do n\xEDvel do C\xF4modo."
   order: 8
   rarity: 2
   blocked: 0

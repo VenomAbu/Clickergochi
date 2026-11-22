@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: BoloDeMorango
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Bolo de Morango"
-  stickerImage: {fileID: 0}
-  description: "Um bolo de aniversário de morango.\n\nEfeito (AFK Supremo): Aumenta a geração AFK de gosma em +500% enquanto o bônus de Euforia estiver ativo."
+  stickerName: Bolo de Morango
+  stickerImage: {fileID: -280296892830672002, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um bolo de anivers\xE1rio de morango.\n\nEfeito (AFK Supremo): Aumenta
+    a gera\xE7\xE3o AFK de gosma em +500% enquanto o b\xF4nus de Euforia estiver
+    ativo."
   order: 10
   rarity: 2
   blocked: 0

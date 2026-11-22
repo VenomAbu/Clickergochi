@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: ControleRetro
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Controle Retrô"
-  stickerImage: {fileID: 0}
-  description: "Um controle de videogame clássico.\n\nEfeito (Gosma por Clique): +10% de Gosma por Clique."
+  stickerName: "Controle Retr\xF4"
+  stickerImage: {fileID: -3611365872772144240, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um controle de videogame cl\xE1ssico.\n\nEfeito (Gosma por Clique):
+    +10% de Gosma por Clique."
   order: 2
   rarity: 0
   blocked: 0

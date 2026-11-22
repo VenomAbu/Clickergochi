@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TrevoDaSorte
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
   stickerName: Trevo da Sorte
-  stickerImage: {fileID: 0}
+  stickerImage: {fileID: -788235791600079141, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
   description: "Um trevo de quatro folhas.\n\nEfeito (Eventos Aleat\xF3rios): +15%
     de chance de eventos aleat\xF3rios ocorrerem."
   order: 6

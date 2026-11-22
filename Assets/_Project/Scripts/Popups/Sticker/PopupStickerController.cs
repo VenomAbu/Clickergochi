@@ -10,6 +10,10 @@ public class PopupStickerController : MonoBehaviour
     [SerializeField] private Image stickerImage;
     [SerializeField] private TMP_Text descriptionTMP;
 
+    [Header("Raridade")]
+    [SerializeField] private Image rarityBackground;
+    [SerializeField] private TMP_Text rarityTMP;
+
     [Header("Popup Controller")]
     [SerializeField] private PopupController popupController;
 
@@ -23,9 +27,15 @@ public class PopupStickerController : MonoBehaviour
         stickerImage.sprite = stickerData.stickerImage;
         stickerImage.enabled = stickerData.stickerImage != null;
 
-        descriptionTMP.text =
-            "Raridade: " + stickerData.GetRarityLabel() + "\n\n" +
-            stickerData.description;
+        // A raridade sai da descricao e vai para o selo proprio no popup.
+        descriptionTMP.text = stickerData.description;
+
+        if (rarityBackground != null)
+            rarityBackground.color = stickerData.GetRarityColor();
+
+        if (rarityTMP != null)
+            rarityTMP.text = stickerData.GetRarityLabel();
+        // A cor do TMP e mantida: so o fundo muda com a raridade.
     }
 
     public void ClosePopup()

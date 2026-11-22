@@ -114,7 +114,20 @@ public class StickerAlbumUGUIController : MonoBehaviour
 
     private void Bind(Transform card, StickerData data, int index)
     {
+        // O nome mantem a cor do prefab; quem indica a raridade e o fundo do titulo.
         SetText(card, "Sticker Name", data.stickerName);
+
+        Transform titleBackgroundTransform = FindDirect(card, "backgroundTittle");
+        Image titleBackground = titleBackgroundTransform != null
+            ? titleBackgroundTransform.GetComponent<Image>()
+            : null;
+        if (titleBackground != null)
+        {
+            Color rarityColor = data.GetCardRarityColor();
+            rarityColor.a = titleBackground.color.a; // preserva a transparencia do prefab
+            titleBackground.color = rarityColor;
+        }
+
         SetText(card, "NumTMP", (index + 1).ToString());
 
         Transform iconTransform = FindDirect(card, "Image");
@@ -174,12 +187,13 @@ public class StickerAlbumUGUIController : MonoBehaviour
     // HELPERS
     // =========================================
 
-    private static void SetText(Transform root, string childName, string value)
+    private static TMP_Text SetText(Transform root, string childName, string value)
     {
         Transform found = FindDirect(root, childName);
         TMP_Text label = found != null ? found.GetComponent<TMP_Text>() : null;
         if (label != null)
             label.text = value;
+        return label;
     }
 
     /// <summary>Filho direto com o nome exato (nao desce a arvore).</summary>

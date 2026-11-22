@@ -572,6 +572,13 @@ public class PopupController : MonoBehaviour
     // CLOSE ALL POPUPS
     // =========================================
 
+    /// <summary>Fecha somente o popup de sticker.</summary>
+    public void CloseStickerPopup()
+    {
+        ClosePanel(popupSticker, true);
+        PlayClose();
+    }
+
     public void CloseAllPopups()
     {
         CloseAllInternal(true, true);

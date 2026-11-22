@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: RatoChef
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Rato Chef"
-  stickerImage: {fileID: 0}
-  description: "Um ratinho com chapéu de cozinheiro mexendo um caldeirão.\n\nEfeito (Tempo de Efeito da Comida): +25% do tempo."
+  stickerName: Rato Chef
+  stickerImage: {fileID: -2823751980369642591, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um ratinho com chap\xE9u de cozinheiro mexendo um caldeir\xE3o.\n\nEfeito
+    (Tempo de Efeito da Comida): +25% do tempo."
   order: 7
   rarity: 1
   blocked: 0

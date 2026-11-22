@@ -33,6 +33,10 @@ public class VerticalNavegationController : MonoBehaviour
         if (panel == null)
             return;
 
+        // Reinicia os efeitos das telas ao abri-las (AlbumUI e SlimeSkinUI).
+        AlbumEffectsController.NotifyPanelOpened(panel);
+        SlimeSkinEffectsController.NotifyPanelOpened(panel);
+
         if (transitionController != null)
         {
             transitionController.OpenVerticalPanel(
@@ -43,7 +47,7 @@ public class VerticalNavegationController : MonoBehaviour
             return;
         }
 
-        // Fallback caso o controlador de transições não esteja configurado.
+        // Fallback caso o controlador de transiï¿½ï¿½es nï¿½o esteja configurado.
         CloseAllPanels();
         panel.SetActive(true);
     }
@@ -96,7 +100,7 @@ public class VerticalNavegationController : MonoBehaviour
         if (horizontalNavigation == null)
         {
             Debug.LogWarning(
-                "VerticalNavegationController: HorizontalNavigation não configurado."
+                "VerticalNavegationController: HorizontalNavigation nï¿½o configurado."
             );
 
             return;
@@ -121,7 +125,7 @@ public class VerticalNavegationController : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "VerticalNavegationController: ShopPanel não configurado."
+                "VerticalNavegationController: ShopPanel nï¿½o configurado."
             );
         }
     }

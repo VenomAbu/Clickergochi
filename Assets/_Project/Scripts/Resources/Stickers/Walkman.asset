@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Walkman
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
   stickerName: Walkman
-  stickerImage: {fileID: 0}
+  stickerImage: {fileID: -5625546784100471998, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
   description: "Um toca-fitas port\xE1til com fones amarelos cl\xE1ssicos.\n\nEfeito
     (Clique-Base Fixo): Adiciona ao Clique-Base do C\xF4modo e +100% de Gosma por
     Clique."

@@ -52,6 +52,52 @@ public class StickerData : ScriptableObject
         }
     }
 
+    /// <summary>Cores das raridades usadas no selo do popup.</summary>
+    /// <remarks>Comum usa a mesma cor do backgroundTittle do card.</remarks>
+    public static Color RarityComumColor => CardComumColor;    // azul claro #ADD8E6
+
+    public static Color RarityEpicoColor =>
+        new Color(138f / 255f, 43f / 255f, 226f / 255f, 1f);  // roxo #8A2BE2
+
+    public static Color RarityLendarioColor =>
+        new Color(255f / 255f, 215f / 255f, 0f / 255f, 1f);   // amarelo #FFD700
+
+    /// <summary>Cores do backgroundTittle no card do album.</summary>
+    public static Color CardComumColor =>
+        new Color(0f / 255f, 192f / 255f, 255f / 255f, 1f); // azul claro #00C0FF
+
+    public static Color CardEpicoColor => RarityEpicoColor;     // roxo #8A2BE2
+
+    public static Color CardLendarioColor => RarityLendarioColor; // amarelo #FFD700
+
+    /// <summary>Cor da raridade atual para o backgroundTittle do card.</summary>
+    public Color GetCardRarityColor()
+    {
+        switch (rarity)
+        {
+            case StickerRarity.Epico:
+                return CardEpicoColor;
+            case StickerRarity.Lendario:
+                return CardLendarioColor;
+            default:
+                return CardComumColor;
+        }
+    }
+
+    /// <summary>Cor da raridade atual do selo no popup.</summary>
+    public Color GetRarityColor()
+    {
+        switch (rarity)
+        {
+            case StickerRarity.Epico:
+                return RarityEpicoColor;
+            case StickerRarity.Lendario:
+                return RarityLendarioColor;
+            default:
+                return RarityComumColor;
+        }
+    }
+
     /// <summary>Raridade em PT-BR para o popup do sticker.</summary>
     public string GetRarityLabel()
     {

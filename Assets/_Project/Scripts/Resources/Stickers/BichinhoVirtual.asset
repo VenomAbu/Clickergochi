@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: BichinhoVirtual
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Bichinho Virtual"
-  stickerImage: {fileID: 0}
-  description: "Um chaveirinho de pet virtual.\n\nEfeito (Tempo do Bônus de Diversão): +25% do tempo."
+  stickerName: Bichinho Virtual
+  stickerImage: {fileID: 7795267918341249717, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um chaveirinho de pet virtual.\n\nEfeito (Tempo do B\xF4nus de Divers\xE3o):
+    +25% do tempo."
   order: 5
   rarity: 1
   blocked: 0

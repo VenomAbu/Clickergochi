@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66933f6e3c1e9a040b05e4a991ea7885, type: 3}
   m_Name: Dino
   m_EditorClassIdentifier: Assembly-CSharp::StickerData
-  stickerName: "Dino"
-  stickerImage: {fileID: 0}
-  description: "Um T-Rex verde de pelúcia com bracinhos curtos.\n\nEfeito (Chance Crítica da Cômoda): +10% de Chance Crítica."
+  stickerName: Dino
+  stickerImage: {fileID: -6290020845161898678, guid: 3c9a4ed3f9e9e894da12964ea4e7cd16, type: 3}
+  description: "Um T-Rex verde de pel\xFAcia com bracinhos curtos.\n\nEfeito (Chance
+    Cr\xEDtica da C\xF4moda): +10% de Chance Cr\xEDtica."
   order: 4
   rarity: 0
   blocked: 0

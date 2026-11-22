@@ -35,7 +35,7 @@ public class RoomController : MonoBehaviour
     [SerializeField] private GameObject happinessBubble;
     [SerializeField] private GameObject hygieneBubble;
     [SerializeField] private GameObject hungerBubble;
-    [SerializeField] private float bubbleDuration = 1.5f;
+    [SerializeField] private float bubbleDuration = 2f;
 
     private bool isMuted;
     private Coroutine bubbleCoroutine;
@@ -195,31 +195,96 @@ public class RoomController : MonoBehaviour
     // MEASUREMENT DIALOG BUBBLES
     // =========================================
 
+    // Os botoes do MensuresLayout ficam no HUD e estao ligados no Inspector a
+    // uma sala especifica. Como a navegacao horizontal desativa essa sala, os
+    // botoes precisam redirecionar para a sala ativa no momento do clique.
+    private static RoomController ActiveRoom
+    {
+        get
+        {
+            RoomController[] rooms = FindObjectsByType<RoomController>(
+                FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            for (int i = 0; i < rooms.Length; i++)
+            {
+                if (rooms[i].gameObject.activeInHierarchy)
+                    return rooms[i];
+            }
+            return null;
+        }
+    }
+
     public void MensureHappinessBtt()
     {
-        ShowBubble(happinessBubble);
+        ToggleBubbleOnActive(r => r.happinessBubble);
     }
 
     public void MensureHygieneBtt()
     {
-        ShowBubble(hygieneBubble);
+        ToggleBubbleOnActive(r => r.hygieneBubble);
     }
 
     public void MensureHungerBtt()
     {
-        ShowBubble(hungerBubble);
+        ToggleBubbleOnActive(r => r.hungerBubble);
+    }
+
+    /// <summary>
+    /// Clique no proprio dialogo tambem fecha o balao (wiring na cena).
+    /// </summary>
+    public void HideBubbles()
+    {
+        if (bubbleCoroutine != null)
+        {
+            StopCoroutine(bubbleCoroutine);
+            bubbleCoroutine = null;
+        }
+        HideAllBubbles();
+    }
+
+    /// <summary>
+    /// Fecha os baloes na sala ativa. Usado pelo clique no proprio dialogo,
+    /// que e compartilhado entre as salas.
+    /// </summary>
+    public static void HideActiveBubbles()
+    {
+        RoomController active = ActiveRoom;
+        if (active != null)
+            active.HideBubbles();
+    }
+
+    private void ToggleBubbleOnActive(Func<RoomController, GameObject> selector)
+    {
+        RoomController target = gameObject.activeInHierarchy ? this : ActiveRoom;
+        if (target == null || selector == null)
+            return;
+
+        GameObject bubble = selector(target);
+        if (bubble == null)
+            return;
+
+        // Clique repetido no mesmo botao/dialogo esconde o balao.
+        if (bubble.activeSelf)
+        {
+            target.HideBubbles();
+            return;
+        }
+
+        target.ShowBubble(bubble);
     }
 
     private void ShowBubble(GameObject bubble)
     {
-        if (bubble == null)
+        // StartCoroutine so falha em MonoBehaviour de GameObject inativo.
+        if (bubble == null || !isActiveAndEnabled)
             return;
 
         if (bubbleCoroutine != null)
+        {
             StopCoroutine(bubbleCoroutine);
+            bubbleCoroutine = null;
+        }
 
         HideAllBubbles();
-
         bubble.SetActive(true);
 
         bubbleCoroutine = StartCoroutine(

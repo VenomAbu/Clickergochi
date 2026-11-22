@@ -1,0 +1,534 @@
+fileFormatVersion: 2
+guid: 3c9a4ed3f9e9e894da12964ea4e7cd16
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1737666170829472984
+    second: AllStickers_0
+  - first:
+      213: 6875232967347962966
+    second: AllStickers_1
+  - first:
+      213: -3611365872772144240
+    second: AllStickers_2
+  - first:
+      213: -5625546784100471998
+    second: AllStickers_3
+  - first:
+      213: -2823751980369642591
+    second: AllStickers_4
+  - first:
+      213: 7795267918341249717
+    second: AllStickers_5
+  - first:
+      213: 6812487482173146499
+    second: AllStickers_6
+  - first:
+      213: -1111617634620898130
+    second: AllStickers_7
+  - first:
+      213: 8552072789932390631
+    second: AllStickers_8
+  - first:
+      213: -6612473111423110656
+    second: AllStickers_9
+  - first:
+      213: 3532452545141237952
+    second: AllStickers_10
+  - first:
+      213: -1934657245947186899
+    second: AllStickers_11
+  - first:
+      213: -6719995536046119726
+    second: AllStickers_12
+  - first:
+      213: 1278265698117647180
+    second: AllStickers_13
+  - first:
+      213: 2566800945064017191
+    second: AllStickers_14
+  - first:
+      213: -1984036323453104262
+    second: AllStickers_15
+  - first:
+      213: -1250608781658271571
+    second: AllStickers_16
+  - first:
+      213: -6206535765837672313
+    second: AllStickers_17
+  - first:
+      213: -379528702933951384
+    second: AllStickers_18
+  - first:
+      213: 4337859602714102771
+    second: AllStickers_19
+  - first:
+      213: 1274162553022577746
+    second: AllStickers_20
+  - first:
+      213: 6324736519166148783
+    second: AllStickers_21
+  - first:
+      213: 6912211240428518264
+    second: AllStickers_22
+  - first:
+      213: -8624835324658007320
+    second: AllStickers_23
+  - first:
+      213: 8322298509396518341
+    second: AllStickers_24
+  - first:
+      213: -2601410202096612178
+    second: AllStickers_25
+  - first:
+      213: -6290020845161898678
+    second: AllStickers_26
+  - first:
+      213: -216481975380331929
+    second: AllStickers_27
+  - first:
+      213: 5138277981647298988
+    second: AllStickers_28
+  - first:
+      213: -280296892830672002
+    second: AllStickers_29
+  - first:
+      213: 5053786716343652468
+    second: AllStickers_30
+  - first:
+      213: -788235791600079141
+    second: AllStickers_31
+  - first:
+      213: 302460773217499082
+    second: AllStickers_32
+  - first:
+      213: -8377304183223225358
+    second: AllStickers_33
+  - first:
+      213: 8999365984196075934
+    second: AllStickers_34
+  - first:
+      213: -8500779514737676863
+    second: AllStickers_35
+  - first:
+      213: -5826305298526088177
+    second: AllStickers_36
+  - first:
+      213: -5832022696952075721
+    second: AllStickers_37
+  - first:
+      213: 2828784667575610664
+    second: AllStickers_38
+  - first:
+      213: 4161633049009107029
+    second: AllStickers_39
+  - first:
+      213: 7242826833591033845
+    second: AllStickers_40
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: AllStickers_0
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 627
+        width: 540
+        height: 540
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d401820d2e6d1810800000000000000
+      internalID: 1737666170829472984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_1
+      rect:
+        serializedVersion: 2
+        x: 679
+        y: 613
+        width: 540
+        height: 540
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65484de05fbb96f50800000000000000
+      internalID: 6875232967347962966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_2
+      rect:
+        serializedVersion: 2
+        x: 1301
+        y: 612
+        width: 570
+        height: 562
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 093a27f5fd9d1edc0800000000000000
+      internalID: -3611365872772144240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_3
+      rect:
+        serializedVersion: 2
+        x: 2612
+        y: 527
+        width: 726
+        height: 667
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24ba95a510b0ee1b0800000000000000
+      internalID: -5625546784100471998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_4
+      rect:
+        serializedVersion: 2
+        x: 1939
+        y: 617
+        width: 555
+        height: 555
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1abf244e88400d8d0800000000000000
+      internalID: -2823751980369642591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_5
+      rect:
+        serializedVersion: 2
+        x: 677
+        y: 12
+        width: 540
+        height: 540
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ba9ab1eeda5e2c60800000000000000
+      internalID: 7795267918341249717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_26
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 20
+        width: 580
+        height: 580
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4d92560e5b55b8a0800000000000000
+      internalID: -6290020845161898678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_29
+      rect:
+        serializedVersion: 2
+        x: 1271
+        y: 29
+        width: 560
+        height: 560
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7b9e27067f2c1cf0800000000000000
+      internalID: -280296892830672002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_30
+      rect:
+        serializedVersion: 2
+        x: 1937
+        y: 27
+        width: 550
+        height: 550
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 470504e0e38a22640800000000000000
+      internalID: 5053786716343652468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AllStickers_31
+      rect:
+        serializedVersion: 2
+        x: 2634
+        y: 28
+        width: 520
+        height: 520
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdead6a49bf9f05f0800000000000000
+      internalID: -788235791600079141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 614f31423e8be5e4ba52067c5901ab3a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      AllStickers_0: 1737666170829472984
+      AllStickers_1: 6875232967347962966
+      AllStickers_10: 3532452545141237952
+      AllStickers_11: -1934657245947186899
+      AllStickers_12: -6719995536046119726
+      AllStickers_13: 1278265698117647180
+      AllStickers_14: 2566800945064017191
+      AllStickers_15: -1984036323453104262
+      AllStickers_16: -1250608781658271571
+      AllStickers_17: -6206535765837672313
+      AllStickers_18: -379528702933951384
+      AllStickers_19: 4337859602714102771
+      AllStickers_2: -3611365872772144240
+      AllStickers_20: 1274162553022577746
+      AllStickers_21: 6324736519166148783
+      AllStickers_22: 6912211240428518264
+      AllStickers_23: -8624835324658007320
+      AllStickers_24: 8322298509396518341
+      AllStickers_25: -2601410202096612178
+      AllStickers_26: -6290020845161898678
+      AllStickers_27: -216481975380331929
+      AllStickers_28: 5138277981647298988
+      AllStickers_29: -280296892830672002
+      AllStickers_3: -5625546784100471998
+      AllStickers_30: 5053786716343652468
+      AllStickers_31: -788235791600079141
+      AllStickers_32: 302460773217499082
+      AllStickers_4: -2823751980369642591
+      AllStickers_5: 7795267918341249717
+      AllStickers_6: 6812487482173146499
+      AllStickers_7: -1111617634620898130
+      AllStickers_8: 8552072789932390631
+      AllStickers_9: -6612473111423110656
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
