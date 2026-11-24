@@ -113,7 +113,7 @@ public class PopUpConfirmPackController : MonoBehaviour
             transform.SetAsLastSibling();
         }
         visible = true;
-        MainHUDUGUIController.Instance?.PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
     }
 
     public void Hide()
@@ -153,6 +153,6 @@ public class PopUpConfirmPackController : MonoBehaviour
             return;
 
         Hide();
-        MainHUDUGUIController.Instance?.PlayClose();
+        GameAudioManager.Instance?.PlayClose();
     }
 }

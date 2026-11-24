@@ -229,7 +229,7 @@ public class SkinShopUGUIController : MonoBehaviour
             if (!PopupController.BuySkin(skin))
             {
                 // Sem gosma ou ja dona: retranca.
-                MainHUDUGUIController.Instance?.PlayClose();
+                GameAudioManager.Instance?.PlayClose();
                 RefreshButtons();
                 return;
             }

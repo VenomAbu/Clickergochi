@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -639,5 +640,59 @@ public class HorizontalNavegationController : MonoBehaviour,
             return null;
 
         return navigationPanels[currentPanelIndex].gameObject;
+    }
+
+    /// <summary>Indice da sala horizontal atual (usado pelo fluxo de anuncio).</summary>
+    public int GetCurrentPanelIndex() => currentPanelIndex;
+
+    /// <summary>
+    /// Restaura uma sala horizontal especifica sem animacao. Usado ao voltar
+    /// de um anuncio, para garantir que o jogador caia exatamente na sala em
+    /// que estava quando pediu o comercial.
+    /// </summary>
+    public void SetCurrentPanel(GameObject panel)
+    {
+        if (panel == null || navigationPanels == null ||
+            originalPanelPositions == null)
+            return;
+
+        RectTransform target = panel.GetComponent<RectTransform>();
+        int index = Array.IndexOf(navigationPanels, target);
+        if (index < 0 || index >= navigationPanels.Length)
+            return;
+
+        // Cancela qualquer transicao/swipe em andamento antes de restaurar.
+        if (transitionCoroutine != null)
+        {
+            StopCoroutine(transitionCoroutine);
+            transitionCoroutine = null;
+        }
+        isTransitioning = false;
+        isDragging = false;
+        dragDirection = 0;
+
+        if (index == currentPanelIndex)
+        {
+            if (navigationPanels[index] != null)
+                navigationPanels[index].gameObject.SetActive(true);
+            return;
+        }
+
+        RectTransform current = navigationPanels[currentPanelIndex];
+        if (current != null)
+        {
+            current.anchoredPosition = originalPanelPositions[currentPanelIndex];
+            current.gameObject.SetActive(false);
+        }
+
+        currentPanelIndex = index;
+        if (target != null)
+        {
+            target.anchoredPosition = originalPanelPositions[index];
+            target.gameObject.SetActive(true);
+        }
+
+        if (edgeFadeController != null)
+            edgeFadeController.HideAll();
     }
 }

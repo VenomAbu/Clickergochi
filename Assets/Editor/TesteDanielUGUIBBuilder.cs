@@ -101,13 +101,18 @@ public static class TesteDanielUGUIBBuilder
         scaler.referenceResolution = new Vector2(720f, 1280f);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
-        AudioSource audio = canvasGo.GetComponent<AudioSource>();
-        audio.playOnAwake = false;
-        audio.spatialBlend = 0f;
         TesteDanielUGUIController hud = canvasGo.GetComponent<TesteDanielUGUIController>();
         hud.slimeManager = slimeManager;
-        hud.audioSource = audio;
-        hud.slimeClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Sounds/SFX/squish-cut.mp3");
+
+        // Audio centralizado no GameAudioManager.
+        GameAudioManager audioManager = UnityEngine.Object.FindFirstObjectByType<GameAudioManager>();
+        if (audioManager == null)
+            audioManager = slimeManager.gameObject.AddComponent<GameAudioManager>();
+        SerializedObject audioSo = new SerializedObject(audioManager);
+        audioSo.FindProperty("slimeClip").objectReferenceValue =
+            AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Sounds/SFX/squish-cut.mp3");
+        audioSo.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(audioManager);
 
         RectTransform canvasRect = canvasGo.GetComponent<RectTransform>();
         GameObject background = CreateImage("Background", canvasRect, White, backgroundSprite, false, false);

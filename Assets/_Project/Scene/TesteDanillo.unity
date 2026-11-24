@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 74530535}
   - component: {fileID: 74530534}
   - component: {fileID: 74530533}
+  - component: {fileID: 74530536}
   m_Layer: 0
   m_Name: MainUI
   m_TagString: Untagged
@@ -156,14 +157,6 @@ MonoBehaviour:
   level: 1
   slimeCount: 0
   slimeManager: {fileID: 1632827374}
-  slimeClip: {fileID: 8300000, guid: 530f88d7932160c4a970f86ab31e94a6, type: 3}
-  clickClip: {fileID: 0}
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
-  buyClip: {fileID: 0}
-  uiVolume: 0.5
-  musicClip: {fileID: 8300000, guid: 7e4c5fd53b8fa5b49ae64f537e953bb5, type: 3}
-  musicVolume: 0.25
 --- !u!114 &74530534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,6 +195,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &74530536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74530532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e4217f2d00c9ae40aab7bcc76a7b7a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudioManager
+  slimeClip: {fileID: 8300000, guid: 530f88d7932160c4a970f86ab31e94a6, type: 3}
+  clickClip: {fileID: 0}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  buyClip: {fileID: 0}
+  uiVolume: 0.5
+  musicVolume: 0.25
+  musicClip: {fileID: 8300000, guid: 7e4c5fd53b8fa5b49ae64f537e953bb5, type: 3}
+  startMusicOnAwake: 1
 --- !u!1 &553203424
 GameObject:
   m_ObjectHideFlags: 0
@@ -861,6 +875,7 @@ MonoBehaviour:
   funBonusClickMultiplier: 2
   funBonusDurationSeconds: 30
   euphoriaDurationHours: 4
+  euphoriaTriggerThreshold: 0.995
   moodExcellentThreshold: 0.75
   moodGoodThreshold: 0.5
   moodOkayThreshold: 0.25
@@ -899,6 +914,8 @@ MonoBehaviour:
   critMultiplier: 5
   bedTickSeconds: 1
   passiveSaveIntervalSeconds: 10
+  maxOfflineHours: 8
+  offlineEfficiency: 1
 --- !u!1 &1879032575
 GameObject:
   m_ObjectHideFlags: 0
@@ -1215,6 +1232,7 @@ MonoBehaviour:
   - {fileID: 1452602264}
   - {fileID: 1410704411}
   maxCritters: 3
+  baseEventChance: 1
   moveSpeedMin: 1
   moveSpeedMax: 5
   hitsRequired: 5

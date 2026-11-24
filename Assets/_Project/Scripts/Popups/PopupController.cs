@@ -483,7 +483,7 @@ public class PopupController : MonoBehaviour
         // na loja — o click em skin comprada cai aqui).
         if (!IsSkinOwned(skins[index]))
         {
-            MainHUDUGUIController.Instance?.PlayClose();
+            GameAudioManager.Instance?.PlayClose();
             return;
         }
 
@@ -508,7 +508,7 @@ public class PopupController : MonoBehaviour
         }
 
         ApplySkin(kind);
-        MainHUDUGUIController.Instance?.PlayBuy();
+        GameAudioManager.Instance?.PlayBuy();
     }
 
     private void ApplySavedSkins()
@@ -635,11 +635,11 @@ public class PopupController : MonoBehaviour
 
     private static void PlayOpen()
     {
-        MainHUDUGUIController.Instance?.PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
     }
 
     private static void PlayClose()
     {
-        MainHUDUGUIController.Instance?.PlayClose();
+        GameAudioManager.Instance?.PlayClose();
     }
 }

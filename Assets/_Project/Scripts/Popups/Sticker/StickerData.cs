@@ -11,18 +11,24 @@ public class StickerData : ScriptableObject
     public string stickerName;
     public Sprite stickerImage;
 
+    [Tooltip("Chave estavel no save do album. Vazio = usa o stickerName.")]
+    public string stickerId;
+
     [TextArea(3, 6)]
     public string description;
 
-    [Header("Album (gacha pendente)")]
+    [Header("Album")]
     [Tooltip("Posicao do sticker no album (ordenado com os demais).")]
     public int order;
 
-    [Tooltip("Raridade base do sticker (o gacha ainda nao existe).")]
+    [Tooltip("Raridade base do sticker.")]
     public StickerRarity rarity;
 
-    [Tooltip("Marque para o sticker aparecer bloqueado no album ate o gacha chegar.")]
+    [Tooltip("Legado do Inspector: no jogo o estado real vem do save (StickerCollection).")]
     public bool blocked;
+
+    /// <summary>Chave usada no save; assets antigos caem para o nome.</summary>
+    public string Key => string.IsNullOrEmpty(stickerId) ? stickerName : stickerId;
 
     [Header("Efeito (fracao; o valor ativo sai do rarity atual)")]
     [Tooltip("Qual sistema do jogo este sticker melhora. None = sem efeito (ainda).")]

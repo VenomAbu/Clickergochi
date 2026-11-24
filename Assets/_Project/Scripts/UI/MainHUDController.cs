@@ -22,22 +22,16 @@ public class MainHUDController : MonoBehaviour
     [Header("Sistemas")]
     public SlimeManager slimeManager;
 
-    [Header("Sons (vazio = sintetizado fofo e calmo)")]
-    public AudioClip slimeClip;
-    public AudioClip clickClip;
-    public AudioClip openClip;
-    public AudioClip closeClip;
-    public AudioClip buyClip;
-    [Range(0f, 1f)] public float uiVolume = 0.5f;
-
-    [Header("Música de fundo")]
-    public AudioClip musicClip;
-    [Range(0f, 1f)] public float musicVolume = 0.25f;
-
     private Label _levelText;
     private VisualElement _levelFill;
     private Button _muteButton;
-    private bool _muted;
+
+    // Delegates estáveis para eventos que recebem method group.
+    private readonly System.Action _audioPlayClick = () => GameAudioManager.Instance?.PlayClick();
+    private readonly System.Action _audioPlayClose = () => GameAudioManager.Instance?.PlayClose();
+    private readonly System.Action _audioPlayBuy = () => GameAudioManager.Instance?.PlayBuy();
+    private readonly System.Action _audioToggleMute = () => GameAudioManager.Instance?.ToggleMute();
+
     private VisualElement _furniturePopup;
     private VisualElement _skinPopup;
     private VisualElement _stickerPopup;
@@ -125,27 +119,8 @@ public class MainHUDController : MonoBehaviour
     private readonly List<FeelParticle> _feelParticles = new();
     private IVisualElementScheduledItem _feelTimer;
 
-    private AudioSource _audio;
-    private AudioSource _musicSource;
-    private GameObject _musicSourceObject;
-    private readonly Dictionary<string, AudioClip> _synthCache = new();
     private SaveManager _subscribedSaveManager;
     private float _syncTimer;
-
-    private void OnValidate()
-    {
-        musicVolume = Mathf.Clamp01(musicVolume);
-        if (_musicSource != null)
-            _musicSource.volume = musicVolume;
-    }
-
-    private void Start()
-    {
-        // Repete a tentativa depois de o ciclo de vida da UI terminar de ser
-        // inicializado; alguns dispositivos/headless environments initialize
-        // o audio depois do OnEnable.
-        StartBackgroundMusic();
-    }
 
     private void OnEnable()
     {
@@ -167,7 +142,9 @@ public class MainHUDController : MonoBehaviour
         _levelText = root.Q<Label>("LevelText");
         _levelFill = root.Q<VisualElement>("LevelFill");
         _muteButton = root.Q<Button>("MuteButton");
-        StartBackgroundMusic();
+        if (GameAudioManager.Instance != null)
+            GameAudioManager.Instance.MuteChanged += HandleAudioMuteChanged;
+        ApplyMuteIcon();
         _furniturePopup = root.Q<VisualElement>("FurniturePopup");
         _skinPopup = root.Q<VisualElement>("SkinPopup");
         _stickerPopup = root.Q<VisualElement>("StickerPopup");
@@ -196,7 +173,7 @@ public class MainHUDController : MonoBehaviour
         _furniture = FurnitureManager.Instance;
         _furniture.StateChanged += HandleFurnitureStateChanged;
         _confirmPopup = new ConfirmPopupUI(root.Q<VisualElement>("ConfirmPopup"));
-        _confirmPopup.Canceled += PlayClose;
+        _confirmPopup.Canceled += _audioPlayClose;
 
         // Evento Caixa de Paraquedas: som de premio ao capturar.
         _parachute = ParachuteEventManager.Instance;
@@ -208,7 +185,7 @@ public class MainHUDController : MonoBehaviour
             _furniture,
             slimeManager,
             _confirmPopup,
-            PlayBuy);
+            _audioPlayBuy);
 
         // Tela principal: clique real vai para o SlimeManager (Fase 1).
         var slimeBtn = root.Q<Button>("SlimeButton");
@@ -235,7 +212,7 @@ public class MainHUDController : MonoBehaviour
                     slimeCount++;
                     RefreshCounters();
                 }
-                PlaySlime();
+                GameAudioManager.Instance?.PlaySlime();
                 SlimeBurst(slimeBtn);
             }, TrickleDown.TrickleDown);
 
@@ -249,30 +226,30 @@ public class MainHUDController : MonoBehaviour
 
         var shop = root.Q<Button>("ShopButton");
         if (shop != null)
-            shop.clicked += () => { PlayOpen(); ShowScreen("ShopScreen"); };
+            shop.clicked += () => { GameAudioManager.Instance?.PlayOpen(); ShowScreen("ShopScreen"); };
         var stickers = root.Q<Button>("StickerButton");
         if (stickers != null)
-            stickers.clicked += () => { PlayOpen(); ShowScreen("StickersScreen"); };
+            stickers.clicked += () => { GameAudioManager.Instance?.PlayOpen(); ShowScreen("StickersScreen"); };
         var food = root.Q<Button>("FoodButton");
         if (food != null)
-            food.clicked += () => { PlayOpen(); ShowScreen("FoodScreen"); };
+            food.clicked += () => { GameAudioManager.Instance?.PlayOpen(); ShowScreen("FoodScreen"); };
 
         if (_muteButton != null)
-            _muteButton.clicked += ToggleMute;
+            _muteButton.clicked += _audioToggleMute;
 
         // Baratas: só a cena original usa este caminho. Em TesteDanillo
         // o CockroachManager não existe; as baratas são GameObjects.
         var roaches = FindFirstObjectByType<CockroachManager>();
         if (roaches != null)
         {
-            roaches.onCritterHit += PlayClick;
-            roaches.onCritterKilled += () => { PlayBuy(); PullFromManager(); };
+            roaches.onCritterHit += _audioPlayClick;
+            roaches.onCritterKilled += () => { GameAudioManager.Instance?.PlayBuy(); PullFromManager(); };
         }
 
         // Popup do movel.
         var close = root.Q<Button>("CloseButton");
         if (close != null)
-            close.clicked += () => { PlayClose(); Show(_furniturePopup, false); };
+            close.clicked += () => { GameAudioManager.Instance?.PlayClose(); Show(_furniturePopup, false); };
         var upgrade = root.Q<Button>("UpgradeButton");
         _upgradeButton = upgrade;
         if (upgrade != null)
@@ -282,7 +259,7 @@ public class MainHUDController : MonoBehaviour
             skin.clicked += OpenSkinPopup;
         var back = root.Q<Button>("SkinBackButton");
         if (back != null)
-            back.clicked += () => { PlayClose(); Show(_skinPopup, false); Show(_furniturePopup, true); };
+            back.clicked += () => { GameAudioManager.Instance?.PlayClose(); Show(_skinPopup, false); Show(_furniturePopup, true); };
 
         var left = root.Q<Button>("SkinLeft");
         if (left != null)
@@ -309,10 +286,10 @@ public class MainHUDController : MonoBehaviour
         }
         var shopBack = root.Q<Button>("ShopBack");
         if (shopBack != null)
-            shopBack.clicked += () => { PlayClose(); ShowScreen("MainScreen"); };
+            shopBack.clicked += () => { GameAudioManager.Instance?.PlayClose(); ShowScreen("MainScreen"); };
         var detailBack = root.Q<Button>("DetailBack");
         if (detailBack != null)
-            detailBack.clicked += () => { PlayClose(); ShowScreen("ShopScreen"); };
+            detailBack.clicked += () => { GameAudioManager.Instance?.PlayClose(); ShowScreen("ShopScreen"); };
 
         // Stickers: cards -> popup + grade sempre com 3 colunas.
         for (int i = 0; i < 12; i++)
@@ -332,16 +309,16 @@ public class MainHUDController : MonoBehaviour
         }
         var stickerClose = root.Q<Button>("StickerCloseButton");
         if (stickerClose != null)
-            stickerClose.clicked += () => { PlayClose(); Show(_stickerPopup, false); };
+            stickerClose.clicked += () => { GameAudioManager.Instance?.PlayClose(); Show(_stickerPopup, false); };
         var stickersBack = root.Q<Button>("StickersBack");
         if (stickersBack != null)
-            stickersBack.clicked += () => { PlayClose(); ShowScreen("MainScreen"); };
+            stickersBack.clicked += () => { GameAudioManager.Instance?.PlayClose(); ShowScreen("MainScreen"); };
 
         // Comidas: cards montados dos FoodItemData + compra real.
         BuildFoodList();
         var foodBack = root.Q<Button>("FoodBack");
         if (foodBack != null)
-            foodBack.clicked += () => { PlayClose(); ShowScreen("MainScreen"); };
+            foodBack.clicked += () => { GameAudioManager.Instance?.PlayClose(); ShowScreen("MainScreen"); };
 
         // Feel de aperto em todos os botoes (mouse + touch).
         foreach (var btn in root.Query<Button>().Build())
@@ -356,7 +333,6 @@ public class MainHUDController : MonoBehaviour
             RefreshStats();
         }
         RefreshSkins();
-        ApplyMuteIcon();
         RefreshMood();
     }
 
@@ -366,16 +342,19 @@ public class MainHUDController : MonoBehaviour
         if (_furniture != null)
             _furniture.StateChanged -= HandleFurnitureStateChanged;
         if (_confirmPopup != null)
-            _confirmPopup.Canceled -= PlayClose;
+            _confirmPopup.Canceled -= _audioPlayClose;
         if (_parachute != null)
             _parachute.Claimed -= HandleParachuteClaimed;
         _parachute = null;
-        StopBackgroundMusic();
+        if (_muteButton != null)
+            _muteButton.clicked -= _audioToggleMute;
+        if (GameAudioManager.Instance != null)
+            GameAudioManager.Instance.MuteChanged -= HandleAudioMuteChanged;
     }
 
     private void HandleParachuteClaimed(float amount)
     {
-        PlayBuy();
+        GameAudioManager.Instance?.PlayBuy();
     }
 
     private void SubscribeToState()
@@ -528,16 +507,16 @@ public class MainHUDController : MonoBehaviour
         FoodBonusManager bonus = FoodBonusManager.Instance;
         if (bonus == null || !bonus.CanEat)
         {
-            PlayClose();
+            GameAudioManager.Instance?.PlayClose();
             return;
         }
 
         void DoBuy()
         {
             if (FoodBonusManager.Instance.TryEat(entry.Food, entry.Tier))
-                PlayBuy();
+                GameAudioManager.Instance?.PlayBuy();
             else
-                PlayClose();
+                GameAudioManager.Instance?.PlayClose();
             PullFromManager();
         }
 
@@ -670,7 +649,7 @@ public class MainHUDController : MonoBehaviour
         // O slime ja faz som + SlimeBurst no PointerDown (contagem na pressao);
         // disparar de novo no `clicked` (UP) dobraria tudo por clique.
         if (!isSlime)
-            b.clicked += PlayClick;
+            b.clicked += _audioPlayClick;
     }
 
     private static float CurrentScale(VisualElement el)
@@ -828,147 +807,6 @@ public class MainHUDController : MonoBehaviour
         EnsureFeelTicking();
     }
 
-    public void SetMusicVolume(float volume)
-    {
-        musicVolume = Mathf.Clamp01(volume);
-        if (_musicSource != null)
-            _musicSource.volume = musicVolume;
-    }
-
-    private AudioSource GetMusicSource()
-    {
-        if (_musicSource != null)
-            return _musicSource;
-
-        _musicSourceObject = new GameObject("BackgroundMusic");
-        _musicSourceObject.transform.SetParent(transform, false);
-        _musicSource = _musicSourceObject.AddComponent<AudioSource>();
-        _musicSource.playOnAwake = false;
-        _musicSource.loop = true;
-        _musicSource.spatialBlend = 0f;
-        _musicSource.volume = musicVolume;
-        return _musicSource;
-    }
-
-    private void StartBackgroundMusic()
-    {
-        if (!Application.isPlaying || musicClip == null)
-            return;
-
-        AudioSource source = GetMusicSource();
-        source.clip = musicClip;
-        source.loop = true;
-        source.volume = musicVolume;
-        if (!source.isPlaying)
-            source.Play();
-    }
-
-    private void StopBackgroundMusic()
-    {
-        if (_musicSource != null && _musicSource.isPlaying)
-            _musicSource.Stop();
-    }
-
-    // ---- Sons suaves (clipe do inspector ou sintetizado) ----
-    private AudioSource Audio
-    {
-        get
-        {
-            if (_audio == null)
-            {
-                _audio = GetComponent<AudioSource>();
-                if (_audio == null)
-                    _audio = gameObject.AddComponent<AudioSource>();
-                _audio.playOnAwake = false;
-            }
-            return _audio;
-        }
-    }
-
-    private void PlayClick() => PlayClip(clickClip, "ui-click", 720f, 540f, 0.07f, 0.35f);
-
-    private void PlaySlime()
-    {
-        if (slimeClip != null)
-        {
-            PlayClip(slimeClip);
-        }
-        else
-        {
-            PlayClip(null, "ui-pop", 300f, 660f, 0.16f, 0.5f);
-            PlayClip(null, "ui-pop-hi", 660f, 990f, 0.1f, 0.25f);
-        }
-    }
-
-    private void PlayOpen() => PlayClip(openClip, "ui-open", 440f, 680f, 0.12f, 0.35f);
-    private void PlayClose() => PlayClip(closeClip, "ui-close", 520f, 330f, 0.12f, 0.35f);
-    private void PlayBuy() => PlayClip(buyClip, "ui-buy", new[] { 523f, 659f, 784f }, 0.09f, 0.4f);
-
-    private void PlayClip(AudioClip clip)
-    {
-        if (!Application.isPlaying || clip == null)
-            return;
-        Audio.volume = uiVolume;
-        Audio.PlayOneShot(clip);
-    }
-
-    private void PlayClip(AudioClip clip, string key, float f0, float f1, float dur, float vol)
-    {
-        PlayClip(clip != null ? clip : SynthTone(key, f0, f1, dur, vol));
-    }
-
-    private void PlayClip(AudioClip clip, string key, float[] notes, float noteDur, float vol)
-    {
-        PlayClip(clip != null ? clip : SynthMelody(key, notes, noteDur, vol));
-    }
-
-    private AudioClip SynthTone(string key, float f0, float f1, float dur, float vol)
-    {
-        if (_synthCache.TryGetValue(key, out var cached))
-            return cached;
-        const int rate = 44100;
-        int n = Mathf.Max(1, (int)(rate * dur));
-        var data = new float[n];
-        float phase = 0f;
-        for (int i = 0; i < n; i++)
-        {
-            float t = (float)i / n;
-            float f = Mathf.Lerp(f0, f1, t);
-            phase += 2f * Mathf.PI * f / rate;
-            float env = Mathf.Exp(-4f * t) * Mathf.Min(1f, t * 40f);
-            data[i] = Mathf.Sin(phase) * env * vol;
-        }
-        var clip = AudioClip.Create(key, n, 1, rate, false);
-        clip.SetData(data, 0);
-        _synthCache[key] = clip;
-        return clip;
-    }
-
-    private AudioClip SynthMelody(string key, float[] notes, float noteDur, float vol)
-    {
-        if (_synthCache.TryGetValue(key, out var cached))
-            return cached;
-        const int rate = 44100;
-        int per = Mathf.Max(1, (int)(rate * noteDur));
-        int n = per * notes.Length;
-        var data = new float[n];
-        for (int m = 0; m < notes.Length; m++)
-        {
-            float phase = 0f;
-            for (int i = 0; i < per; i++)
-            {
-                float t = (float)i / per;
-                phase += 2f * Mathf.PI * notes[m] / rate;
-                float env = Mathf.Exp(-3f * t) * Mathf.Min(1f, t * 40f);
-                data[m * per + i] = Mathf.Sin(phase) * env * vol;
-            }
-        }
-        var clip = AudioClip.Create(key, n, 1, rate, false);
-        clip.SetData(data, 0);
-        _synthCache[key] = clip;
-        return clip;
-    }
-
     /// <summary>
     /// Grade de stickers sempre com 3 colunas: o card se ajusta a largura;
     /// se sobrar largura alem do teto, vira padding lateral.
@@ -1008,7 +846,7 @@ public class MainHUDController : MonoBehaviour
         if (_detailTitle != null)
             _detailTitle.text = optionName;
         _furnitureShop?.Show(optionName == _shopOptions[0]);
-        PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
         ShowScreen("ShopDetailScreen");
     }
 
@@ -1020,7 +858,7 @@ public class MainHUDController : MonoBehaviour
             _stickerNameLabel.text = _stickerNames[stickerIndex];
         if (_stickerDescLabel != null)
             _stickerDescLabel.text = _stickerDescs[stickerIndex];
-        PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
         Show(_stickerPopup, true);
     }
 
@@ -1083,17 +921,19 @@ public class MainHUDController : MonoBehaviour
         }
     }
 
-    private void ToggleMute()
+    private void HandleAudioMuteChanged(bool muted)
     {
-        _muted = !_muted;
-        AudioListener.pause = _muted;
         ApplyMuteIcon();
     }
 
     private void ApplyMuteIcon()
     {
-        if (_muteButton != null)
-            _muteButton.text = _muted ? "🔇" : "🔊";
+        if (_muteButton == null)
+            return;
+
+        bool muted = GameAudioManager.Instance != null &&
+                     GameAudioManager.Instance.IsMuted;
+        _muteButton.text = muted ? "🔇" : "🔊";
     }
 
     private void OpenFurniturePopup(string furnitureName)
@@ -1102,7 +942,7 @@ public class MainHUDController : MonoBehaviour
         if (_furnitureTitle != null)
             _furnitureTitle.text = furnitureName;
         RefreshFurniturePopup();
-        PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
         Show(_skinPopup, false);
         Show(_furniturePopup, true);
     }
@@ -1111,7 +951,7 @@ public class MainHUDController : MonoBehaviour
     {
         if (_skinTitle != null)
             _skinTitle.text = _currentFurniture;
-        PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
         Show(_furniturePopup, false);
         Show(_skinPopup, true);
         RefreshSkins();
@@ -1239,7 +1079,7 @@ public class MainHUDController : MonoBehaviour
             () =>
             {
                 if (_furniture.TryUpgradeFurniture(kind))
-                    PlayBuy();
+                    GameAudioManager.Instance?.PlayBuy();
                 RefreshFurniturePopup();
             });
     }

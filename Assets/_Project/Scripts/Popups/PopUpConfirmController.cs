@@ -132,7 +132,7 @@ public class PopUpConfirmController : MonoBehaviour
             transform.SetAsLastSibling();
         }
         visible = true;
-        MainHUDUGUIController.Instance?.PlayOpen();
+        GameAudioManager.Instance?.PlayOpen();
     }
 
     /// <summary>Esconde sem executar nada (sem som, igual ao comportamento antigo).</summary>
@@ -173,6 +173,6 @@ public class PopUpConfirmController : MonoBehaviour
             return;
 
         Hide();
-        MainHUDUGUIController.Instance?.PlayClose();
+        GameAudioManager.Instance?.PlayClose();
     }
 }

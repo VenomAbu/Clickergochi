@@ -14,6 +14,7 @@ public class MeasurementBubbleDismisser : MonoBehaviour, IPointerClickHandler
             eventData.pointerCurrentRaycast.gameObject != gameObject)
             return;
 
-        RoomController.HideActiveBubbles();
+        if (MainHUDUGUIController.Instance != null)
+            MainHUDUGUIController.Instance.HideBubbles();
     }
 }

@@ -170,16 +170,16 @@ public class FoodShopUGUIController : MonoBehaviour
         if (bonus == null || !bonus.CanEat)
         {
             // Fome cheia: o botao ja fica desativado, so retranca.
-            MainHUDUGUIController.Instance?.PlayClose();
+            GameAudioManager.Instance?.PlayClose();
             return;
         }
 
         void DoBuy()
         {
             if (FoodBonusManager.Instance.TryEat(card.Food, card.Tier))
-                MainHUDUGUIController.Instance?.PlayBuy();
+                GameAudioManager.Instance?.PlayBuy();
             else
-                MainHUDUGUIController.Instance?.PlayClose();
+                GameAudioManager.Instance?.PlayClose();
             RefreshButtons();
         }
 

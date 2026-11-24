@@ -105,6 +105,13 @@ public class PackShopUGUIController : MonoBehaviour
     private GameObject clickBlocker;
 
     private StickerData openedSticker;
+
+    /// <summary>
+    /// Acao de saida do fluxo de anuncio: ao sair do sticker, volta para a sala
+    /// onde o AD_Btt foi apertado em vez de apenas voltar ao PackUI.
+    /// </summary>
+    private Action adExitAction;
+
     private Vector2 stickerBasePosition;
     private Vector3 stickerBaseScale;
     private Vector3 stickerBaseEuler;
@@ -185,6 +192,18 @@ public class PackShopUGUIController : MonoBehaviour
     public void BuyGolden()
     {
         AskConfirm(goldenState, goldenPackName, goldenPackPrice, confirmMessageGolden);
+    }
+
+    /// <summary>
+    /// Mostra o Golden Pack ganho por um anuncio pulsando/levitando, exatamente
+    /// como no fluxo normal. A abertura so acontece quando o jogador toca na
+    /// tela (clique no PackOpenClickBlocker). Quando sair do sticker, executa
+    /// onExit em vez de ficar no PackUI.
+    /// </summary>
+    public void ShowGoldenPackFromAd(Action onExit)
+    {
+        adExitAction = onExit;
+        ShowPack(goldenState);
     }
 
     private void AskConfirm(PackState pack, string packName, string price, string message)
@@ -334,10 +353,15 @@ public class PackShopUGUIController : MonoBehaviour
             return null;
 
         List<StickerData>[] pools = new List<StickerData>[3];
+        List<StickerData>[] missingPools = new List<StickerData>[3];
         for (int i = 0; i < pools.Length; i++)
+        {
             pools[i] = new List<StickerData>();
+            missingPools[i] = new List<StickerData>();
+        }
 
         List<StickerData> withImage = new();
+        List<StickerData> missing = new();
         for (int i = 0; i < catalog.Length; i++)
         {
             StickerData sticker = catalog[i];
@@ -346,8 +370,17 @@ public class PackShopUGUIController : MonoBehaviour
 
             withImage.Add(sticker);
             int rarity = (int)sticker.rarity;
-            if (rarity >= 0 && rarity < pools.Length)
-                pools[rarity].Add(sticker);
+            if (rarity < 0 || rarity >= pools.Length)
+                continue;
+
+            pools[rarity].Add(sticker);
+            // Prioriza completar o album: so entra no pool de repetidos
+            // quando todos os stickers daquele tier ja foram ganhos.
+            if (!StickerCollection.IsOwned(sticker))
+            {
+                missing.Add(sticker);
+                missingPools[rarity].Add(sticker);
+            }
         }
 
         if (withImage.Count == 0)
@@ -377,7 +410,11 @@ public class PackShopUGUIController : MonoBehaviour
             }
         }
 
-        List<StickerData> pool = pools[chosenRarity];
+        List<StickerData> pool = missingPools[chosenRarity];
+        if (pool.Count == 0)
+            pool = missing;
+        if (pool.Count == 0)
+            pool = pools[chosenRarity];
         if (pool.Count == 0)
             pool = withImage;
 
@@ -478,6 +515,9 @@ public class PackShopUGUIController : MonoBehaviour
 
     private void ShowStickerResult(StickerData sticker)
     {
+        // O sticker revelado entra no save do album (e nos efeitos) na hora.
+        StickerCollection.Unlock(sticker);
+
         ApplyStickerData(sticker);
 
         SetActive(packStickerResult, true);
@@ -772,7 +812,9 @@ public class PackShopUGUIController : MonoBehaviour
 
     private void OnExitResult()
     {
+        Action exit = adExitAction;
         ResetView();
+        exit?.Invoke();
     }
 
     private void StopResultAnimations()
@@ -971,6 +1013,7 @@ public class PackShopUGUIController : MonoBehaviour
 
     private void ResetView()
     {
+        adExitAction = null;
         StopAnimations();
         ResetResultUI();
         ClearStars();

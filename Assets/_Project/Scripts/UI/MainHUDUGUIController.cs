@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// HUD principal da nova cena UGUI (MainScene) - port do MainHUDController
@@ -10,12 +12,12 @@ using UnityEngine;
 /// cada, mas UM único HUD compartilhado (SlimeConter, LvlTMP, medidores).
 /// Este controlador: anexa SlimeClickRelay no ClickButton invisível (ou no
 /// RawImage como fallback nos painéis ainda sem botão), alimenta os
-/// elementos do HUD e empurra estado para os 3 RoomControllers (todos
-/// apontam para os mesmos medidores/barras).
-///
-/// Fase 1: clique na slime, contadores, medidores, barra do comodo, borda
-/// dourada da euforia e audio (SFX + musica + mute). Loja, comida, stickers,
-/// skins e paraquedas entram na Fase 2.
+/// elementos do HUD e é o dono dos medidores e dos balões de medida.
+/// O áudio (SFX, música, volumes e mute) vive no GameAudioManager; aqui só
+/// ficam os ícones dos botões de SFX e música, que reagem aos eventos
+/// SfxMuteChanged e MusicMuteChanged.
+/// Os RoomControllers ficam apenas com a barra de nível do comodo; os painéis
+/// Album/Shop/Food são abertos pelo VerticalNavegationController.
 /// </summary>
 public class MainHUDUGUIController : MonoBehaviour
 {
@@ -27,36 +29,49 @@ public class MainHUDUGUIController : MonoBehaviour
     public TMP_Text levelLabel;     // "Nv 3"
     public Transform slimeRoot;     // Slimes3D (borda da euforia)
 
-    [Header("Audio - SFX")]
-    public AudioClip slimeClip;
-    public AudioClip clickClip;
-    public AudioClip openClip;
-    public AudioClip closeClip;
-    public AudioClip buyClip;
-    [Range(0f, 1f)] public float uiVolume = 0.5f;
-
-    [Header("Audio - Musica de fundo")]
-    public AudioClip musicClip;
-    [Range(0f, 1f)] public float musicVolume = 0.25f;
-
     [Header("Euforia")]
     [Tooltip("Cor da borda (Outline) da slime durante a euforia.")]
     public Color euphoriaColor = new Color(1f, 0.7921569f, 0.2745098f); // rgb(255,202,70)
+    [Tooltip("Image do SlimeConter: troca para o fundo dourado na euforia.")]
+    [SerializeField] private Image slimeCounterImage;
+    [SerializeField] private Sprite slimeBgNormalSprite;
+    [SerializeField] private Sprite slimeBgGoldSprite;
+    [Tooltip("TMP dentro do SlimeConter que mostra o multiplicador atual.")]
+    [SerializeField] private TMP_Text multiplierText;
+
+    [Header("Measurements")]
+    [Tooltip("Ordem: [HapinessFill, HungerFill, HygieneFill]. A cor de cada fill e a do Inspector; so o fillAmount e alterado.")]
+    [SerializeField] private Image[] measureImages = new Image[3];
+    [SerializeField] private float[] measureValues = new float[3];
+    [SerializeField] private float[] measureMaxValues = new float[3] { 100f, 100f, 100f };
+
+    [Header("Measurement Dialog Bubbles")]
+    [SerializeField] private GameObject happinessBubble;
+    [SerializeField] private GameObject hygieneBubble;
+    [SerializeField] private GameObject hungerBubble;
+    [SerializeField] private float bubbleDuration = 2f;
+
+    [Header("Hygiene - Baratas")]
+    [SerializeField] private HygieneCockroachManager hygieneCockroaches;
+
+    [Header("Audio - Icones dos botoes (visual)")]
+    [SerializeField] private GameObject soundIcon;
+    [SerializeField] private GameObject noSoundIcon;
+    [SerializeField] private GameObject musicIcon;
+    [SerializeField] private GameObject noMusicIcon;
 
     // ---- estado interno ----
     private int _level = 1;
     private float _levelProgress;
-    private bool _muted;
     private bool _euphoriaActive;
+    private bool _temporaryEuphoriaVisual;
+    private bool _multiplierTextVisible;
     private float _euphoriaCheckTimer;
 
     private RoomController[] _roomControllers = new RoomController[0];
     private FurnitureManager _furniture;
     private SaveManager _subscribedSaveManager;
-    private AudioSource _audio;
-    private AudioSource _musicSource;
-    private GameObject _musicSourceObject;
-    private readonly Dictionary<string, AudioClip> _synthCache = new();
+    private Coroutine _bubbleCoroutine;
 
     private Outline[] _outlines;
     private Color[] _outlinesOriginal;
@@ -69,6 +84,10 @@ public class MainHUDUGUIController : MonoBehaviour
     {
         Instance = this;
         ResolveReferences();
+        UpdateAllMensure();
+        UpdateSoundVisual();
+        UpdateMusicVisual();
+        HideAllBubbles();
     }
 
     private void OnEnable()
@@ -80,16 +99,17 @@ public class MainHUDUGUIController : MonoBehaviour
         if (_subscribedSaveManager != null)
             _subscribedSaveManager.SaveDataChanged += HandleSaveDataChanged;
 
-        foreach (var rc in _roomControllers)
-        {
-            if (rc != null)
-                rc.MuteChanged += HandleMuteChanged;
-        }
-
         if (_furniture != null)
             _furniture.StateChanged += HandleStateChanged;
 
-        StartBackgroundMusic();
+        if (GameAudioManager.Instance != null)
+        {
+            GameAudioManager.Instance.SfxMuteChanged += HandleSfxMuteChanged;
+            GameAudioManager.Instance.MusicMuteChanged += HandleMusicMuteChanged;
+        }
+        UpdateSoundVisual();
+        UpdateMusicVisual();
+
         PullFromManager();
     }
 
@@ -100,14 +120,13 @@ public class MainHUDUGUIController : MonoBehaviour
         if (_subscribedSaveManager != null)
             _subscribedSaveManager.SaveDataChanged -= HandleSaveDataChanged;
         _subscribedSaveManager = null;
-        foreach (var rc in _roomControllers)
-        {
-            if (rc != null)
-                rc.MuteChanged -= HandleMuteChanged;
-        }
         if (_furniture != null)
             _furniture.StateChanged -= HandleStateChanged;
-        StopBackgroundMusic();
+        if (GameAudioManager.Instance != null)
+        {
+            GameAudioManager.Instance.SfxMuteChanged -= HandleSfxMuteChanged;
+            GameAudioManager.Instance.MusicMuteChanged -= HandleMusicMuteChanged;
+        }
     }
 
     private void OnDestroy()
@@ -135,14 +154,35 @@ public class MainHUDUGUIController : MonoBehaviour
     {
         if (slimeManager == null)
             slimeManager = SlimeManager.Instance;
+        Transform counterRoot = FindTransformByName("SlimeConter");
         if (slimeCounter == null)
         {
             // O TMP do contador esta no filho "text" do SlimeConter (o pai so
             // tem Image) — o GetComponent direto no pai retornava null e o
             // texto ficava sempre vazio.
-            Transform counterRoot = FindTransformByName("SlimeConter");
             if (counterRoot != null)
                 slimeCounter = counterRoot.GetComponentInChildren<TMP_Text>(true);
+        }
+        if (slimeCounterImage == null && counterRoot != null)
+            slimeCounterImage = counterRoot.GetComponent<Image>();
+        if (slimeBgNormalSprite == null && slimeCounterImage != null)
+            slimeBgNormalSprite = slimeCounterImage.sprite;
+        if (multiplierText == null && counterRoot != null)
+        {
+            Transform t = counterRoot.Find("MultiplierText");
+            if (t != null)
+                multiplierText = t.GetComponent<TMP_Text>();
+        }
+        if (slimeBgGoldSprite == null)
+        {
+            foreach (Sprite sprite in Resources.FindObjectsOfTypeAll<Sprite>())
+            {
+                if (sprite.name == "SlimeBG_Gold_0")
+                {
+                    slimeBgGoldSprite = sprite;
+                    break;
+                }
+            }
         }
         if (levelLabel == null)
         {
@@ -157,6 +197,18 @@ public class MainHUDUGUIController : MonoBehaviour
             if (t != null)
                 slimeRoot = t;
         }
+
+        if (soundIcon == null)
+            soundIcon = FindTransformByName("SoundIcon")?.gameObject;
+        if (noSoundIcon == null)
+            noSoundIcon = FindTransformByName("NoSoundIcon")?.gameObject;
+        if (musicIcon == null)
+            musicIcon = FindTransformByName("MusicIcon")?.gameObject;
+        if (noMusicIcon == null)
+            noMusicIcon = FindTransformByName("NoMusicIcon")?.gameObject;
+
+        if (hygieneCockroaches == null)
+            hygieneCockroaches = FindFirstObjectByType<HygieneCockroachManager>();
 
         _furniture = FurnitureManager.Instance;
         _roomControllers = FindObjectsByType<RoomController>(
@@ -287,10 +339,14 @@ public class MainHUDUGUIController : MonoBehaviour
             PullFromManager();
     }
 
-    private void HandleMuteChanged(bool muted)
+    private void HandleSfxMuteChanged(bool muted)
     {
-        _muted = muted;
-        AudioListener.pause = muted;
+        UpdateSoundVisual();
+    }
+
+    private void HandleMusicMuteChanged(bool muted)
+    {
+        UpdateMusicVisual();
     }
 
     // =========================================
@@ -331,35 +387,79 @@ public class MainHUDUGUIController : MonoBehaviour
         if (levelLabel != null)
             levelLabel.text = $"Nv {_level}";
 
+        // Medidores e baloes pertencem a este HUD; as salas apenas mantem
+        // a barra de nivel do comodo.
+        SetMeasures(
+            slimeManager.Hunger, slimeManager.Fun, slimeManager.Hygiene);
+
+        if (hygieneCockroaches != null)
+            hygieneCockroaches.Refresh();
+
         foreach (var rc in _roomControllers)
         {
             if (rc == null)
                 continue;
             rc.SetLevelProgress(_levelProgress);
-            rc.SetMeasures(
-                slimeManager.Hunger, slimeManager.Fun, slimeManager.Hygiene);
         }
 
         RefreshEuphoria();
     }
 
+    /// <summary>
+    /// Borda dourada temporaria do bonus do presente. Nao altera o estado da
+    /// euforia real: se ela estiver ativa, a borda continua dourada ao final.
+    /// </summary>
+    public void SetTemporaryEuphoriaVisual(bool active)
+    {
+        _temporaryEuphoriaVisual = active;
+        RefreshEuphoria(true);
+    }
+
     private void RefreshEuphoria(bool force = false)
     {
-        if (slimeManager == null || _outlines == null || _outlines.Length == 0)
+        if (slimeManager == null)
             return;
 
-        bool euphoric = slimeManager.IsEuphoric;
-        if (!force && euphoric == _euphoriaActive)
-            return;
+        bool realEuphoria = slimeManager.IsEuphoric;
+        // O visual dourado tambem vale para o bonus do presente; o texto de
+        // multiplicador e exclusivo da euforia real.
+        bool euphoric = _temporaryEuphoriaVisual || realEuphoria;
+        bool showMultiplier = realEuphoria;
+        bool stateChanged = force || euphoric != _euphoriaActive ||
+            showMultiplier != _multiplierTextVisible;
 
-        _euphoriaActive = euphoric;
-        for (int i = 0; i < _outlines.Length; i++)
+        if (stateChanged)
         {
-            if (_outlines[i] == null)
-                continue;
-            _outlines[i].outlineColor = euphoric
-                ? euphoriaColor
-                : _outlinesOriginal[i];
+            _euphoriaActive = euphoric;
+            _multiplierTextVisible = showMultiplier;
+            if (_outlines != null)
+            {
+                for (int i = 0; i < _outlines.Length; i++)
+                {
+                    if (_outlines[i] == null)
+                        continue;
+                    _outlines[i].outlineColor = euphoric
+                        ? euphoriaColor
+                        : _outlinesOriginal[i];
+                }
+            }
+
+            if (slimeCounterImage != null)
+            {
+                slimeCounterImage.sprite = euphoric && slimeBgGoldSprite != null
+                    ? slimeBgGoldSprite
+                    : slimeBgNormalSprite;
+            }
+            if (multiplierText != null)
+                multiplierText.gameObject.SetActive(showMultiplier);
+        }
+
+        // Atualiza mesmo sem troca de estado: o tier da euforia muda a cada
+        // 25% de carga, entao o multiplicador pode mudar com o tempo.
+        if (showMultiplier && multiplierText != null)
+        {
+            multiplierText.text = "x" + slimeManager.EuphoriaMultiplier()
+                .ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 
@@ -374,150 +474,153 @@ public class MainHUDUGUIController : MonoBehaviour
             slimeManager.RegisterClick();
             PullFromManager();
         }
-        PlaySlime();
+        GameAudioManager.Instance?.PlaySlime();
     }
 
     // =========================================
-    // AUDIO (SFX + musica + mute)
+    // MEASUREMENTS
     // =========================================
 
-    public void SetMusicVolume(float volume)
+    /// <summary>
+    /// Alimenta os medidores com os cuidados do slime (0-1).
+    /// Ordem interna de measureImages: [HapinessFill, HungerFill, HygieneFill].
+    /// O fill mostra a necessidade pendente: quanto mais atendido o cuidado,
+    /// menor o fillAmount. A cor vem configurada na cena e nao e alterada.
+    /// </summary>
+    public void SetMeasures(float hunger, float fun, float hygiene)
     {
-        musicVolume = Mathf.Clamp01(volume);
-        if (_musicSource != null)
-            _musicSource.volume = musicVolume;
-    }
-
-    private AudioSource GetMusicSource()
-    {
-        if (_musicSource != null)
-            return _musicSource;
-
-        _musicSourceObject = new GameObject("BackgroundMusic");
-        _musicSourceObject.transform.SetParent(transform, false);
-        _musicSource = _musicSourceObject.AddComponent<AudioSource>();
-        _musicSource.playOnAwake = false;
-        _musicSource.loop = true;
-        _musicSource.spatialBlend = 0f;
-        _musicSource.volume = musicVolume;
-        return _musicSource;
-    }
-
-    private void StartBackgroundMusic()
-    {
-        if (!Application.isPlaying || musicClip == null)
+        if (measureValues == null || measureValues.Length < 3)
             return;
 
-        AudioSource source = GetMusicSource();
-        source.clip = musicClip;
-        source.loop = true;
-        source.volume = musicVolume;
-        if (!source.isPlaying)
-            source.Play();
+        measureValues[0] = Mathf.Clamp01(fun) * 100f;
+        measureValues[1] = Mathf.Clamp01(hunger) * 100f;
+        measureValues[2] = Mathf.Clamp01(hygiene) * 100f;
+        UpdateAllMensure();
     }
 
-    private void StopBackgroundMusic()
+    public void UpdateAllMensure()
     {
-        if (_musicSource != null && _musicSource.isPlaying)
-            _musicSource.Stop();
-    }
-
-    private AudioSource Audio
-    {
-        get
-        {
-            if (_audio == null)
-            {
-                _audio = GetComponent<AudioSource>();
-                if (_audio == null)
-                    _audio = gameObject.AddComponent<AudioSource>();
-                _audio.playOnAwake = false;
-            }
-            return _audio;
-        }
-    }
-
-    public void PlayClick() => PlayClip(clickClip, "ui-click", 720f, 540f, 0.07f, 0.35f);
-
-    public void PlaySlime()
-    {
-        if (slimeClip != null)
-        {
-            PlayClip(slimeClip);
-        }
-        else
-        {
-            PlayClip(null, "ui-pop", 300f, 660f, 0.16f, 0.5f);
-            PlayClip(null, "ui-pop-hi", 660f, 990f, 0.1f, 0.25f);
-        }
-    }
-
-    public void PlayOpen() => PlayClip(openClip, "ui-open", 440f, 680f, 0.12f, 0.35f);
-    public void PlayClose() => PlayClip(closeClip, "ui-close", 520f, 330f, 0.12f, 0.35f);
-    public void PlayBuy() => PlayClip(buyClip, "ui-buy", new[] { 523f, 659f, 784f }, 0.09f, 0.4f);
-
-    private void PlayClip(AudioClip clip)
-    {
-        if (!Application.isPlaying || clip == null || _muted)
+        if (measureImages == null || measureValues == null)
             return;
-        Audio.volume = uiVolume;
-        Audio.PlayOneShot(clip);
-    }
 
-    private void PlayClip(AudioClip clip, string key, float f0, float f1, float dur, float vol)
-    {
-        PlayClip(clip != null ? clip : SynthTone(key, f0, f1, dur, vol));
-    }
-
-    private void PlayClip(AudioClip clip, string key, float[] notes, float noteDur, float vol)
-    {
-        PlayClip(clip != null ? clip : SynthMelody(key, notes, noteDur, vol));
-    }
-
-    private AudioClip SynthTone(string key, float f0, float f1, float dur, float vol)
-    {
-        if (_synthCache.TryGetValue(key, out var cached))
-            return cached;
-        const int rate = 44100;
-        int n = Mathf.Max(1, (int)(rate * dur));
-        var data = new float[n];
-        float phase = 0f;
-        for (int i = 0; i < n; i++)
+        int count = Mathf.Min(measureImages.Length, measureValues.Length);
+        for (int i = 0; i < count; i++)
         {
-            float t = (float)i / n;
-            float f = Mathf.Lerp(f0, f1, t);
-            phase += 2f * Mathf.PI * f / rate;
-            float env = Mathf.Exp(-4f * t) * Mathf.Min(1f, t * 40f);
-            data[i] = Mathf.Sin(phase) * env * vol;
+            if (measureImages[i] == null)
+                continue;
+
+            float maxValue =
+                measureMaxValues != null && i < measureMaxValues.Length
+                    ? measureMaxValues[i]
+                    : 100f;
+
+            float percentage = maxValue > 0f
+                ? measureValues[i] / maxValue
+                : 0f;
+
+            // Necessidade pendente: 0% atendido = anel cheio;
+            // 100% atendido = anel vazio. A cor permanece a da cena.
+            measureImages[i].fillAmount = Mathf.Clamp01(1f - percentage);
         }
-        var clip = AudioClip.Create(key, n, 1, rate, false);
-        clip.SetData(data, 0);
-        _synthCache[key] = clip;
-        return clip;
     }
 
-    private AudioClip SynthMelody(string key, float[] notes, float noteDur, float vol)
+    // =========================================
+    // MEASUREMENT DIALOG BUBBLES
+    // =========================================
+
+    public void MensureHappinessBtt() => ToggleBubble(happinessBubble);
+
+    public void MensureHygieneBtt() => ToggleBubble(hygieneBubble);
+
+    public void MensureHungerBtt() => ToggleBubble(hungerBubble);
+
+    /// <summary>Clique no proprio dialogo tambem fecha o balao.</summary>
+    public void HideBubbles()
     {
-        if (_synthCache.TryGetValue(key, out var cached))
-            return cached;
-        const int rate = 44100;
-        int per = Mathf.Max(1, (int)(rate * noteDur));
-        int n = per * notes.Length;
-        var data = new float[n];
-        for (int m = 0; m < notes.Length; m++)
+        if (_bubbleCoroutine != null)
         {
-            float phase = 0f;
-            for (int i = 0; i < per; i++)
-            {
-                float t = (float)i / per;
-                phase += 2f * Mathf.PI * notes[m] / rate;
-                float env = Mathf.Exp(-3f * t) * Mathf.Min(1f, t * 40f);
-                data[m * per + i] = Mathf.Sin(phase) * env * vol;
-            }
+            StopCoroutine(_bubbleCoroutine);
+            _bubbleCoroutine = null;
         }
-        var clip = AudioClip.Create(key, n, 1, rate, false);
-        clip.SetData(data, 0);
-        _synthCache[key] = clip;
-        return clip;
+        HideAllBubbles();
     }
+
+    private void ToggleBubble(GameObject bubble)
+    {
+        if (bubble == null)
+            return;
+
+        // Clique repetido no mesmo botao/dialogo esconde o balao.
+        if (bubble.activeSelf)
+        {
+            HideBubbles();
+            return;
+        }
+
+        ShowBubble(bubble);
+    }
+
+    private void ShowBubble(GameObject bubble)
+    {
+        // StartCoroutine falha em MonoBehaviour de GameObject inativo.
+        if (bubble == null || !isActiveAndEnabled)
+            return;
+
+        if (_bubbleCoroutine != null)
+        {
+            StopCoroutine(_bubbleCoroutine);
+            _bubbleCoroutine = null;
+        }
+
+        HideAllBubbles();
+        bubble.SetActive(true);
+        _bubbleCoroutine = StartCoroutine(HideBubbleAfterDelay(bubble));
+    }
+
+    private IEnumerator HideBubbleAfterDelay(GameObject bubble)
+    {
+        yield return new WaitForSeconds(bubbleDuration);
+
+        if (bubble != null)
+            bubble.SetActive(false);
+
+        _bubbleCoroutine = null;
+    }
+
+    private void HideAllBubbles()
+    {
+        if (happinessBubble != null)
+            happinessBubble.SetActive(false);
+        if (hungerBubble != null)
+            hungerBubble.SetActive(false);
+        if (hygieneBubble != null)
+            hygieneBubble.SetActive(false);
+    }
+
+    // =========================================
+    // AUDIO - APENAS VISUAL DOS BOTOES
+    // =========================================
+
+    private void UpdateSoundVisual()
+    {
+        bool muted = GameAudioManager.Instance == null ||
+                     GameAudioManager.Instance.IsSfxMuted;
+
+        if (soundIcon != null)
+            soundIcon.SetActive(!muted);
+        if (noSoundIcon != null)
+            noSoundIcon.SetActive(muted);
+    }
+
+    private void UpdateMusicVisual()
+    {
+        bool muted = GameAudioManager.Instance == null ||
+                     GameAudioManager.Instance.IsMusicMuted;
+
+        if (musicIcon != null)
+            musicIcon.SetActive(!muted);
+        if (noMusicIcon != null)
+            noMusicIcon.SetActive(muted);
+    }
+
 }

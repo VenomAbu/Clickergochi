@@ -206,7 +206,7 @@ public class PopupMovelController : MonoBehaviour
     {
         if (FurnitureManager.Instance.TryUpgradeFurniture(currentKind))
         {
-            MainHUDUGUIController.Instance?.PlayBuy();
+            GameAudioManager.Instance?.PlayBuy();
             Refresh();
         }
         else if (priceTMP != null)

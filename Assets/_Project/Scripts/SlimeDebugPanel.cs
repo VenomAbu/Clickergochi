@@ -9,6 +9,8 @@ public class SlimeDebugPanel : MonoBehaviour
     [Header("Medidores (arraste no Play)")]
     [Range(0f, 1f)] public float hunger = 0.5f;
     [Range(0f, 1f)] public float fun = 0.5f;
+    [Tooltip("80-60%: 1 barata | 59-30%: 2 baratas | 29-0%: 3 baratas. " +
+             "Cada esmagada da +35% de higiene; a ultima leva a 100%.")]
     [Range(0f, 1f)] public float hygiene = 0.5f;
 
     [Header("Ao dar Play")]
@@ -36,12 +38,15 @@ public class SlimeDebugPanel : MonoBehaviour
         if (slimeManager == null)
             return;
 
+        slimeManager.StateChanged += HandleStateChanged;
+
         // O jogo sempre comeca sem euforia, mesmo que o campo tenha ficado
-        // marcado no Inspector na ultima sessao de teste. O override manual
-        // impede que os cuidados em 100% reativem a euforia no primeiro Update.
+        // marcado no Inspector na ultima sessao de teste. Aqui o override
+        // manual e removido: os cuidados acima de 95% devem poder disparar a
+        // euforia automaticamente durante o Play.
         euphoria = false;
         lastEuphoria = false;
-        slimeManager.SetEuphoriaManual(false);
+        slimeManager.ClearEuphoria(true);
 
         if (startAtMin)
             slimeManager.SetCare(0f, 0f, 0f);
@@ -82,6 +87,19 @@ public class SlimeDebugPanel : MonoBehaviour
         {
             slimeManager.SetCare(hunger, fun, hygiene);
         }
+        Pull();
+    }
+
+    private void OnDestroy()
+    {
+        if (slimeManager != null)
+            slimeManager.StateChanged -= HandleStateChanged;
+    }
+
+    private void HandleStateChanged()
+    {
+        // Baratas esmagadas mudam a higiene fora do Update deste painel;
+        // sem isso o slider antigo sobrescreveria a limpeza no frame seguinte.
         Pull();
     }
 

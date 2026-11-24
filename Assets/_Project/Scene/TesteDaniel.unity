@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 74530535}
   - component: {fileID: 74530534}
   - component: {fileID: 74530533}
+  - component: {fileID: 74530536}
   m_Layer: 0
   m_Name: MainUI
   m_TagString: Untagged
@@ -156,12 +157,6 @@ MonoBehaviour:
   level: 1
   slimeCount: 0
   slimeManager: {fileID: 1632827374}
-  slimeClip: {fileID: 8300000, guid: 530f88d7932160c4a970f86ab31e94a6, type: 3}
-  clickClip: {fileID: 0}
-  openClip: {fileID: 0}
-  closeClip: {fileID: 0}
-  buyClip: {fileID: 0}
-  uiVolume: 0.5
 --- !u!114 &74530534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,6 +195,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &74530536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74530532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e4217f2d00c9ae40aab7bcc76a7b7a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudioManager
+  slimeClip: {fileID: 8300000, guid: 530f88d7932160c4a970f86ab31e94a6, type: 3}
+  clickClip: {fileID: 0}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
+  buyClip: {fileID: 0}
+  uiVolume: 0.5
+  musicVolume: 0.25
+  musicClip: {fileID: 0}
+  startMusicOnAwake: 1
 --- !u!1 &609783156
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,6 +350,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d4cd60043feea04ba5b5d66af9cabcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveManager
+  saveDebounceSeconds: 0.75
+  maxSaveWaitSeconds: 3
 --- !u!4 &931561275
 Transform:
   m_ObjectHideFlags: 0
@@ -379,11 +397,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlimeManager
   baseGooPerClick: 1
+  funDecayPerHour: 0.1
+  hungerDecayPerHour: 0.7
+  hygieneDecayPerHour: 0.5
+  decayUpdateIntervalSeconds: 1
+  decaySaveIntervalSeconds: 30
   requiredFunClicks: 100
   funBonusClickCount: 20
   funBonusClickMultiplier: 2
   funBonusDurationSeconds: 30
   euphoriaDurationHours: 4
+  euphoriaTriggerThreshold: 0.995
+  moodExcellentThreshold: 0.75
+  moodGoodThreshold: 0.5
+  moodOkayThreshold: 0.25
 --- !u!4 &1632827375
 Transform:
   m_ObjectHideFlags: 0

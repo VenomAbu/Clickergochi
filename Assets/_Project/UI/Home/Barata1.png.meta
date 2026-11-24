@@ -1,0 +1,593 @@
+fileFormatVersion: 2
+guid: 6c7edfb749cb3874fa672fad55d717c5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4463169147317549217
+    second: Barata1_0
+  - first:
+      213: 9199541872839171480
+    second: Barata1_1
+  - first:
+      213: -7890689869767805492
+    second: Barata1_2
+  - first:
+      213: 7761805363297207005
+    second: Barata1_3
+  - first:
+      213: -7078445276679334908
+    second: Barata1_4
+  - first:
+      213: 330548607533164051
+    second: Barata1_5
+  - first:
+      213: 1592786854016883445
+    second: Barata1_6
+  - first:
+      213: 5637397067384708937
+    second: Barata1_7
+  - first:
+      213: -8156751206855200263
+    second: Barata1_8
+  - first:
+      213: -6975882197644706557
+    second: Barata1_9
+  - first:
+      213: -3813506122608848758
+    second: Barata1_10
+  - first:
+      213: 7968409741071994591
+    second: Barata1_11
+  - first:
+      213: 5095933821657086330
+    second: Barata1_12
+  - first:
+      213: -6924738414307273619
+    second: Barata1_13
+  - first:
+      213: -8398159781315465771
+    second: Barata1_14
+  - first:
+      213: -6524016572483269117
+    second: Barata1_15
+  - first:
+      213: 4762436058793080428
+    second: Barata1_16
+  - first:
+      213: 2642565036905841020
+    second: Barata1_17
+  - first:
+      213: -5861384899583261456
+    second: Barata1_18
+  - first:
+      213: 8049893281671164310
+    second: Barata1_19
+  - first:
+      213: 486514146372134213
+    second: Barata1_20
+  - first:
+      213: -2715226678306286034
+    second: Barata1_21
+  - first:
+      213: 2869463726094118323
+    second: Barata1_22
+  - first:
+      213: -6611015212917822060
+    second: Barata1_23
+  - first:
+      213: 2026451797362272685
+    second: Barata1_24
+  - first:
+      213: -6564974468540606870
+    second: Barata1_25
+  - first:
+      213: -2596446164202184068
+    second: Barata1_26
+  - first:
+      213: -2380668760676964527
+    second: Barata1_27
+  - first:
+      213: 3880557131762286172
+    second: Barata1_28
+  - first:
+      213: 1484183644120103313
+    second: Barata1_29
+  - first:
+      213: -7826375054941604957
+    second: Barata1_30
+  - first:
+      213: -7249512468371386010
+    second: Barata1_31
+  - first:
+      213: -1081472343110349408
+    second: Barata1_32
+  - first:
+      213: -486716566490799881
+    second: Barata1_33
+  - first:
+      213: -5879552200726296695
+    second: Barata1_34
+  - first:
+      213: 3897645966721355966
+    second: Barata1_35
+  - first:
+      213: 1560007451073393167
+    second: Barata1_36
+  - first:
+      213: 7664583111410489868
+    second: Barata1_37
+  - first:
+      213: -1507942434066135811
+    second: Barata1_38
+  - first:
+      213: -7041011150224459235
+    second: Barata1_39
+  - first:
+      213: -3524868745203198017
+    second: Barata1_40
+  - first:
+      213: -1894424280642250797
+    second: Barata1_41
+  - first:
+      213: 7396562810431229519
+    second: Barata1_42
+  - first:
+      213: -832554558546755513
+    second: Barata1_43
+  - first:
+      213: -9032297642471678644
+    second: Barata1_44
+  - first:
+      213: -8171907440328198460
+    second: Barata1_45
+  - first:
+      213: -7951500540054932490
+    second: Barata1_46
+  - first:
+      213: 3826173859216251206
+    second: Barata1_47
+  - first:
+      213: -7915314983444044537
+    second: Barata1_48
+  - first:
+      213: 7588953177880410342
+    second: Barata1_49
+  - first:
+      213: -4701878955917446552
+    second: Barata1_50
+  - first:
+      213: -813940344689100797
+    second: Barata1_51
+  - first:
+      213: -4015560379756102905
+    second: Barata1_52
+  - first:
+      213: 289419262189061805
+    second: Barata1_53
+  - first:
+      213: -517682815700194776
+    second: Barata1_54
+  - first:
+      213: 7441982557437854395
+    second: Barata1_55
+  - first:
+      213: -5652618671903504297
+    second: Barata1_56
+  - first:
+      213: 7818476310138633492
+    second: Barata1_57
+  - first:
+      213: -3461068930346820810
+    second: Barata1_58
+  - first:
+      213: -2751578400700602178
+    second: Barata1_59
+  - first:
+      213: -5366047388747377988
+    second: Barata1_60
+  - first:
+      213: -1218598332658286019
+    second: Barata1_61
+  - first:
+      213: -3660566799640593789
+    second: Barata1_62
+  - first:
+      213: 1149417377576388513
+    second: Barata1_63
+  - first:
+      213: -3542701727346172273
+    second: Barata1_64
+  - first:
+      213: 6896377405904769432
+    second: Barata1_65
+  - first:
+      213: 2885848514963355133
+    second: Barata1_66
+  - first:
+      213: 2695324013289344110
+    second: Barata1_67
+  - first:
+      213: -2603771014976640293
+    second: Barata1_68
+  - first:
+      213: -2061725108908114525
+    second: Barata1_69
+  - first:
+      213: -2307908554244265527
+    second: Barata1_70
+  - first:
+      213: 8311422553379871170
+    second: Barata1_71
+  - first:
+      213: -5013984370668157606
+    second: Barata1_72
+  - first:
+      213: 2557398253120634700
+    second: Barata1_73
+  - first:
+      213: -6365658064544788107
+    second: Barata1_74
+  - first:
+      213: 6350649938655070977
+    second: Barata1_75
+  - first:
+      213: -8641806116143458166
+    second: Barata1_76
+  - first:
+      213: 5339250429316633265
+    second: Barata1_77
+  - first:
+      213: -5599314701831319399
+    second: Barata1_78
+  - first:
+      213: 3656208746488345622
+    second: Barata1_79
+  - first:
+      213: -8306742661957262781
+    second: Barata1_80
+  - first:
+      213: -2467033721421751311
+    second: Barata1_81
+  - first:
+      213: 1588204802698597279
+    second: Barata1_82
+  - first:
+      213: 7075927800838967528
+    second: Barata1_83
+  - first:
+      213: 7729024352042474162
+    second: Barata1_84
+  - first:
+      213: -6755256950058960707
+    second: Barata1_85
+  - first:
+      213: 7634282172563496094
+    second: Barata1_86
+  - first:
+      213: 3580005762233021418
+    second: Barata1_87
+  - first:
+      213: -5543754933184609224
+    second: Barata1_88
+  - first:
+      213: -5186315996296560782
+    second: Barata1_89
+  - first:
+      213: -3550913688871651527
+    second: Barata1_90
+  - first:
+      213: -7469014976444580934
+    second: Barata1_91
+  - first:
+      213: -8427912930372977858
+    second: Barata1_92
+  - first:
+      213: -436986843169647767
+    second: Barata1_93
+  - first:
+      213: 5563010454931528452
+    second: Barata1_94
+  - first:
+      213: -9109409906885720948
+    second: Barata1_95
+  - first:
+      213: -144160384534360904
+    second: Barata1_96
+  - first:
+      213: -3616508389379910752
+    second: Barata1_97
+  - first:
+      213: -8047346410544082908
+    second: Barata1_98
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Barata1_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5787a1be43af02c0800000000000000
+      internalID: -4463169147317549217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Barata1_1
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89d19e297965baf70800000000000000
+      internalID: 9199541872839171480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Barata1_2
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc577bfbe53ae7290800000000000000
+      internalID: -7890689869767805492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Barata1_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd24d07aad877bb60800000000000000
+      internalID: 7761805363297207005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Barata1_4
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4049c79268f44cd90800000000000000
+      internalID: -7078445276679334908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Barata1_5
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 316a30d0538569400800000000000000
+      internalID: 330548607533164051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 7d20a8bf01cb9df4a8d2f492fdc69a01
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":512.0,"y":512.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Barata1_0: -4463169147317549217
+      Barata1_1: 9199541872839171480
+      Barata1_2: -7890689869767805492
+      Barata1_3: 7761805363297207005
+      Barata1_4: -7078445276679334908
+      Barata1_5: 330548607533164051
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

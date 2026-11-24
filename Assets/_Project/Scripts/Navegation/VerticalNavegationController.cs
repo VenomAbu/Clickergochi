@@ -9,8 +9,11 @@ public class VerticalNavegationController : MonoBehaviour
     [Header("Vertical Panels")]
     [SerializeField] private GameObject[] verticalPanels;
 
-    [Header("Shop Panel")]
+    [Header("HUD Panels")]
+    [Tooltip("Painéis abertos pelos botões do HUD. Centralizados aqui porque este controlador decide o que abre.")]
+    [SerializeField] private GameObject albumPanel;
     [SerializeField] private GameObject shopPanel;
+    [SerializeField] private GameObject foodPanel;
     [Header("Shop Sub Panels")]
     [SerializeField] private GameObject slimeSkinPanel;
     [SerializeField] private GameObject packPanel;
@@ -50,6 +53,25 @@ public class VerticalNavegationController : MonoBehaviour
         // Fallback caso o controlador de transi��es n�o esteja configurado.
         CloseAllPanels();
         panel.SetActive(true);
+    }
+
+    // =========================================
+    // HUD PANEL BUTTONS
+    // =========================================
+
+    public void OpenAlbum()
+    {
+        OpenPanel(albumPanel);
+    }
+
+    public void OpenShop()
+    {
+        OpenPanel(shopPanel);
+    }
+
+    public void OpenFood()
+    {
+        OpenPanel(foodPanel);
     }
 
     public void OpenSlimeSkinPanel()
@@ -110,6 +132,18 @@ public class VerticalNavegationController : MonoBehaviour
 
         if (currentHorizontalPanel != null)
             currentHorizontalPanel.SetActive(true);
+    }
+
+    /// <summary>
+    /// Fecha o painel vertical e volta para uma sala horizontal especifica.
+    /// Usado pelo AD_Btt apos o anuncio, para nao ficar no PackUI.
+    /// </summary>
+    public void ReturnToRoom(GameObject roomPanel)
+    {
+        if (roomPanel != null && horizontalNavigation != null)
+            horizontalNavigation.SetCurrentPanel(roomPanel);
+
+        BackBtt();
     }
 
     // =========================================

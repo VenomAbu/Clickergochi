@@ -5,14 +5,20 @@ using UnityEngine.UI;
 /// <summary>
 /// Album de stickers do MainScene (UGUI). Liga os StickerData de
 /// Resources/Stickers aos StickerCardPrefb que a cena ja traz dentro de
-/// StickerCardPainel (painel AlbumUI), na ordem do grid. Todos comecam
-/// desbloqueados; o campo blocked do inspector trava um card (o gacha de
-/// stickers ainda nao existe). Clique abre o popup do sticker.
+/// StickerCardPainel (painel AlbumUI), na ordem do grid. O card fica liberado
+/// quando o sticker esta no save (StickerCollection), incluindo os ganhos ao
+/// abrir pacotes. Clique abre o popup do sticker.
 /// </summary>
 public class StickerAlbumUGUIController : MonoBehaviour
 {
     /// <summary>Stickers do album, na ordem exibida (para o clique).</summary>
     private StickerData[] entries;
+
+    /// <summary>
+    /// O Album fica inativo na cena, entao OnEnable nao dispara no Install.
+    /// A inscricao e feita no Build para acompanhar ganhos mesmo fechado.
+    /// </summary>
+    private bool subscribedToCollection;
 
     /// <summary>Cor dos cards bloqueados no album (mesma das skins travadas).</summary>
     private static readonly Color LockedColor =
@@ -48,8 +54,28 @@ public class StickerAlbumUGUIController : MonoBehaviour
     // BUILD (cards em runtime)
     // =========================================
 
+    private void OnDestroy()
+    {
+        if (subscribedToCollection)
+            StickerCollection.Changed -= HandleCollectionChanged;
+    }
+
+    private void HandleCollectionChanged()
+    {
+        // Um pacote pode ser aberto enquanto o Album esta desativado; ao
+        // ganhar o sticker, os cards ja ficam atualizados quando ele abre.
+        if (entries != null)
+            Build();
+    }
+
     private void Build()
     {
+        if (!subscribedToCollection)
+        {
+            StickerCollection.Changed += HandleCollectionChanged;
+            subscribedToCollection = true;
+        }
+
         Transform container =
             transform.Find("StickerScrollPainel/StickerCardPainel");
         if (container == null)
@@ -57,6 +83,17 @@ public class StickerAlbumUGUIController : MonoBehaviour
             Debug.LogWarning(
                 "[StickerAlbum] Container de cards (StickerCardPainel) nao encontrado.");
             return;
+        }
+
+        // O botao fica dentro deste painel inativo; liga aqui para que o
+        // clique confirme mesmo antes da primeira abertura do Album.
+        Transform resetRoot = transform.Find("ResetStickersButton");
+        if (resetRoot != null)
+        {
+            StickerResetButton resetButton =
+                resetRoot.GetComponent<StickerResetButton>();
+            if (resetButton != null)
+                resetButton.Bind();
         }
 
         // Titulo em PT (a cena traz "STICKER ALBUM").
@@ -143,7 +180,7 @@ public class StickerAlbumUGUIController : MonoBehaviour
             if (data.stickerImage != null)
                 icon.sprite = data.stickerImage;
 
-            icon.color = data.blocked ? LockedColor : Color.white;
+            icon.color = StickerCollection.IsOwned(data) ? Color.white : LockedColor;
         }
 
         Button button = card.GetComponent<Button>();
@@ -154,8 +191,8 @@ public class StickerAlbumUGUIController : MonoBehaviour
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(() => OnCard(captured));
 
-            // Trava do inspector: card visivel, mas nao clicavel.
-            button.interactable = !data.blocked;
+            // Card visivel, mas nao clicavel ate o sticker ser conquistado.
+            button.interactable = StickerCollection.IsOwned(data);
         }
     }
 
@@ -172,11 +209,11 @@ public class StickerAlbumUGUIController : MonoBehaviour
         if (data == null)
             return;
 
-        // Bloqueado no inspector: nao abre (gacha pendente). O botao ja
-        // fica nao clicavel no Bind; este ramo e so uma seguranca.
-        if (data.blocked)
+        // Ainda nao conquistado: nao abre. O botao ja fica nao clicavel no
+        // Bind; este ramo e so uma seguranca.
+        if (!StickerCollection.IsOwned(data))
         {
-            MainHUDUGUIController.Instance?.PlayClose();
+            GameAudioManager.Instance?.PlayClose();
             return;
         }
 

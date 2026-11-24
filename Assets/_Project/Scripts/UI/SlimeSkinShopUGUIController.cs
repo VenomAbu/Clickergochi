@@ -174,7 +174,7 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
             if (!Buy(skin))
             {
                 // Sem gosma ou ja dona: retranca.
-                MainHUDUGUIController.Instance?.PlayClose();
+                GameAudioManager.Instance?.PlayClose();
                 RefreshButtons();
                 return;
             }
@@ -295,7 +295,7 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
     {
         if (skin == null || !IsOwned(skin))
         {
-            MainHUDUGUIController.Instance?.PlayClose();
+            GameAudioManager.Instance?.PlayClose();
             return;
         }
 
@@ -308,7 +308,7 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
         }
 
         ApplyEquipped();
-        MainHUDUGUIController.Instance?.PlayBuy();
+        GameAudioManager.Instance?.PlayBuy();
     }
 
     /// <summary>

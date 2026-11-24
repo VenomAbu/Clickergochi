@@ -2,13 +2,13 @@ using UnityEngine;
 
 /// <summary>
 /// Aplica os efeitos dos stickers do album (doc "Stickers"): todo sticker
-/// desbloqueado (blocked = false) vale ao mesmo tempo, e os bonus sao
-/// aplicados SOBRE os bônus de moveis/comodo/comida — como fatores
-/// multiplicativos, nao somados aos deles.
+/// conquistado no save vale ao mesmo tempo, e os bonus sao aplicados SOBRE os
+/// bônus de moveis/comodo/comida — como fatores multiplicativos, nao somados
+/// aos deles.
 /// Catalogo puro: carrega os StickerData de Resources/Stickers uma vez (ja
 /// ordenados por order) e soma o valor do efeito por tipo; os sistemas
-/// consultam as propriedades no ponto de uso. Os campos dos assets sao
-/// lidos ao vivo, entao marcar blocked no Inspector reflete na hora.
+/// consultam as propriedades no ponto de uso. O estado de posse vem de
+/// StickerCollection, entao abrir um pacote reflete nos efeitos na hora.
 /// Pendente: Trevo da Sorte (Chance de Eventos) — o sistema de eventos
 /// aleatorios ainda nao existe no jogo.
 /// </summary>
@@ -71,7 +71,8 @@ public static class StickerManager
         for (int i = 0; i < catalog.Length; i++)
         {
             StickerData sticker = catalog[i];
-            if (sticker == null || sticker.blocked || sticker.effectKind != kind)
+            if (sticker == null || !StickerCollection.IsOwned(sticker) ||
+                sticker.effectKind != kind)
                 continue;
             total += sticker.EffectValue;
         }

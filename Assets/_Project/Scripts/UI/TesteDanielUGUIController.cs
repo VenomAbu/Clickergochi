@@ -12,9 +12,6 @@ public class TesteDanielUGUIController : MonoBehaviour
 {
     [Header("Sistemas")]
     public SlimeManager slimeManager;
-    public AudioSource audioSource;
-    public AudioClip slimeClip;
-    [Range(0f, 1f)] public float audioVolume = 0.5f;
 
     [Header("Telas")]
     public GameObject mainScreen;
@@ -118,7 +115,7 @@ public class TesteDanielUGUIController : MonoBehaviour
     private int currentFurniture;
     private int currentSticker;
     private int skinIndex = 1;
-    private bool muted;
+    private readonly UnityEngine.Events.UnityAction _audioToggleMute = () => GameAudioManager.Instance?.ToggleMute();
     private bool listenersBound;
     private float nextRefresh;
 
@@ -126,8 +123,6 @@ public class TesteDanielUGUIController : MonoBehaviour
     {
         if (slimeManager == null)
             slimeManager = FindFirstObjectByType<SlimeManager>();
-        if (audioSource == null)
-            audioSource = GetComponent<AudioSource>();
 
         int count = roachButtons?.Length ?? 0;
         roachHits = new int[count];
@@ -143,6 +138,9 @@ public class TesteDanielUGUIController : MonoBehaviour
     private void OnEnable()
     {
         BindListeners();
+        if (GameAudioManager.Instance != null)
+            GameAudioManager.Instance.MuteChanged += HandleAudioMuteChanged;
+        UpdateMuteText();
         ShowMain();
         Refresh();
     }
@@ -150,6 +148,8 @@ public class TesteDanielUGUIController : MonoBehaviour
     private void OnDisable()
     {
         UnbindListeners();
+        if (GameAudioManager.Instance != null)
+            GameAudioManager.Instance.MuteChanged -= HandleAudioMuteChanged;
     }
 
     private void Update()
@@ -167,7 +167,7 @@ public class TesteDanielUGUIController : MonoBehaviour
             return;
 
         AddListener(slimeButton, OnSlimeClicked);
-        AddListener(muteButton, ToggleMute);
+        AddListener(muteButton, _audioToggleMute);
         AddListener(shopButton, () => ShowScreen(shopScreen));
         AddListener(stickersButton, () => ShowScreen(stickersScreen));
         AddListener(foodButton, () => ShowScreen(foodScreen));
@@ -332,7 +332,7 @@ public class TesteDanielUGUIController : MonoBehaviour
     private void OnSlimeClicked()
     {
         slimeManager?.RegisterClick();
-        Play(slimeClip);
+        GameAudioManager.Instance?.PlaySlime();
         Refresh();
     }
 
@@ -348,7 +348,7 @@ public class TesteDanielUGUIController : MonoBehaviour
         if (tier == null || !slimeManager.SpendGoo(tier.price))
             return;
         slimeManager.AddHunger(tier.hungerRestore);
-        Play(slimeClip);
+        GameAudioManager.Instance?.PlaySlime();
         Refresh();
     }
 
@@ -359,21 +359,28 @@ public class TesteDanielUGUIController : MonoBehaviour
         roachHits[index]++;
         if (roachHits[index] < Mathf.Max(1, roachHitsRequired))
         {
-            Play(slimeClip);
+            GameAudioManager.Instance?.PlaySlime();
             return;
         }
         roachHits[index] = 0;
         slimeManager.AddHygiene(hygienePerKill);
-        Play(slimeClip);
+        GameAudioManager.Instance?.PlaySlime();
         Refresh();
     }
 
-    private void ToggleMute()
+    private void HandleAudioMuteChanged(bool muted)
     {
-        muted = !muted;
-        AudioListener.pause = muted;
-        if (muteText != null)
-            muteText.text = muted ? "OFF" : "ON";
+        UpdateMuteText();
+    }
+
+    private void UpdateMuteText()
+    {
+        if (muteText == null)
+            return;
+
+        bool muted = GameAudioManager.Instance != null &&
+                     GameAudioManager.Instance.IsMuted;
+        muteText.text = muted ? "OFF" : "ON";
     }
 
     private void MoveSkin(int direction)
@@ -447,6 +454,7 @@ public class TesteDanielUGUIController : MonoBehaviour
 
     private void Refresh()
     {
+        UpdateMuteText();
         if (slimeManager == null)
             return;
 
@@ -492,13 +500,5 @@ public class TesteDanielUGUIController : MonoBehaviour
     {
         Vector2 direction = UnityEngine.Random.insideUnitCircle;
         return direction.sqrMagnitude < 0.001f ? Vector2.right : direction.normalized;
-    }
-
-    private void Play(AudioClip clip)
-    {
-        if (audioSource == null || clip == null || muted)
-            return;
-        audioSource.volume = audioVolume;
-        audioSource.PlayOneShot(clip);
     }
 }

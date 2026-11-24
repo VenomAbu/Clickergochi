@@ -65,6 +65,10 @@ public class SaveData
     // Skin de slime equipada (SlimeSkinData.skinId); vazio = padrao.
     public string slimeSkinId;
 
+    // Album de stickers: ids conquistados ao abrir pacotes. O botao do album
+    // apaga esta lista apos confirmacao no PopUpConfirmTV.
+    public List<string> ownedStickers;
+
     public SaveData()
     {
         clickCount = 0;
@@ -90,6 +94,7 @@ public class SaveData
         ownedSkins = new List<string>();
         ownedSlimeSkins = new List<string>();
         slimeSkinId = "";
+        ownedStickers = new List<string>();
     }
 
     /// <summary>
@@ -143,6 +148,17 @@ public class SaveData
                 if (string.IsNullOrEmpty(ownedSlimeSkins[i]) ||
                     ownedSlimeSkins.IndexOf(ownedSlimeSkins[i]) != i)
                     ownedSlimeSkins.RemoveAt(i);
+            }
+        }
+        if (ownedStickers == null)
+            ownedStickers = new List<string>();
+        else
+        {
+            for (int i = ownedStickers.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrEmpty(ownedStickers[i]) ||
+                    ownedStickers.IndexOf(ownedStickers[i]) != i)
+                    ownedStickers.RemoveAt(i);
             }
         }
     }

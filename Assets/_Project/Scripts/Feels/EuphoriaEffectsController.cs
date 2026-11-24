@@ -16,6 +16,8 @@ using UnityEngine.UI;
 /// </summary>
 public class EuphoriaEffectsController : MonoBehaviour
 {
+    public static EuphoriaEffectsController Instance { get; private set; }
+
 #if UNITY_EDITOR
     private const string GoldSheetPath =
         "Assets/_Project/UI/spritesheet_dourado_4_frames_1024.png";
@@ -56,6 +58,12 @@ public class EuphoriaEffectsController : MonoBehaviour
     [Tooltip("Amarelo mais frio (fim do espectro).")]
     [SerializeField] private Color starColdColor = new Color(1f, 1f, 0.82f, 1f);
 
+    [Header("Duracao do efeito")]
+    [Tooltip("Segundos com o efeito cheio antes de comecar a sumir.")]
+    [SerializeField, Min(0.1f)] private float fullEffectDuration = 5f;
+    [Tooltip("Segundos de fade ate o visual desaparecer. O estado da euforia continua ativo.")]
+    [SerializeField, Min(0.1f)] private float fadeOutDuration = 2f;
+
     private sealed class StarParticle
     {
         public RectTransform Rect;
@@ -68,8 +76,18 @@ public class EuphoriaEffectsController : MonoBehaviour
     private readonly List<StarParticle> stars = new();
 
     private bool wasActive;
+    private bool wasRealEuphoric;
+    private bool temporaryVisual;
     private int goldFrame;
     private float goldTimer;
+    private float effectTimer;
+    private CanvasGroup panelGroup;
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
 
     private void Reset()
     {
@@ -86,10 +104,13 @@ public class EuphoriaEffectsController : MonoBehaviour
         starMaxFallSpeed = Mathf.Max(starMinFallSpeed, starMaxFallSpeed);
         twinSize = Mathf.Max(16f, twinSize);
         goldFps = Mathf.Max(0.1f, goldFps);
+        fullEffectDuration = Mathf.Max(0.1f, fullEffectDuration);
+        fadeOutDuration = Mathf.Max(0.1f, fadeOutDuration);
     }
 
     private void Awake()
     {
+        Instance = this;
         ResolveReferences();
 #if UNITY_EDITOR
         SetupAssets();
@@ -103,7 +124,20 @@ public class EuphoriaEffectsController : MonoBehaviour
 
     private void Update()
     {
-        bool active = IsEuphoric();
+        bool realEuphoria = slimeManager != null && slimeManager.IsEuphoric;
+        bool active = temporaryVisual || realEuphoria;
+
+        // A euforia real que comeca enquanto o bonus do presente ja mostra o
+        // visual dourado tambem deve reapresentar os 5s cheios + fade.
+        if (realEuphoria && !wasRealEuphoric)
+        {
+            wasRealEuphoric = true;
+            wasActive = true;
+            ApplyState(true, true);
+            return;
+        }
+        wasRealEuphoric = realEuphoria;
+
         if (active != wasActive)
         {
             ApplyState(active, false);
@@ -113,10 +147,24 @@ public class EuphoriaEffectsController : MonoBehaviour
             return;
 
         Animate(Time.deltaTime);
+        UpdateVisualFade(Time.unscaledDeltaTime);
     }
 
     private bool IsEuphoric()
-        => slimeManager != null && slimeManager.IsEuphoric;
+        => temporaryVisual || (slimeManager != null && slimeManager.IsEuphoric);
+
+    /// <summary>
+    /// Liga/desliga o visual dourado sem mexer na euforia real do SlimeManager.
+    /// Usado pelo bonus de clique do presente entregue com a mesma cara da
+    /// euforia; se a euforia real estiver ativa, ela continua no lugar.
+    /// </summary>
+    public void SetTemporaryEuphoriaVisual(bool active)
+    {
+        temporaryVisual = active;
+        // Ativar reinicia a animacao mesmo se o painel ja estiver ligado
+        // (ex.: euforia real ja ativa e o bonus do presente dispara).
+        ApplyState(IsEuphoric(), active);
+    }
 
     // =========================================
     // SETUP
@@ -197,6 +245,13 @@ public class EuphoriaEffectsController : MonoBehaviour
     {
         if (euforiaPanel == null || goldImage == null)
             return;
+
+        if (panelGroup == null)
+            panelGroup = euforiaPanel.GetComponent<CanvasGroup>();
+        if (panelGroup == null)
+            panelGroup = euforiaPanel.gameObject.AddComponent<CanvasGroup>();
+        panelGroup.interactable = false;
+        panelGroup.blocksRaycasts = false;
 
         goldImage.raycastTarget = false;
         if (goldImage.sprite == null && goldFrames.Length > 0)
@@ -310,6 +365,12 @@ public class EuphoriaEffectsController : MonoBehaviour
 
         EnsureBuilt();
 
+        // Cada entrada de euforia reapresenta o efeito cheio por alguns
+        // segundos; o fade so comeca depois disso.
+        effectTimer = 0f;
+        if (panelGroup != null)
+            panelGroup.alpha = 1f;
+
         goldTimer = 0f;
         goldFrame = 0;
         if (goldFrames.Length > 0)
@@ -353,6 +414,27 @@ public class EuphoriaEffectsController : MonoBehaviour
             if (pos.y < -halfH - star.Size)
                 ResetStar(star, false, halfW, halfH);
         }
+    }
+
+    /// <summary>
+    /// Mantem o efeito cheio por fullEffectDuration e depois baixa o alpha do
+    /// painel ate zero em fadeOutDuration. Nao encerra a euforia: so o visual.
+    /// </summary>
+    private void UpdateVisualFade(float dt)
+    {
+        if (panelGroup == null)
+            return;
+
+        effectTimer += dt;
+        if (effectTimer <= fullEffectDuration)
+        {
+            panelGroup.alpha = 1f;
+            return;
+        }
+
+        float k = Mathf.Clamp01(
+            (effectTimer - fullEffectDuration) / fadeOutDuration);
+        panelGroup.alpha = 1f - Mathf.SmoothStep(0f, 1f, k);
     }
 
     private void ResetStar(StarParticle star, bool initial,
