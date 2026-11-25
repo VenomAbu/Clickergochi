@@ -45182,7 +45182,7 @@ MonoBehaviour:
   parachuteImage: {fileID: 62450501}
   starSprite: {fileID: 5822653755368913648, guid: 310713fdf187bed4d96ea019ebc17eeb, type: 3}
   whiteFlashMaterial: {fileID: 2100000, guid: db75a361c8590674aad114bf5c3dbe3d, type: 2}
-  spawnInterval: 10
+  spawnInterval: 40
   fallSpeed: 70
   swayAmplitude: 80
   swaySpeed: 0.45

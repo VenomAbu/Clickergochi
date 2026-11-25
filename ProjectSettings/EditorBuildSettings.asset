@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Project/Scene/TesteDanillo.unity
-    guid: 88a8c04f495a90847bfa56462e600cad
+    path: Assets/_Project/Scene/MainScene.unity
+    guid: defdef7ee362751488add38826e430fa
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
