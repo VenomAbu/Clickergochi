@@ -1,5 +1,4 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +8,7 @@ using UnityEngine.UI;
 /// efeito de estrelas). Nao altera o estado real da Euforia.
 ///
 /// Enquanto o bonus dura, BonusTime mostra o tempo restante no Fill Amount e
-/// MultiplicadorText mostra "Cliques x500". Ao terminar, os dois somem.
+/// o MultiplierText do SlimeConter (HUD) mostra "x500". Ao terminar, os dois somem.
 /// </summary>
 public sealed class PresentClickBonusController : MonoBehaviour
 {
@@ -26,8 +25,6 @@ public sealed class PresentClickBonusController : MonoBehaviour
     [Header("Visual do bonus")]
     [Tooltip("Image Filled de Canvas/Effects/BonusTime.")]
     [SerializeField] private Image bonusTimeFill;
-    [Tooltip("Texto de Canvas/Effects/MultiplicadorText.")]
-    [SerializeField] private TextMeshProUGUI multiplicadorText;
 
     private Coroutine _routine;
     private bool _multiplierRegistered;
@@ -44,6 +41,7 @@ public sealed class PresentClickBonusController : MonoBehaviour
         // Na destruicao da cena os objetos de UI ja podem estar sendo
         // destruidos; apenas libera o multiplicador, sem chamar SetActive.
         ClearBonus(false);
+        GameAudioManager.Instance?.StopPresentBonusAudio(true);
         if (Instance == this)
             Instance = null;
     }
@@ -53,6 +51,8 @@ public sealed class PresentClickBonusController : MonoBehaviour
     {
         if (_routine != null)
             StopCoroutine(_routine);
+
+        GameAudioManager.Instance?.BeginPresentBonusAudio(durationSeconds);
         _routine = StartCoroutine(BonusRoutine());
     }
 
@@ -71,8 +71,10 @@ public sealed class PresentClickBonusController : MonoBehaviour
         _multiplierRegistered = true;
         SetEuphoriaVisual(true);
 
-        if (multiplicadorText != null)
-            multiplicadorText.text = $"Cliques x{clickMultiplier:0}";
+        // O multiplicador aparece no TMP do SlimeConter da HUD, no lugar do
+        // texto grande de Effects usado antes.
+        MainHUDUGUIController.Instance?.SetBonusMultiplierText(
+            $"x{clickMultiplier:0}");
         if (bonusTimeFill != null)
             bonusTimeFill.fillAmount = 1f;
         SetBonusUi(true);
@@ -87,6 +89,8 @@ public sealed class PresentClickBonusController : MonoBehaviour
             yield return null;
         }
 
+        // O fade da musica e agendado pelo GameAudioManager e termina 1s
+        // depois do efeito; nao interromper aqui.
         ClearBonus();
         _routine = null;
     }
@@ -105,6 +109,7 @@ public sealed class PresentClickBonusController : MonoBehaviour
         SetBonusUi(false);
         if (Application.isPlaying)
             SetEuphoriaVisual(false);
+        MainHUDUGUIController.Instance?.SetBonusMultiplierText(null);
     }
 
     private void SetBonusUi(bool active)
@@ -115,8 +120,6 @@ public sealed class PresentClickBonusController : MonoBehaviour
                 bonusTimeFill.fillAmount = 0f;
             bonusTimeFill.gameObject.SetActive(active);
         }
-        if (multiplicadorText != null)
-            multiplicadorText.gameObject.SetActive(active);
     }
 
     private static void SetEuphoriaVisual(bool active)
@@ -138,12 +141,6 @@ public sealed class PresentClickBonusController : MonoBehaviour
             Transform t = FindInactiveChild("BonusTime");
             if (t != null)
                 bonusTimeFill = t.GetComponent<Image>();
-        }
-        if (multiplicadorText == null)
-        {
-            Transform t = FindInactiveChild("MultiplicadorText");
-            if (t != null)
-                multiplicadorText = t.GetComponent<TextMeshProUGUI>();
         }
     }
 

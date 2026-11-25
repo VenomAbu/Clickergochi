@@ -40,6 +40,8 @@ public class PopupStickerController : MonoBehaviour
 
     public void ClosePopup()
     {
+        // O ClosePopUpBtt silencia o som generico; este popup tem som proprio.
+        GameAudioManager.Instance?.PlayPopupClose();
         if (popupController != null)
             popupController.CloseAllPopups();
     }

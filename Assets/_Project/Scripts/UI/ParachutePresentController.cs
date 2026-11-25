@@ -348,6 +348,8 @@ public sealed class ParachutePresentController : MonoBehaviour, IPointerClickHan
         if (!BeginDestroy())
             return;
 
+        GameAudioManager.Instance?.PlayPresentOpen();
+
         // So o sucesso (5 cliques) da o bonus; deixar cair no chao nao da.
         PresentClickBonusController bonus = PresentClickBonusController.Instance;
         if (bonus == null)
@@ -411,7 +413,7 @@ public sealed class ParachutePresentController : MonoBehaviour, IPointerClickHan
             : -_rect.rect.height * _rect.pivot.y;
 
         PrepareDissolve();
-        GameAudioManager.Instance?.PlayClick();
+        GameAudioManager.Instance?.PlayPresentLost();
         _destroyRoutine = StartCoroutine(GroundDestroyRoutine());
     }
 

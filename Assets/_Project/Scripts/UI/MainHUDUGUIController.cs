@@ -39,6 +39,9 @@ public class MainHUDUGUIController : MonoBehaviour
     [Tooltip("TMP dentro do SlimeConter que mostra o multiplicador atual.")]
     [SerializeField] private TMP_Text multiplierText;
 
+    [Tooltip("Texto temporario do bonus do presente (ex.: x500). Vazio = sem bonus.")]
+    private string _bonusMultiplierText;
+
     [Header("Measurements")]
     [Tooltip("Ordem: [HapinessFill, HungerFill, HygieneFill]. A cor de cada fill e a do Inspector; so o fillAmount e alterado.")]
     [SerializeField] private Image[] measureImages = new Image[3];
@@ -415,16 +418,29 @@ public class MainHUDUGUIController : MonoBehaviour
         RefreshEuphoria(true);
     }
 
+    /// <summary>
+    /// Multiplicador do bonus do presente no TMP do SlimeConter. Enquanto o
+    /// texto nao e vazio, ele tem prioridade sobre o multiplicador da euforia.
+    /// Passe null/empty ao terminar o bonus.
+    /// </summary>
+    public void SetBonusMultiplierText(string text)
+    {
+        _bonusMultiplierText = string.IsNullOrEmpty(text) ? null : text;
+        RefreshEuphoria(true);
+    }
+
     private void RefreshEuphoria(bool force = false)
     {
         if (slimeManager == null)
             return;
 
         bool realEuphoria = slimeManager.IsEuphoric;
-        // O visual dourado tambem vale para o bonus do presente; o texto de
-        // multiplicador e exclusivo da euforia real.
+        // O visual dourado tambem vale para o bonus do presente. O TMP do
+        // SlimeConter mostra o bonus quando ativo e, na falta dele, o da
+        // euforia real.
         bool euphoric = _temporaryEuphoriaVisual || realEuphoria;
-        bool showMultiplier = realEuphoria;
+        bool hasBonusMultiplier = !string.IsNullOrEmpty(_bonusMultiplierText);
+        bool showMultiplier = hasBonusMultiplier || realEuphoria;
         bool stateChanged = force || euphoric != _euphoriaActive ||
             showMultiplier != _multiplierTextVisible;
 
@@ -458,8 +474,10 @@ public class MainHUDUGUIController : MonoBehaviour
         // 25% de carga, entao o multiplicador pode mudar com o tempo.
         if (showMultiplier && multiplierText != null)
         {
-            multiplierText.text = "x" + slimeManager.EuphoriaMultiplier()
-                .ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+            multiplierText.text = hasBonusMultiplier
+                ? _bonusMultiplierText
+                : "x" + slimeManager.EuphoriaMultiplier()
+                    .ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5068ff7c944426e4a9fb452d2c13acc6, type: 3}
+  m_Name: PiaLaranja
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSkinData
+  skinName: Pia Laranja
+  skinImage: {fileID: 3316324214628478910, guid: e200c67b2710e5f478bc07e348a6b3a6, type: 3}
+  skinId: pia_laranja
+  skinPrice: 300

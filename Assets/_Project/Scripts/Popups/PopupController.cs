@@ -191,7 +191,10 @@ public class PopupController : MonoBehaviour
         ApplySavedSkins();
     }
 
-    /// <summary>bed/cama, closet/wardrobe/guarda, desk/dresser/comoda.</summary>
+    /// <summary>
+    /// Mapeia o nome do sprite do botao da sala para o movel real. Mantem os
+    /// termos antigos do quarto e inclui banheiro (Room (1)) e cozinha (Room (2)).
+    /// </summary>
     private static bool TryMapSpriteToKind(string spriteName, out FurnitureKind kind)
     {
         kind = FurnitureKind.Bed;
@@ -207,9 +210,40 @@ public class PopupController : MonoBehaviour
             kind = FurnitureKind.Wardrobe;
             return true;
         }
-        if (n.Contains("desk") || n.Contains("dresser") || n.Contains("comoda"))
+        if (n.Contains("desk") || n.Contains("dresser") || n.Contains("comoda") ||
+            n.Contains("escrivaninha"))
         {
             kind = FurnitureKind.Dresser;
+            return true;
+        }
+        if (n.Contains("banheira"))
+        {
+            kind = FurnitureKind.Banheira;
+            return true;
+        }
+        if (n.Contains("vaso"))
+        {
+            kind = FurnitureKind.Vaso;
+            return true;
+        }
+        if (n.Contains("pia"))
+        {
+            kind = FurnitureKind.Pia;
+            return true;
+        }
+        if (n.Contains("geladeira"))
+        {
+            kind = FurnitureKind.Geladeira;
+            return true;
+        }
+        if (n.Contains("microondas"))
+        {
+            kind = FurnitureKind.Microondas;
+            return true;
+        }
+        if (n.Contains("mesa"))
+        {
+            kind = FurnitureKind.Mesa;
             return true;
         }
         return false;
@@ -473,7 +507,7 @@ public class PopupController : MonoBehaviour
     }
 
     /// <summary>Equipa a skin escolhida no carrossel (grava e aplica).</summary>
-    public void EquipSkin(FurnitureKind kind, int index)
+    public void EquipSkin(FurnitureKind kind, int index, bool playSound = true)
     {
         List<FurnitureSkinData> skins = ResolveSkins(kind);
         if (skins == null || index < 0 || index >= skins.Count)
@@ -508,7 +542,8 @@ public class PopupController : MonoBehaviour
         }
 
         ApplySkin(kind);
-        GameAudioManager.Instance?.PlayBuy();
+        if (playSound)
+            GameAudioManager.Instance?.PlayBuy();
     }
 
     private void ApplySavedSkins()

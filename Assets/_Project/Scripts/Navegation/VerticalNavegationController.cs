@@ -36,6 +36,9 @@ public class VerticalNavegationController : MonoBehaviour
         if (panel == null)
             return;
 
+        // Musica fica de fora enquanto qualquer ambiente vertical estiver aberto.
+        GameAudioManager.Instance?.SetMusicSuppressed(true);
+
         // Reinicia os efeitos das telas ao abri-las (AlbumUI e SlimeSkinUI).
         AlbumEffectsController.NotifyPanelOpened(panel);
         SlimeSkinEffectsController.NotifyPanelOpened(panel);
@@ -111,6 +114,9 @@ public class VerticalNavegationController : MonoBehaviour
 
     public void BackBtt()
     {
+        // Voltou para uma sala horizontal: libera a musica novamente.
+        GameAudioManager.Instance?.SetMusicSuppressed(false);
+
         if (transitionController != null)
         {
             transitionController.ReturnToHorizontal(verticalPanels);

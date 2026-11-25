@@ -505,6 +505,7 @@ public class SlimeManager : MonoBehaviour
     /// </summary>
     public void SetEuphoriaManual(bool active)
     {
+        bool wasEuphoric = IsEuphoric;
         manualEuphoriaOverride = active;
         if (active)
         {
@@ -512,6 +513,8 @@ public class SlimeManager : MonoBehaviour
                 .AddHours(Mathf.Max(0.01f, euphoriaDurationHours))
                 .ToString("o");
             RefreshEuphoriaMultiplier();
+            if (!wasEuphoric)
+                GameAudioManager.Instance?.PlayEuforiaStart();
         }
         else
         {
@@ -687,6 +690,7 @@ public class SlimeManager : MonoBehaviour
             return;
         data.euphoriaEndUtc = DateTime.UtcNow.AddHours(euphoriaDurationHours).ToString("o");
         RefreshEuphoriaMultiplier();
+        GameAudioManager.Instance?.PlayEuforiaStart();
         Debug.Log("[Slime] Euforia iniciada automaticamente (3 cuidados acima de 95%).");
         Commit();
     }

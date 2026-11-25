@@ -177,7 +177,7 @@ public class FoodShopUGUIController : MonoBehaviour
         void DoBuy()
         {
             if (FoodBonusManager.Instance.TryEat(card.Food, card.Tier))
-                GameAudioManager.Instance?.PlayBuy();
+                GameAudioManager.Instance?.PlayPurchase();
             else
                 GameAudioManager.Instance?.PlayClose();
             RefreshButtons();

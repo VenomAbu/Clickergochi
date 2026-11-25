@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529d86f89fa31d04ca11595bb98a442e, type: 3}
+  m_Name: Banheira
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureData
+  itemName: Banheira
+  itemImage: {fileID: -296597884187475351, guid: 2994fd5346f084b42a973c2906597e14, type: 3}
+  kind: 4
+  description: Banheira do banheiro.
+  level: 0
+  price: 0
+  skins:
+  - {fileID: 11400000, guid: 89126bbb62b75f8409880c4b1e36e3e5, type: 2}
+  - {fileID: 11400000, guid: 905ede92c06f06a40965cfff22e8abbe, type: 2}
+  - {fileID: 11400000, guid: 34596f7eec1a0ec46965e89823db0189, type: 2}

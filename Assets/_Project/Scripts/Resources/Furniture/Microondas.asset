@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529d86f89fa31d04ca11595bb98a442e, type: 3}
+  m_Name: Microondas
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureData
+  itemName: Microondas
+  itemImage: {fileID: 3872759311028606006, guid: 659a902f2986ed5499cc2e6200e8b17d, type: 3}
+  kind: 7
+  description: Microondas da cozinha.
+  level: 0
+  price: 0
+  skins:
+  - {fileID: 11400000, guid: 69847b81f44a4b64eba0a1f587defc5f, type: 2}
+  - {fileID: 11400000, guid: 199e12d78e6496c4494006a914166041, type: 2}
+  - {fileID: 11400000, guid: 4b424d106b2e966488ab47e6f02b9161, type: 2}

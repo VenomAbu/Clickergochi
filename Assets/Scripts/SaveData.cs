@@ -29,6 +29,15 @@ public class SaveData
     public int wardrobeLevel;
     public int dresserLevel;
 
+    // Banheiro / Room (1) e Cozinha / Room (2). Niveis independentes, no
+    // mesmo ordinal dos FurnitureKind (3..8). Saves antigos nao tem o campo.
+    public int vasoLevel;
+    public int banheiraLevel;
+    public int piaLevel;
+    public int geladeiraLevel;
+    public int microondasLevel;
+    public int mesaLevel;
+
     // Ultima vez em que a producao da Cama foi liquidada (loop rodando ou
     // fixado ao ir para segundo plano). E a base do credito de gosma
     // offline em UTC — no Android/iOS o Update() para ao suspender.
@@ -85,6 +94,12 @@ public class SaveData
         bedLevel = 0;
         wardrobeLevel = 0;
         dresserLevel = 0;
+        vasoLevel = 0;
+        banheiraLevel = 0;
+        piaLevel = 0;
+        geladeiraLevel = 0;
+        microondasLevel = 0;
+        mesaLevel = 0;
         lastAfkUtc = "";
         foodBuffs = new List<ActiveFoodBuff>();
         nextFurnitureDiscount = 0f;
@@ -108,6 +123,12 @@ public class SaveData
         bedLevel = Math.Max(0, bedLevel);
         wardrobeLevel = Math.Max(0, wardrobeLevel);
         dresserLevel = Math.Max(0, dresserLevel);
+        vasoLevel = Math.Max(0, vasoLevel);
+        banheiraLevel = Math.Max(0, banheiraLevel);
+        piaLevel = Math.Max(0, piaLevel);
+        geladeiraLevel = Math.Max(0, geladeiraLevel);
+        microondasLevel = Math.Max(0, microondasLevel);
+        mesaLevel = Math.Max(0, mesaLevel);
         goo = Math.Max(0f, goo);
         // Campos string ausentes em saves antigos vem null (o JsonUtility
         // nao roda o construtor).

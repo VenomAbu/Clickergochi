@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529d86f89fa31d04ca11595bb98a442e, type: 3}
+  m_Name: Geladeira
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureData
+  itemName: Geladeira
+  itemImage: {fileID: -7302039312994681843, guid: f09ab5960ad72c547a621d13817d4788, type: 3}
+  kind: 6
+  description: Geladeira da cozinha.
+  level: 0
+  price: 0
+  skins:
+  - {fileID: 11400000, guid: f47c175c3f44b7148a0571f5da736d45, type: 2}
+  - {fileID: 11400000, guid: ab3ae55d2072184419914748b0b8e412, type: 2}
+  - {fileID: 11400000, guid: 9a76fcdf71b40364eb8b89648d034cdb, type: 2}

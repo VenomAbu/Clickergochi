@@ -135,6 +135,8 @@ public class PopupMovelController : MonoBehaviour
             return;
         }
 
+        // Sprite de cada movel tem proporcao propria: nunca estica a imagem.
+        itemImage.preserveAspect = true;
         itemImage.sprite = sprite;
         itemImage.enabled = true;
     }
@@ -154,6 +156,8 @@ public class PopupMovelController : MonoBehaviour
 
     public void ClosePopup()
     {
+        // O ClosePopUpBtt silencia o som generico; este popup tem som proprio.
+        GameAudioManager.Instance?.PlayPopupMovelClose();
         if (popupController != null)
             popupController.CloseAllPopups();
     }
@@ -206,7 +210,7 @@ public class PopupMovelController : MonoBehaviour
     {
         if (FurnitureManager.Instance.TryUpgradeFurniture(currentKind))
         {
-            GameAudioManager.Instance?.PlayBuy();
+            GameAudioManager.Instance?.PlayPurchase();
             Refresh();
         }
         else if (priceTMP != null)

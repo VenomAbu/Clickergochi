@@ -159,6 +159,8 @@ public class PopupSkinMovelController : MonoBehaviour
             return;
 
         bool visible = skin != null && skin.skinImage != null;
+        // Cada skin tem sua proporcao; preserva para nao deformar o movel.
+        target.preserveAspect = true;
         target.sprite = visible ? skin.skinImage : null;
         target.enabled = visible;
 
@@ -233,6 +235,8 @@ public class PopupSkinMovelController : MonoBehaviour
 
     public void CloseAllPopups()
     {
+        // O ClosePopUpBtt silencia o som generico; este popup tem som proprio.
+        GameAudioManager.Instance?.PlayPopupClose();
         if (popupController != null)
             popupController.CloseAllPopups();
     }

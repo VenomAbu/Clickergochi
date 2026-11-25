@@ -492,10 +492,12 @@ public sealed class HygieneCockroachManager : MonoBehaviour
         StartCoroutine(DamageRoutine(roach));
         SpawnParticles(hitLocal);
         SpawnStain(hitLocal);
-        GameAudioManager.Instance?.PlayClick();
 
         if (roach.hits < Mathf.Max(1, hitsToKill))
+        {
+            GameAudioManager.Instance?.PlayRoachDamage();
             return;
+        }
 
         bool wasLastRoach = _roaches.Count == 1;
 
@@ -516,7 +518,7 @@ public sealed class HygieneCockroachManager : MonoBehaviour
             _suppressRefresh = false;
         }
 
-        GameAudioManager.Instance?.PlaySlime();
+        GameAudioManager.Instance?.PlayRoachKill();
         Refresh();
     }
 

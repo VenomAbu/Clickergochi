@@ -80,6 +80,17 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
         if (titleTMP != null)
             titleTMP.text = "Skins dos Slimes";
 
+        // O painel comeca inativo; liga o botao aqui para o reset ja pedir
+        // confirmacao na primeira abertura, igual ao album de stickers.
+        Transform resetRoot = transform.Find("ResetSkinsButton");
+        if (resetRoot != null)
+        {
+            SlimeSkinResetButton resetButton =
+                resetRoot.GetComponent<SlimeSkinResetButton>();
+            if (resetButton != null)
+                resetButton.Bind();
+        }
+
         SlimeSkinData[] catalog = LoadCatalog();
         if (catalog.Length == 0)
         {
@@ -179,8 +190,9 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
                 return;
             }
 
-            // Comprada: equipa na hora (o Equip toca o som de compra).
-            Equip(skin);
+            // Comprada: som de confirmacao de compra; o Equip fica silencioso.
+            GameAudioManager.Instance?.PlayPurchase();
+            Equip(skin, false);
             RefreshButtons();
         }
 
@@ -291,7 +303,7 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
     }
 
     /// <summary>Grava a skin escolhida e ativa o modelo correspondente.</summary>
-    private static void Equip(SlimeSkinData skin)
+    private static void Equip(SlimeSkinData skin, bool playSound = true)
     {
         if (skin == null || !IsOwned(skin))
         {
@@ -308,7 +320,37 @@ public class SlimeSkinShopUGUIController : MonoBehaviour
         }
 
         ApplyEquipped();
-        GameAudioManager.Instance?.PlayBuy();
+        if (playSound)
+            GameAudioManager.Instance?.PlayBuy();
+    }
+
+    /// <summary>
+    /// Apaga as skins compradas e devolve o slime a skin azul padrao.
+    /// Chamado so depois da confirmacao no PopUpConfirmTV.
+    /// </summary>
+    public static void ResetOwned()
+    {
+        SaveManager manager = SaveManager.Instance;
+        SaveData save = manager != null ? manager.GetSaveData() : null;
+        if (save == null)
+            return;
+
+        if (save.ownedSlimeSkins == null)
+            save.ownedSlimeSkins = new List<string>();
+        else
+            save.ownedSlimeSkins.Clear();
+
+        // Vazio = padrao azul (ResolveEquipped/ApplyEquipped).
+        save.slimeSkinId = "";
+        manager.RequestSave();
+
+        ApplyEquipped();
+
+        SlimeSkinShopUGUIController shop =
+            FindFirstObjectByType<SlimeSkinShopUGUIController>(
+                FindObjectsInactive.Include);
+        if (shop != null)
+            shop.RefreshButtons();
     }
 
     /// <summary>

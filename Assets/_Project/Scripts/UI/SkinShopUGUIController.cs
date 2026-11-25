@@ -107,11 +107,19 @@ public class SkinShopUGUIController : MonoBehaviour
             return;
         }
 
+        // A cena hoje tem 3 linhas; o loop abaixo respeita rows.Count.
+        // Incluir os 9 kinds permite ligar linhas extras sem novo codigo.
         var kinds = new[]
         {
             FurnitureKind.Bed,
             FurnitureKind.Wardrobe,
-            FurnitureKind.Dresser
+            FurnitureKind.Dresser,
+            FurnitureKind.Vaso,
+            FurnitureKind.Banheira,
+            FurnitureKind.Pia,
+            FurnitureKind.Geladeira,
+            FurnitureKind.Microondas,
+            FurnitureKind.Mesa
         };
 
         slots.Clear();
@@ -234,8 +242,9 @@ public class SkinShopUGUIController : MonoBehaviour
                 return;
             }
 
-            // Comprada: equipa na hora (o EquipSkin toca o som de compra).
-            hub.EquipSkin(kind, index);
+            // Comprada: som de confirmacao de compra; EquipSkin fica silencioso.
+            GameAudioManager.Instance?.PlayPurchase();
+            hub.EquipSkin(kind, index, false);
             RefreshButtons();
         }
 

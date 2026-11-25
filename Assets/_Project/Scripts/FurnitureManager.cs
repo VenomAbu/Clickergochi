@@ -5,7 +5,15 @@ public enum FurnitureKind
 {
     Bed,
     Wardrobe,
-    Dresser
+    Dresser,
+    // Banheiro / Room (1)
+    Vaso,
+    Banheira,
+    Pia,
+    // Cozinha / Room (2)
+    Geladeira,
+    Microondas,
+    Mesa
 }
 
 /// <summary>
@@ -80,8 +88,11 @@ public class FurnitureManager : MonoBehaviour
     /// <summary>Disparado quando nivel do comodo/niveis dos moveis mudam.</summary>
     public event Action StateChanged;
 
-    private static readonly int[] UnlockLevels = { 2, 5, 10 };
-    private static readonly float[] BaseCosts = { 5f, 42f, 1185f };
+    // Um par por FurnitureKind; nunca reordenar os tres primeiros (save usa o ordinal).
+    private static readonly int[] UnlockLevels =
+        { 2, 5, 10, 2, 5, 10, 2, 5, 10 };
+    private static readonly float[] BaseCosts =
+        { 5f, 42f, 1185f, 5f, 42f, 1185f, 5f, 42f, 1185f };
 
     public int ComodoLevel => Mathf.Max(1, Save()?.comodoLevel ?? startComodoLevel);
     public int MaxComodoLevel => maxComodoLevel;
@@ -230,6 +241,12 @@ public class FurnitureManager : MonoBehaviour
         data.bedLevel = 0;
         data.wardrobeLevel = 0;
         data.dresserLevel = 0;
+        data.vasoLevel = 0;
+        data.banheiraLevel = 0;
+        data.piaLevel = 0;
+        data.geladeiraLevel = 0;
+        data.microondasLevel = 0;
+        data.mesaLevel = 0;
 
         // Desconto do Milk-shake e consumido nesta compra.
         FoodBonusManager.Instance.TakeComodoDiscount();
@@ -250,7 +267,14 @@ public class FurnitureManager : MonoBehaviour
         {
             case FurnitureKind.Bed: return data.bedLevel;
             case FurnitureKind.Wardrobe: return data.wardrobeLevel;
-            default: return data.dresserLevel;
+            case FurnitureKind.Dresser: return data.dresserLevel;
+            case FurnitureKind.Vaso: return data.vasoLevel;
+            case FurnitureKind.Banheira: return data.banheiraLevel;
+            case FurnitureKind.Pia: return data.piaLevel;
+            case FurnitureKind.Geladeira: return data.geladeiraLevel;
+            case FurnitureKind.Microondas: return data.microondasLevel;
+            case FurnitureKind.Mesa: return data.mesaLevel;
+            default: return 0;
         }
     }
 
@@ -269,7 +293,7 @@ public class FurnitureManager : MonoBehaviour
         int max = FurnitureMaxLevel(kind);
         if (max <= 0 || level >= max)
             return -1f;
-        float baseCost = Mathf.Ceil(BaseCosts[kind == FurnitureKind.Bed ? 0 : kind == FurnitureKind.Wardrobe ? 1 : 2]
+        float baseCost = Mathf.Ceil(BaseCosts[(int)kind]
             * Mathf.Pow(1.4f, level));
         // Desconto do Sanduiche (nao acumula; apenas um por aprimoramento) e
         // desconto permanente do Martelo (sticker), aplicado por cima.
@@ -298,7 +322,13 @@ public class FurnitureManager : MonoBehaviour
         {
             case FurnitureKind.Bed: data.bedLevel++; break;
             case FurnitureKind.Wardrobe: data.wardrobeLevel++; break;
-            default: data.dresserLevel++; break;
+            case FurnitureKind.Dresser: data.dresserLevel++; break;
+            case FurnitureKind.Vaso: data.vasoLevel++; break;
+            case FurnitureKind.Banheira: data.banheiraLevel++; break;
+            case FurnitureKind.Pia: data.piaLevel++; break;
+            case FurnitureKind.Geladeira: data.geladeiraLevel++; break;
+            case FurnitureKind.Microondas: data.microondasLevel++; break;
+            case FurnitureKind.Mesa: data.mesaLevel++; break;
         }
 
         // Desconto do Sanduiche e consumido nesta compra.
@@ -323,7 +353,10 @@ public class FurnitureManager : MonoBehaviour
     {
         get
         {
-            float rate = BedGooRate(FurnitureLevel(FurnitureKind.Bed))
+            // Cama do quarto + Vaso/Geladeira tem o mesmo efeito de gosma/s.
+            float rate = (BedGooRate(FurnitureLevel(FurnitureKind.Bed))
+                + BedGooRate(FurnitureLevel(FurnitureKind.Vaso))
+                + BedGooRate(FurnitureLevel(FurnitureKind.Geladeira)))
                 * (1f + FoodBonusManager.Instance.AfkBonusFraction)
                 * (1f + StickerManager.AfkGooBonusFraction);
 
@@ -338,12 +371,18 @@ public class FurnitureManager : MonoBehaviour
     /// <summary>Bonus fracionario do Guarda-roupas (0.20 = +20%). GDD: 100*(1.2^n - 1)%.</summary>
     public static float WardrobeBonusAt(int level) => level <= 0 ? 0f : Mathf.Pow(1.2f, level) - 1f;
 
-    public float WardrobeBonusFraction => WardrobeBonusAt(FurnitureLevel(FurnitureKind.Wardrobe));
+    public float WardrobeBonusFraction => WardrobeBonusAt(
+        FurnitureLevel(FurnitureKind.Wardrobe) +
+        FurnitureLevel(FurnitureKind.Banheira) +
+        FurnitureLevel(FurnitureKind.Microondas));
 
     /// <summary>Chance de critico da Comoda (0.35% por nivel; 35% no Lv.100).</summary>
     public static float DresserCritChanceAt(int level) => Mathf.Clamp01(level * 0.0035f);
 
-    public float DresserCritChance => DresserCritChanceAt(FurnitureLevel(FurnitureKind.Dresser));
+    public float DresserCritChance => DresserCritChanceAt(
+        FurnitureLevel(FurnitureKind.Dresser) +
+        FurnitureLevel(FurnitureKind.Pia) +
+        FurnitureLevel(FurnitureKind.Mesa));
 
     // ---- Producao da Cama ----
 

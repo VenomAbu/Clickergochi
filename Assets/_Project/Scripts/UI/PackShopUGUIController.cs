@@ -75,6 +75,10 @@ public class PackShopUGUIController : MonoBehaviour
     [SerializeField] private float[] comumPackChances = { 60f, 30f, 10f };
     [SerializeField] private float[] goldenPackChances = { 30f, 40f, 30f };
 
+    [Header("Audio da abertura do pacote")]
+    [Tooltip("Liga a sequencia Crescente1 -> Crescente2 (loop) -> Crescente3.")]
+    [SerializeField] private bool useCrescente = true;
+
     [Header("Animação do sticker")]
     [SerializeField, Min(0.1f)] private float stickerGrowDuration = 0.55f;
     [SerializeField, Min(0.01f)] private float titleCharDelay = 0.055f;
@@ -145,11 +149,13 @@ public class PackShopUGUIController : MonoBehaviour
     {
         StopAnimations();
         StopResultAnimations();
+        StopPackAudio();
     }
 
     private void OnDestroy()
     {
         StopResultAnimations();
+        StopPackAudio();
         DestroyRuntimeMaterial(comunState);
         DestroyRuntimeMaterial(goldenState);
         if (clickBlocker != null)
@@ -216,7 +222,7 @@ public class PackShopUGUIController : MonoBehaviour
 
         if (packPopup != null)
         {
-            packPopup.Show(packName, message, price, () => ShowPack(pack), icon);
+            packPopup.Show(packName, message, price, () => { GameAudioManager.Instance?.PlayPurchase(); ShowPack(pack); }, icon);
             return;
         }
 
@@ -227,7 +233,7 @@ public class PackShopUGUIController : MonoBehaviour
 
         if (popup != null)
         {
-            popup.Show(packName, message, price, () => ShowPack(pack), icon);
+            popup.Show(packName, message, price, () => { GameAudioManager.Instance?.PlayPurchase(); ShowPack(pack); }, icon);
             return;
         }
 
@@ -265,6 +271,10 @@ public class PackShopUGUIController : MonoBehaviour
 
         waitingForOpenClick = true;
         swayCoroutine = StartCoroutine(SwayRoutine());
+
+        // Fase 1: enquanto o pacote fica pulsando, tambores em loop e a
+        // sequencia de crescentes (se a opcao estiver ativa no Inspector).
+        GameAudioManager.Instance?.StartPackPreOpenAudio(useCrescente);
     }
 
     // =========================================
@@ -275,6 +285,13 @@ public class PackShopUGUIController : MonoBehaviour
     {
         if (activePack == null || activePack.Rect == null || openCoroutine != null)
             return;
+
+        // A musica de fundo fica de fora enquanto o pacote esta abrindo.
+        GameAudioManager.Instance?.SetMusicSuppressed(true);
+
+        // Fase 2: no exato clique que inicia a abertura, para tambores e
+        // Crescente2 e dispara Crescente3 + OpenPackComplete.
+        GameAudioManager.Instance?.StartPackOpenAudio(useCrescente);
 
         waitingForOpenClick = false;
         StopSway();
@@ -515,6 +532,11 @@ public class PackShopUGUIController : MonoBehaviour
 
     private void ShowStickerResult(StickerData sticker)
     {
+        // Fase 3: Lendario toca OpenPackMusic, Epico toca ComumPack e Comum
+        // entra direto em OpenPackMusicAfter em loop.
+        StickerRarity rarity = sticker != null ? sticker.rarity : StickerRarity.Epico;
+        GameAudioManager.Instance?.StartPackPostOpenAudio(rarity);
+
         // O sticker revelado entra no save do album (e nos efeitos) na hora.
         StickerCollection.Unlock(sticker);
 
@@ -1007,6 +1029,12 @@ public class PackShopUGUIController : MonoBehaviour
         waitingForOpenClick = false;
     }
 
+    /// <summary>Para qualquer som das tres fases de abertura do pacote.</summary>
+    private static void StopPackAudio()
+    {
+        GameAudioManager.Instance?.StopAllPackAudio();
+    }
+
     // =========================================
     // SETUP
     // =========================================
@@ -1015,6 +1043,7 @@ public class PackShopUGUIController : MonoBehaviour
     {
         adExitAction = null;
         StopAnimations();
+        StopPackAudio();
         ResetResultUI();
         ClearStars();
         activePack = null;

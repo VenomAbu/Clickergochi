@@ -73,6 +73,7 @@ public sealed class AdRewardGoldenPackFlow : MonoBehaviour
             : null;
 
         waitingAd = true;
+        GameAudioManager.Instance?.SetMusicSuppressed(true);
         Debug.Log($"[Ads] Recompensa pedida na sala " +
                   $"{(roomToReturn != null ? roomToReturn.name : "desconhecida")}.");
 
@@ -85,12 +86,14 @@ public sealed class AdRewardGoldenPackFlow : MonoBehaviour
 
         if (requireWatched && result != RewardedAdResult.Watched)
         {
+            GameAudioManager.Instance?.SetMusicSuppressed(false);
             Debug.Log($"[Ads] Anuncio terminou sem recompensa ({result}).");
             return;
         }
 
         if (verticalNavigation == null || packShop == null)
         {
+            GameAudioManager.Instance?.SetMusicSuppressed(false);
             Debug.LogWarning("[Ads] Navegacao ou PackUI nao encontrado; recompensa cancelada.");
             return;
         }

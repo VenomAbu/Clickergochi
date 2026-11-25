@@ -316,7 +316,16 @@ public class FurnitureShopUI
         {
             case FurnitureKind.Bed: return "Cama";
             case FurnitureKind.Wardrobe: return "Guarda-roupas";
-            default: return "Cômoda";
+            case FurnitureKind.Dresser: return "Cômoda";
+            // Banheiro / Room (1)
+            case FurnitureKind.Vaso: return "Vaso";
+            case FurnitureKind.Banheira: return "Banheira";
+            case FurnitureKind.Pia: return "Pia";
+            // Cozinha / Room (2)
+            case FurnitureKind.Geladeira: return "Geladeira";
+            case FurnitureKind.Microondas: return "Microondas";
+            case FurnitureKind.Mesa: return "Mesa";
+            default: return "Móvel";
         }
     }
 
@@ -326,7 +335,14 @@ public class FurnitureShopUI
         {
             case FurnitureKind.Bed: return "🛏";
             case FurnitureKind.Wardrobe: return "👕";
-            default: return "🪞";
+            case FurnitureKind.Dresser: return "🪞";
+            case FurnitureKind.Vaso: return "🚽";
+            case FurnitureKind.Banheira: return "🛁";
+            case FurnitureKind.Pia: return "🚰";
+            case FurnitureKind.Geladeira: return "🧊";
+            case FurnitureKind.Microondas: return "🍲";
+            case FurnitureKind.Mesa: return "🪑";
+            default: return "🪑";
         }
     }
 
@@ -343,10 +359,18 @@ public class FurnitureShopUI
     {
         switch (kind)
         {
+            // Mesma familia de efeito dos moveis do quarto, repetida em cada sala.
             case FurnitureKind.Bed:
+            case FurnitureKind.Vaso:
+            case FurnitureKind.Geladeira:
                 return $"{FormatGoo(FurnitureManager.BedGooRate(level))} gosma/s";
             case FurnitureKind.Wardrobe:
+            case FurnitureKind.Banheira:
+            case FurnitureKind.Microondas:
                 return $"+{FormatPercent(FurnitureManager.WardrobeBonusAt(level))} por clique";
+            case FurnitureKind.Dresser:
+            case FurnitureKind.Pia:
+            case FurnitureKind.Mesa:
             default:
                 float chance = FurnitureManager.DresserCritChanceAt(level) * 100f;
                 return $"{chance.ToString("0.##")}% de chance crítica";
@@ -424,6 +448,13 @@ public class FurnitureShopUI
         {
             case "Cama": return FurnitureKind.Bed;
             case "Guarda-roupas": return FurnitureKind.Wardrobe;
+            case "Cômoda": return FurnitureKind.Dresser;
+            case "Vaso": return FurnitureKind.Vaso;
+            case "Banheira": return FurnitureKind.Banheira;
+            case "Pia": return FurnitureKind.Pia;
+            case "Geladeira": return FurnitureKind.Geladeira;
+            case "Microondas": return FurnitureKind.Microondas;
+            case "Mesa": return FurnitureKind.Mesa;
             default: return FurnitureKind.Dresser;
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Clickergochi.Ads
@@ -130,7 +131,33 @@ namespace Clickergochi.Ads
                 Mathf.Max(0.05f, seconds), onComplete));
         }
 
-        private System.Collections.IEnumerator SimulationRoutine(
+        /// <summary>
+        /// Espera ate condition virar true ou o timeout terminar. Usa tempo real
+        /// para funcionar mesmo com o jogo pausado durante um anuncio.
+        /// </summary>
+        public void RunUntil(Func<bool> condition, float timeoutSeconds,
+            Action<bool> onComplete)
+        {
+            StartCoroutine(UntilRoutine(condition,
+                Mathf.Max(0f, timeoutSeconds), onComplete));
+        }
+
+        private IEnumerator UntilRoutine(Func<bool> condition,
+            float timeoutSeconds, Action<bool> onComplete)
+        {
+            const float step = 0.25f;
+            float elapsed = 0f;
+
+            while (condition != null && !condition() && elapsed < timeoutSeconds)
+            {
+                elapsed += step;
+                yield return new WaitForSecondsRealtime(step);
+            }
+
+            onComplete?.Invoke(condition != null && condition());
+        }
+
+        private IEnumerator SimulationRoutine(
             float seconds, Action<RewardedAdResult> onComplete)
         {
             yield return new WaitForSecondsRealtime(seconds);
