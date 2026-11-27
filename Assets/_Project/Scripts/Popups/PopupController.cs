@@ -593,6 +593,9 @@ public class PopupController : MonoBehaviour
         if (stickerData == null)
             return;
 
+        // Abrir o popup e o que marca o sticker como visto (card + HUD).
+        StickerUnseenTracker.MarkSeen(stickerData);
+
         CloseAllInternal(false);
 
         if (stickerController != null)

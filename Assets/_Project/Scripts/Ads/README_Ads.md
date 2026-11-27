@@ -13,16 +13,22 @@ o jogador toca na tela. Ao sair do sticker, volta para a sala guardada.
 O `AdsManager` (Unity LevelPlay 9.6) é o provedor real. Ele é registrado no
 `RewardedAdBridge` automaticamente no `Awake()`:
 
-- `AdsManager.MostrarRecompensado()` chama `ShowAd()` com o ID configurado.
+- `AdsManager.MostrarRecompensado()` chama `ShowAd()` **sem placement**, usando
+  o rewarded padrão do ad unit (`q443hhgcvppc88fb` na cena).
 - O reward configurado no painel (`Recompensa`, amount `1`) dispara
   `OnAdRewarded`, que só libera o pacote quando o SDK confirma.
 - `OnAdClosed` despausa o jogo e devolve `Watched` (se houve reward) ou
   `Skipped`.
 - `OnAdDisplayFailed` devolve `Failed`.
-- Anúncio não carregado/capped devolve `Unavailable`; o fluxo não fica preso.
+- Anúncio não carregado devolve `Unavailable`; se `ShowAd()` for aceito mas o
+  SDK não emitir close/display failed em até 60 s, o adaptador cancela o anúncio,
+  despausa e devolve `Failed`. O fluxo nunca fica preso nem recompensa sem
+  confirmação.
 
-O placement usado hoje é `rewarded_golden_pack` (campo `Placement Id` do
-`AdRewardGoldenPackFlow` no `AD_Btt`).
+O campo `Placement Id` do `AdRewardGoldenPackFlow` (`rewarded_golden_pack`) é
+mantido apenas como rótulo/diagnóstico. Ele **não** é enviado ao LevelPlay em
+build até o placement ser confirmado no painel. Se o placement existir no painel,
+basta voltar a passá-lo em `AdsManager.MostrarRecompensado()`/`ShowAd(placement)`.
 
 > No Editor o LevelPlay não exibe anúncios nem dispara `OnAdClosed`. Por isso o
 > adaptador mostra uma propaganda de teste em tela cheia (`EditorRewardedAdOverlay`)

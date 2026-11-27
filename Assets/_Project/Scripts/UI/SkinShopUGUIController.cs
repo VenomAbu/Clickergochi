@@ -25,6 +25,26 @@ public class SkinShopUGUIController : MonoBehaviour
     }
 
     private readonly List<SkinSlot> slots = new();
+    private readonly List<Transform> rows = new();
+    private readonly List<RoomTab> roomTabs = new();
+    private SkinRoom currentRoom = SkinRoom.Bedroom;
+    private bool built;
+
+    private enum SkinRoom
+    {
+        Bedroom,
+        Bathroom,
+        Kitchen
+    }
+
+    private sealed class RoomTab
+    {
+        public SkinRoom Room;
+        public Button Button;
+        public RectTransform ButtonTransform;
+        public GameObject SelectPoint;
+        public int[] RowIndices;
+    }
 
     /// <summary>Cor dos slots de skin ainda nao comprada (travada).</summary>
     private static readonly Color LockedColor =
@@ -54,6 +74,16 @@ public class SkinShopUGUIController : MonoBehaviour
         }
 
         panel.gameObject.AddComponent<SkinShopUGUIController>().Build();
+    }
+
+    private void OnEnable()
+    {
+        // Cada vez que a loja abre, comeca pelo quarto (default pedido).
+        if (built)
+        {
+            currentRoom = SkinRoom.Bedroom;
+            SelectRoom(currentRoom);
+        }
     }
 
     private void Update()
@@ -92,7 +122,7 @@ public class SkinShopUGUIController : MonoBehaviour
         }
 
         // Uma linha por movel, na ordem dos filhos do grid da cena.
-        var rows = new List<Transform>();
+        rows.Clear();
         for (int i = 0; i < container.childCount; i++)
         {
             Transform child = container.GetChild(i);
@@ -107,24 +137,139 @@ public class SkinShopUGUIController : MonoBehaviour
             return;
         }
 
-        // A cena hoje tem 3 linhas; o loop abaixo respeita rows.Count.
-        // Incluir os 9 kinds permite ligar linhas extras sem novo codigo.
+        // Ordem pedida para os itens de cada comodo:
+        // Quarto: Guarda-roupa, Cama, Escrivaninha
+        // Banheiro: Vaso, Pia, Banheira
+        // Cozinha: Micro-ondas, Geladeira, Mesa
         var kinds = new[]
         {
-            FurnitureKind.Bed,
             FurnitureKind.Wardrobe,
+            FurnitureKind.Bed,
             FurnitureKind.Dresser,
             FurnitureKind.Vaso,
-            FurnitureKind.Banheira,
             FurnitureKind.Pia,
-            FurnitureKind.Geladeira,
+            FurnitureKind.Banheira,
             FurnitureKind.Microondas,
+            FurnitureKind.Geladeira,
             FurnitureKind.Mesa
         };
 
         slots.Clear();
         for (int r = 0; r < rows.Count && r < kinds.Length; r++)
             BindRow(rows[r], kinds[r], hub);
+
+        BuildRoomTabs();
+        built = true;
+        SelectRoom(SkinRoom.Bedroom);
+        RefreshButtons();
+    }
+
+    // =========================================
+    // ROOM SELECTOR (Quarto / Banheiro / Cozinha)
+    // =========================================
+
+    private void BuildRoomTabs()
+    {
+        roomTabs.Clear();
+
+        Transform selector = transform.Find("RoomSelector");
+        Transform points = transform.Find("SelectPoins");
+        if (selector == null || points == null)
+        {
+            Debug.LogWarning(
+                "[SkinShop] RoomSelector/SelectPoins nao encontrados.", this);
+            return;
+        }
+
+        AddRoomTab(selector, points, SkinRoom.Bedroom,
+            "BttRoonSelect (Bedroon)", "SelectPoin (Bedroon)", 0, 1, 2);
+        AddRoomTab(selector, points, SkinRoom.Bathroom,
+            "BttRoonSelect (Bathroon)", "SelectPoin (Bathroon)", 3, 4, 5);
+        AddRoomTab(selector, points, SkinRoom.Kitchen,
+            "BttRoonSelect (Kitchen)", "SelectPoin (Kitchen)", 6, 7, 8);
+    }
+
+    private void AddRoomTab(
+        Transform selector,
+        Transform points,
+        SkinRoom room,
+        string buttonName,
+        string pointName,
+        params int[] rowIndices)
+    {
+        Transform buttonTransform = FindDirect(selector, buttonName);
+        Button button = buttonTransform != null
+            ? buttonTransform.GetComponent<Button>()
+            : null;
+        GameObject selectPoint = FindDirect(points, pointName)?.gameObject;
+
+        if (button == null || selectPoint == null)
+        {
+            Debug.LogWarning(
+                $"[SkinShop] Botao/ponto do comodo '{room}' nao encontrado.", this);
+            return;
+        }
+
+        SkinRoom captured = room;
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() =>
+        {
+            GameAudioManager.Instance?.PlayClick();
+            SelectRoom(captured);
+        });
+
+        roomTabs.Add(new RoomTab
+        {
+            Room = room,
+            Button = button,
+            ButtonTransform = buttonTransform as RectTransform,
+            SelectPoint = selectPoint,
+            RowIndices = rowIndices
+        });
+    }
+
+    private void SelectRoom(SkinRoom room)
+    {
+        currentRoom = room;
+
+        // Sem abas montadas, preserva o comportamento antigo (tudo visivel).
+        if (roomTabs.Count == 0)
+        {
+            foreach (Transform row in rows)
+                row.gameObject.SetActive(true);
+            return;
+        }
+
+        foreach (Transform row in rows)
+            row.gameObject.SetActive(false);
+
+        foreach (RoomTab tab in roomTabs)
+        {
+            bool selected = tab.Room == room;
+            if (tab.ButtonTransform != null)
+            {
+                tab.ButtonTransform.localScale = selected
+                    ? Vector3.one * 1.15f
+                    : Vector3.one;
+            }
+            if (tab.SelectPoint != null)
+                tab.SelectPoint.SetActive(selected);
+
+            if (!selected || tab.RowIndices == null)
+                continue;
+
+            foreach (int index in tab.RowIndices)
+            {
+                if (index >= 0 && index < rows.Count)
+                    rows[index].gameObject.SetActive(true);
+            }
+        }
+
+        // O jogador sempre cai no topo da lista do comodo escolhido.
+        ScrollRect scroll = transform.Find("StickerScrollPainel")
+            ?.GetComponent<ScrollRect>();
+        if (scroll != null)
+            scroll.verticalNormalizedPosition = 1f;
 
         RefreshButtons();
     }
@@ -137,7 +282,13 @@ public class SkinShopUGUIController : MonoBehaviour
             ? titleTransform.GetComponent<TMP_Text>()
             : null;
         if (titleTMP != null)
-            titleTMP.text = FurnitureShopUI.FurnitureName(kind);
+        {
+            // A cena chamava o Dresser de "Comoda"; nesta loja o nome pedido
+            // e "Escrivaninha". As outras linhas seguem o nome do GDD.
+            titleTMP.text = kind == FurnitureKind.Dresser
+                ? "Escrivaninha"
+                : FurnitureShopUI.FurnitureName(kind);
+        }
 
         List<FurnitureSkinData> skins = hub.ResolveSkins(kind);
 
@@ -170,6 +321,9 @@ public class SkinShopUGUIController : MonoBehaviour
                 // O clique precisa chegar ao botao do slot.
                 icon.raycastTarget = false;
                 icon.sprite = skin.skinImage;
+                // Mesmo ajuste dos demais moveis: a sprite nunca distorce.
+                // A primeira linha da cena vinha com preserveAspect desligado.
+                icon.preserveAspect = true;
             }
 
             Transform buttonTransform = FindDirect(cards[i], "Button");

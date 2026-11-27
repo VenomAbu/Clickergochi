@@ -61,10 +61,10 @@ public class FoodShopUGUIController : MonoBehaviour
 
     private void Build()
     {
-        Transform container = transform.Find("StickerScrollPainel/StickerCardPainel");
+        Transform container = FindCardContainer();
         if (container == null)
         {
-            Debug.LogWarning("[FoodShop] Container de cards (StickerCardPainel) nao encontrado.");
+            Debug.LogWarning("[FoodShop] Container de cards (FoodCardPainel/StickerCardPainel) nao encontrado.");
             return;
         }
 
@@ -123,6 +123,34 @@ public class FoodShopUGUIController : MonoBehaviour
             Bind(cardTransforms[i], entries[i].food, entries[i].tier, i);
 
         RefreshButtons();
+    }
+
+    /// <summary>
+    /// Localiza o grid de cards. A cena atual usa FoodScrollPainel/FoodCardPainel,
+    /// mas versoes antigas usavam StickerScrollPainel/StickerCardPainel.
+    /// </summary>
+    private Transform FindCardContainer()
+    {
+        Transform container = transform.Find("StickerScrollPainel/StickerCardPainel");
+        if (container != null)
+            return container;
+
+        container = transform.Find("FoodScrollPainel/FoodCardPainel");
+        if (container != null)
+            return container;
+
+        foreach (Transform t in GetComponentsInChildren<Transform>(true))
+        {
+            if (t.GetComponent<GridLayoutGroup>() == null)
+                continue;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                if (t.GetChild(i).name.StartsWith("FoodCardPrefab"))
+                    return t;
+            }
+        }
+
+        return null;
     }
 
     private void Bind(Transform card, FoodItemData food, FoodTier tier, int index)

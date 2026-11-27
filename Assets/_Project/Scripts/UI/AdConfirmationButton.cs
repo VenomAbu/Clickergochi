@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -26,6 +27,12 @@ public class AdConfirmationButton : MonoBehaviour
     /// <summary>Evento de confirmacao (usado pelo fluxo de recompensa e pelo Inspector).</summary>
     public UnityEvent OnAdConfirmed => onAdConfirmed;
 
+    /// <summary>
+    /// Disparado no clique da TV, antes de abrir o popup. Permite ao fluxo de
+    /// recompensa escrever no PopUpConfirmTV o premio disponivel no momento.
+    /// </summary>
+    public event Action BeforeConfirmation;
+
     /// <summary>Inscreve um codigo no confirmar sem depender de configuracao no Inspector.</summary>
     public void AddConfirmedListener(UnityAction listener)
     {
@@ -39,6 +46,17 @@ public class AdConfirmationButton : MonoBehaviour
             onAdConfirmed.RemoveListener(listener);
     }
 
+    /// <summary>Troca os textos usados na proxima confirmacao.</summary>
+    public void SetConfirmationTexts(string title, string message, string confirmText)
+    {
+        if (!string.IsNullOrEmpty(title))
+            this.title = title;
+        if (!string.IsNullOrEmpty(message))
+            this.message = message;
+        if (!string.IsNullOrEmpty(confirmText))
+            this.confirmText = confirmText;
+    }
+
     private void Awake()
     {
         if (adButton == null)
@@ -50,6 +68,8 @@ public class AdConfirmationButton : MonoBehaviour
     /// <summary>Mostra a confirmacao. Pode ser chamado direto por um Button.onClick.</summary>
     public void ShowConfirmation()
     {
+        BeforeConfirmation?.Invoke();
+
         PopUpConfirmController popup = confirmPopup;
         if (popup == null)
             popup = FindPopUpConfirmTv();

@@ -104,7 +104,6 @@ public class PackShopUGUIController : MonoBehaviour
     private float swayZ;
     private Coroutine swayCoroutine;
     private Coroutine openCoroutine;
-    private bool waitingForOpenClick;
     private RectTransform starContainer;
     private GameObject clickBlocker;
 
@@ -206,10 +205,17 @@ public class PackShopUGUIController : MonoBehaviour
     /// tela (clique no PackOpenClickBlocker). Quando sair do sticker, executa
     /// onExit em vez de ficar no PackUI.
     /// </summary>
+    /// <summary>Mostra o pacote ganho por um anuncio (Golden ou Comum).</summary>
     public void ShowGoldenPackFromAd(Action onExit)
+        => ShowPackFromAd(goldenState, onExit);
+
+    public void ShowComumPackFromAd(Action onExit)
+        => ShowPackFromAd(comunState, onExit);
+
+    private void ShowPackFromAd(PackState pack, Action onExit)
     {
         adExitAction = onExit;
-        ShowPack(goldenState);
+        ShowPack(pack);
     }
 
     private void AskConfirm(PackState pack, string packName, string price, string message)
@@ -269,7 +275,6 @@ public class PackShopUGUIController : MonoBehaviour
         pack.Rect.localRotation = Quaternion.Euler(pack.Euler);
         ApplySway();
 
-        waitingForOpenClick = true;
         swayCoroutine = StartCoroutine(SwayRoutine());
 
         // Fase 1: enquanto o pacote fica pulsando, tambores em loop e a
@@ -293,7 +298,6 @@ public class PackShopUGUIController : MonoBehaviour
         // Crescente2 e dispara Crescente3 + OpenPackComplete.
         GameAudioManager.Instance?.StartPackOpenAudio(useCrescente);
 
-        waitingForOpenClick = false;
         StopSway();
         SetActive(clickBlocker, false);
 
@@ -1026,7 +1030,6 @@ public class PackShopUGUIController : MonoBehaviour
             StopCoroutine(openCoroutine);
             openCoroutine = null;
         }
-        waitingForOpenClick = false;
     }
 
     /// <summary>Para qualquer som das tres fases de abertura do pacote.</summary>

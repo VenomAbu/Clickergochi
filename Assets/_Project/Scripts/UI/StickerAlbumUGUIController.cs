@@ -11,6 +11,10 @@ using UnityEngine.UI;
 /// </summary>
 public class StickerAlbumUGUIController : MonoBehaviour
 {
+    [Header("Album")]
+    [Tooltip("Sprite RedCircle usado nas bolinhas de sticker novo.")]
+    [SerializeField] private Sprite unseenDotSprite;
+
     /// <summary>Stickers do album, na ordem exibida (para o clique).</summary>
     private StickerData[] entries;
 
@@ -19,6 +23,9 @@ public class StickerAlbumUGUIController : MonoBehaviour
     /// A inscricao e feita no Build para acompanhar ganhos mesmo fechado.
     /// </summary>
     private bool subscribedToCollection;
+
+    /// <summary>Acompanha tambem quando um sticker e marcado como visto.</summary>
+    private bool subscribedToUnseen;
 
     /// <summary>Cor dos cards bloqueados no album (mesma das skins travadas).</summary>
     private static readonly Color LockedColor =
@@ -58,6 +65,8 @@ public class StickerAlbumUGUIController : MonoBehaviour
     {
         if (subscribedToCollection)
             StickerCollection.Changed -= HandleCollectionChanged;
+        if (subscribedToUnseen)
+            StickerUnseenTracker.Changed -= HandleUnseenChanged;
     }
 
     private void HandleCollectionChanged()
@@ -68,12 +77,24 @@ public class StickerAlbumUGUIController : MonoBehaviour
             Build();
     }
 
+    private void HandleUnseenChanged()
+    {
+        // Ao abrir o popup de um card, a bolinha some na hora.
+        if (entries != null)
+            Build();
+    }
+
     private void Build()
     {
         if (!subscribedToCollection)
         {
             StickerCollection.Changed += HandleCollectionChanged;
             subscribedToCollection = true;
+        }
+        if (!subscribedToUnseen)
+        {
+            StickerUnseenTracker.Changed += HandleUnseenChanged;
+            subscribedToUnseen = true;
         }
 
         Transform container =
@@ -183,6 +204,11 @@ public class StickerAlbumUGUIController : MonoBehaviour
             icon.color = StickerCollection.IsOwned(data) ? Color.white : LockedColor;
         }
 
+        // Bolinha vermelha: so aparece em sticker conquistado cujo card
+        // ainda nao foi aberto. Some ao abrir o popup (StickerUnseenTracker).
+        Image unseenDot = EnsureUnseenDot(card);
+        unseenDot.gameObject.SetActive(StickerUnseenTracker.IsUnseen(data));
+
         Button button = card.GetComponent<Button>();
         if (button != null)
         {
@@ -231,6 +257,43 @@ public class StickerAlbumUGUIController : MonoBehaviour
         if (label != null)
             label.text = value;
         return label;
+    }
+
+    /// <summary>
+    /// Reaproveita o marcador RedCirclePosition do prefab do card. Ele ja esta
+    /// no canto superior direito dentro do card, na posicao correta.
+    /// </summary>
+    private Image EnsureUnseenDot(Transform card)
+    {
+        Transform dotTransform = FindDirect(card, "RedCirclePosition");
+        if (dotTransform == null)
+        {
+            // Fallback para cards antigos sem o marcador.
+            GameObject dot = new GameObject("RedCirclePosition");
+            dot.transform.SetParent(card, false);
+
+            RectTransform rect = dot.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(35.998f, 35.998f);
+            rect.anchoredPosition = new Vector2(102f, 89f);
+            rect.localScale = new Vector3(1.0354f, 1.0354f, 1f);
+
+            dot.AddComponent<CanvasRenderer>();
+            dotTransform = dot.transform;
+        }
+
+        Image image = dotTransform.GetComponent<Image>();
+        if (image == null)
+            image = dotTransform.gameObject.AddComponent<Image>();
+
+        image.sprite = unseenDotSprite;
+        image.color = unseenDotSprite != null ? Color.white : new Color(1f, 1f, 1f, 0f);
+        image.preserveAspect = true;
+        image.raycastTarget = false;
+
+        return image;
     }
 
     /// <summary>Filho direto com o nome exato (nao desce a arvore).</summary>

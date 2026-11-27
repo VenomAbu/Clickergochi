@@ -11,8 +11,8 @@ public class UITransitionController : MonoBehaviour
     [Header("Vertical Transition")]
     [SerializeField] private bool useSlideTransition = true;
     [SerializeField] private float slideDistance = 250f;
-    [SerializeField] private float openDuration = 0.35f;
-    [SerializeField] private float closeDuration = 0.25f;
+    [SerializeField] private float openDuration = 0.22f;
+    [SerializeField] private float closeDuration = 0.16f;
 
     [Header("Bounce Settings")]
     [SerializeField] private float startScale = 0.75f;
@@ -21,7 +21,7 @@ public class UITransitionController : MonoBehaviour
     [Header("Vignette")]
     [SerializeField] private string vignetteProperty = "_VignetteStrength";
     [SerializeField, Range(0f, 1f)] private float vignetteMaxOpacity = 1f;
-    [SerializeField] private float vignetteFadeDuration = 0.25f;
+    [SerializeField] private float vignetteFadeDuration = 0.15f;
 
     private readonly Dictionary<Image, Material> vignetteMaterials = new();
 

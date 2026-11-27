@@ -67,11 +67,14 @@ public static class StickerCollection
     public static void ResetOwned()
     {
         List<string> owned = Data().ownedStickers;
-        if (owned.Count == 0)
-            return;
+        if (owned.Count > 0)
+        {
+            owned.Clear();
+            Persist();
+        }
 
-        owned.Clear();
-        Persist();
+        // Zera tambem os "vistos": ao ganhar de novo o sticker volta a ser novo.
+        StickerUnseenTracker.ClearSeen();
         Notify();
     }
 }

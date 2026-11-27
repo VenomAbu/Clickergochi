@@ -248,7 +248,6 @@ public sealed class EditorRewardedAdOverlay : MonoBehaviour
         label.fontSize = fontSize;
         label.alignment = alignment;
         label.color = color;
-        label.enableWordWrapping = true;
         label.raycastTarget = false;
         return label;
     }

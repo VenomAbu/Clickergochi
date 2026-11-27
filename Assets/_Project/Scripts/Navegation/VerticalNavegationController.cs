@@ -18,6 +18,7 @@ public class VerticalNavegationController : MonoBehaviour
     [SerializeField] private GameObject slimeSkinPanel;
     [SerializeField] private GameObject packPanel;
     [SerializeField] private GameObject furnitureSkinPanel;
+    [SerializeField] private GameObject roomLvlPanel;
 
     [Header("Transitions")]
     [SerializeField] private UITransitionController transitionController;
@@ -25,6 +26,23 @@ public class VerticalNavegationController : MonoBehaviour
     private void Awake()
     {
         CloseAllPanels();
+    }
+
+    /// <summary>Algum comodo vertical (Album/Shop/Food/Skins) esta aberto?</summary>
+    public bool IsAnyPanelOpen
+    {
+        get
+        {
+            if (verticalPanels == null)
+                return false;
+
+            foreach (GameObject panel in verticalPanels)
+            {
+                if (panel != null && panel.activeInHierarchy)
+                    return true;
+            }
+            return false;
+        }
     }
 
     // =========================================
@@ -90,6 +108,11 @@ public class VerticalNavegationController : MonoBehaviour
     public void OpenFurnitureSkinPanel()
     {
         OpenPanel(furnitureSkinPanel);
+    }
+
+    public void OpenRoomLvlPanel()
+    {
+        OpenPanel(roomLvlPanel);
     }
 
     // =========================================

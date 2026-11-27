@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 /// <summary>
-/// Botao da loja de skins do slime. Pede confirmacao no PopUpConfirmTV antes
+/// Botao da loja de skins do slime. Pede confirmacao no PopUpConfirm2 antes
 /// de apagar as skins compradas e voltar para a skin azul padrao.
 /// </summary>
 [RequireComponent(typeof(Button))]
@@ -11,7 +11,7 @@ public class SlimeSkinResetButton : MonoBehaviour
 {
     [Header("Referencias")]
     [SerializeField] private Button resetButton;
-    [Tooltip("Popup de confirmacao da TV. Se vazio, procura PopUpConfirmTV na cena.")]
+    [Tooltip("Popup de confirmacao. Se vazio, procura PopUpConfirm2 na cena.")]
     [SerializeField] private PopUpConfirmController confirmPopup;
 
     [Header("Textos do popup")]
@@ -56,13 +56,13 @@ public class SlimeSkinResetButton : MonoBehaviour
     {
         PopUpConfirmController popup = confirmPopup;
         if (popup == null)
-            popup = FindPopUpConfirmTv();
+            popup = PopUpConfirmController.FindPopUpConfirm2();
         if (popup == null)
             popup = PopUpConfirmController.Instance;
 
         if (popup == null)
         {
-            Debug.LogWarning("[SlimeSkinShop] PopUpConfirmTV não encontrado; reset cancelado.");
+            Debug.LogWarning("[SlimeSkinShop] PopUpConfirm2 não encontrado; reset cancelado.");
             return;
         }
 
@@ -71,17 +71,5 @@ public class SlimeSkinResetButton : MonoBehaviour
             SlimeSkinShopUGUIController.ResetOwned();
             onReset.Invoke();
         });
-    }
-
-    private static PopUpConfirmController FindPopUpConfirmTv()
-    {
-        foreach (PopUpConfirmController popup in
-                 FindObjectsByType<PopUpConfirmController>(
-                     FindObjectsInactive.Include, FindObjectsSortMode.None))
-        {
-            if (popup.name == "PopUpConfirmTV")
-                return popup;
-        }
-        return null;
     }
 }

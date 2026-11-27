@@ -3,18 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Chuva de estrelas do SlimeSkinUI, ativa somente enquanto a tela estiver aberta.
+/// Fundo do SlimeSkinUI: estrelas aparecendo aleatoriamente, com o mesmo
+/// ciclo das espirais. Cada estrela nasce pequena e transparente, cresce ate
+/// o tamanho normal e, ao sumir, encolhe e desaparece de novo.
 ///
-/// Cinco linhas paralelas, todas na direção da hipotenusa entre a parede
-/// esquerda e a de baixo do canvas:
-///   - 2 nascendo na parede esquerda;
-///   - 2 nascendo no topo;
-///   - 1 nascendo no canto superior esquerdo.
-///
-/// Cada linha é preenchida por completo com estrelas igualmente espaçadas,
-/// no padrão StarIcon, StarIcon, StarIcon2, StarIcon2 (repetindo).
-/// Ao abrir a tela, a posição inicial (fase) de cada linha é aleatorizada e
-/// todo o restante da linha é preenchido mantendo o mesmo espaçamento.
+/// Vive no proprio painel, entao so atualiza enquanto a tela estiver aberta.
 /// </summary>
 public class SlimeSkinEffectsController : MonoBehaviour
 {
@@ -26,41 +19,45 @@ public class SlimeSkinEffectsController : MonoBehaviour
     [Header("Sprites")]
     [SerializeField] private Sprite[] starSprites;
 
-    [Header("Linhas")]
-    [Tooltip("Distância igual entre estrelas da mesma linha.")]
-    [SerializeField] private float starSpacing = 160f;
-    [SerializeField] private float starSize = 56f;
-    [Tooltip("Mesma velocidade para todas, para preservar o espaçamento.")]
-    [SerializeField] private float fallSpeed = 80f;
+    [Header("Quantidade e tamanho")]
+    [SerializeField, Range(1, 40)] private int starCount = 14;
+    [SerializeField] private Vector2 sizeRange = new Vector2(80f, 150f);
 
-    [Header("Giro")]
-    [SerializeField] private float minSpinSpeed = 60f;
-    [SerializeField] private float maxSpinSpeed = 180f;
+    [Header("Giro e opacidade")]
+    [SerializeField] private Vector2 spinSpeedRange = new Vector2(60f, 180f);
+    [SerializeField] private Vector2 alphaRange = new Vector2(0.45f, 1f);
     [SerializeField] private Color starColor = Color.white;
 
-    private sealed class StarParticle
+    [Header("Tempo de vida")]
+    [Tooltip("Quanto tempo cada estrela fica na tela.")]
+    [SerializeField] private Vector2 lifeRange = new Vector2(2.5f, 5.5f);
+    [Tooltip("Intervalo aleatorio entre um spawn e outro.")]
+    [SerializeField] private Vector2 spawnIntervalRange = new Vector2(0.12f, 0.55f);
+    [SerializeField, Range(0f, 0.5f)] private float initialScale = 0.18f;
+    [SerializeField, Range(0.05f, 0.4f)] private float appearFraction = 0.22f;
+    [SerializeField, Range(0.05f, 0.5f)] private float disappearFraction = 0.28f;
+
+    private sealed class Star
     {
         public RectTransform Rect;
         public Image Image;
-        public int Slot;
         public float Spin;
-        public StarLane Lane;
+        public float Age;
+        public float Life;
+        public float TargetSize;
+        public float TargetAlpha;
+        public bool Alive;
     }
 
-    private sealed class StarLane
-    {
-        public Vector2 Origin;
-        public float Length;
-        public float Phase;
-        public readonly List<StarParticle> Stars = new();
-    }
-
-    private static readonly Vector2 Direction = new Vector2(1f, -1f).normalized;
-
-    private readonly List<StarParticle> stars = new();
-    private readonly List<StarLane> lanes = new();
+    private readonly List<Star> stars = new();
     private RectTransform starsRoot;
     private bool running;
+    private float spawnTimer;
+    private int spawnIndex;
+
+    // =========================================
+    // CICLO DO UNITY
+    // =========================================
 
     private void Reset()
     {
@@ -71,11 +68,17 @@ public class SlimeSkinEffectsController : MonoBehaviour
 
     private void OnValidate()
     {
-        starSpacing = Mathf.Max(starSize + 4f, starSpacing);
-        starSize = Mathf.Max(1f, starSize);
-        fallSpeed = Mathf.Max(1f, fallSpeed);
-        minSpinSpeed = Mathf.Max(1f, minSpinSpeed);
-        maxSpinSpeed = Mathf.Max(minSpinSpeed, maxSpinSpeed);
+        starCount = Mathf.Clamp(starCount, 1, 40);
+        sizeRange.x = Mathf.Max(8f, sizeRange.x);
+        sizeRange.y = Mathf.Max(sizeRange.x, sizeRange.y);
+        spinSpeedRange.x = Mathf.Max(1f, spinSpeedRange.x);
+        spinSpeedRange.y = Mathf.Max(spinSpeedRange.x, spinSpeedRange.y);
+        alphaRange.x = Mathf.Clamp01(alphaRange.x);
+        alphaRange.y = Mathf.Clamp01(Mathf.Max(alphaRange.x, alphaRange.y));
+        lifeRange.x = Mathf.Max(0.5f, lifeRange.x);
+        lifeRange.y = Mathf.Max(lifeRange.x, lifeRange.y);
+        spawnIntervalRange.x = Mathf.Max(0f, spawnIntervalRange.x);
+        spawnIntervalRange.y = Mathf.Max(spawnIntervalRange.x, spawnIntervalRange.y);
     }
 
     private void Awake()
@@ -83,6 +86,7 @@ public class SlimeSkinEffectsController : MonoBehaviour
 #if UNITY_EDITOR
         SetupAssets();
 #endif
+        EnsureBuilt();
     }
 
     private void OnEnable()
@@ -99,37 +103,32 @@ public class SlimeSkinEffectsController : MonoBehaviour
 
     private void Update()
     {
-        if (!running || starsRoot == null || lanes.Count == 0)
+        if (!running || starsRoot == null)
             return;
 
         float dt = Time.deltaTime;
 
-        foreach (StarLane lane in lanes)
+        spawnTimer -= dt;
+        if (spawnTimer <= 0f && AliveCount() < starCount)
         {
-            // A linha inteira avança junta: a fase é a mesma para todas as
-            // estrelas, então o espaçamento entre slots nunca muda.
-            lane.Phase += fallSpeed * dt;
+            Spawn();
+            spawnTimer = Random.Range(spawnIntervalRange.x, spawnIntervalRange.y);
+        }
 
-            int minSlot = int.MaxValue;
-            foreach (StarParticle star in lane.Stars)
-                minSlot = Mathf.Min(minSlot, star.Slot);
+        foreach (Star star in stars)
+        {
+            if (!star.Alive || star.Rect == null)
+                continue;
 
-            foreach (StarParticle star in lane.Stars)
+            star.Age += dt;
+            ApplyVisual(star);
+
+            star.Rect.localRotation *= Quaternion.Euler(0f, 0f, star.Spin * dt);
+
+            if (star.Age >= star.Life)
             {
-                float distance = lane.Phase + star.Slot * starSpacing;
-                if (distance > lane.Length + starSize)
-                {
-                    // Volta para trás da primeira estrela da linha, mantendo
-                    // o padrão 2+2 e o espaçamento igual.
-                    star.Slot = minSlot - 1;
-                    distance = lane.Phase + star.Slot * starSpacing;
-                    if (star.Image != null)
-                        star.Image.sprite = SpriteFor(star.Slot);
-                }
-
-                Vector2 pos = lane.Origin + Direction * distance;
-                star.Rect.anchoredPosition = pos;
-                star.Rect.localRotation *= Quaternion.Euler(0f, 0f, star.Spin * dt);
+                star.Alive = false;
+                star.Rect.gameObject.SetActive(false);
             }
         }
     }
@@ -140,7 +139,7 @@ public class SlimeSkinEffectsController : MonoBehaviour
 
     /// <summary>
     /// Chamado pelo VerticalNavegationController ao abrir qualquer painel.
-    /// Reinicia o padrão apenas quando o painel é o SlimeSkinUI.
+    /// Reinicia o padrao apenas quando o painel e o SlimeSkinUI.
     /// </summary>
     public static void NotifyPanelOpened(GameObject panel)
     {
@@ -158,122 +157,148 @@ public class SlimeSkinEffectsController : MonoBehaviour
         effects.Restart();
     }
 
-    /// <summary>
-    /// Sorteia a fase das 5 linhas e preenche cada uma delas inteira,
-    /// mantendo o espaçamento igual e o padrão 2+2 de sprites.
-    /// </summary>
+    /// <summary>Sorteia estrelas em posicoes, tamanhos e fases diferentes.</summary>
     public void Restart()
     {
         EnsureBuilt();
         if (starsRoot == null)
             return;
 
-        float halfW = starsRoot.rect.width * 0.5f;
-        float halfH = starsRoot.rect.height * 0.5f;
-        float size = Mathf.Max(1f, starSize);
-
-        Vector2[] origins =
+        foreach (Star star in stars)
         {
-            new Vector2(-halfW,  halfH * 0.5f), // parede esquerda (alta)
-            new Vector2(-halfW, -halfH * 0.5f), // parede esquerda (baixa)
-            new Vector2(-halfW * 0.5f, halfH),  // topo (esquerdo)
-            new Vector2( halfW * 0.5f, halfH),  // topo (direito)
-            new Vector2(-halfW, halfH)          // canto superior esquerdo
-        };
+            star.Alive = false;
+            if (star.Rect != null)
+                star.Rect.gameObject.SetActive(false);
+        }
 
-        for (int laneIndex = 0; laneIndex < origins.Length; laneIndex++)
+        spawnTimer = 0f;
+
+        // Ja comeca com algumas em fases diferentes, para nao abrir vazio.
+        int initial = Mathf.Min(4, starCount);
+        for (int i = 0; i < initial; i++)
         {
-            StarLane lane = lanes[laneIndex];
-            lane.Origin = origins[laneIndex];
-            lane.Length = LaneLength(lane.Origin, halfW, halfH, size);
-
-            int needed = Mathf.Max(1, Mathf.FloorToInt(lane.Length / starSpacing) + 1);
-            while (lane.Stars.Count < needed)
-            {
-                StarParticle star = TakeStar();
-                star.Lane = lane;
-                lane.Stars.Add(star);
-            }
-            while (lane.Stars.Count > needed)
-            {
-                StarParticle extra = lane.Stars[lane.Stars.Count - 1];
-                lane.Stars.RemoveAt(lane.Stars.Count - 1);
-                extra.Lane = null;
-                extra.Rect.gameObject.SetActive(false);
-            }
-
-            // Fase aleatória: a linha toda é preenchida a partir dela.
-            lane.Phase = Random.Range(0f, starSpacing);
-            for (int i = 0; i < lane.Stars.Count; i++)
-            {
-                StarParticle star = lane.Stars[i];
-                star.Slot = i;
-                float distance = lane.Phase + i * starSpacing;
-                star.Spin = RandomSpin();
-                star.Rect.gameObject.SetActive(true);
-                star.Rect.sizeDelta = new Vector2(size, size);
-                star.Rect.localRotation = Quaternion.Euler(
-                    0f, 0f, Random.Range(0f, 360f));
-                star.Rect.anchoredPosition =
-                    lane.Origin + Direction * distance;
-
-                if (star.Image != null)
-                {
-                    star.Image.sprite = SpriteFor(i);
-                    star.Image.color = starColor;
-                }
-            }
+            Star star = Spawn();
+            if (star == null)
+                break;
+            star.Age = Random.Range(0f, star.Life * 0.6f);
+            ApplyVisual(star);
         }
     }
 
-    private float LaneLength(Vector2 origin, float halfW, float halfH, float size)
+    // =========================================
+    // SPAWN / ANIMACAO
+    // =========================================
+
+    private int AliveCount()
     {
-        float untilRight =
-            Direction.x > 0f ? (halfW + size - origin.x) / Direction.x : float.MaxValue;
-        float untilBottom =
-            Direction.y < 0f ? (origin.y + halfH + size) / -Direction.y : float.MaxValue;
-        return Mathf.Max(0f, Mathf.Min(untilRight, untilBottom));
+        int count = 0;
+        foreach (Star star in stars)
+        {
+            if (star.Alive)
+                count++;
+        }
+        return count;
     }
 
-    private float RandomSpin()
+    private Star Spawn()
     {
-        float magnitude = Random.Range(minSpinSpeed, maxSpinSpeed);
-        return Random.value < 0.5f ? -magnitude : magnitude;
+        Star star = stars.Find(s => !s.Alive && s.Rect != null);
+        if (star == null)
+        {
+            if (stars.Count >= starCount)
+                return null;
+            star = TakeStar();
+        }
+
+        float halfW = starsRoot.rect.width * 0.5f;
+        float halfH = starsRoot.rect.height * 0.5f;
+        float size = Random.Range(sizeRange.x, sizeRange.y);
+        float limitX = Mathf.Max(0f, halfW - size * 0.5f);
+        float limitY = Mathf.Max(0f, halfH - size * 0.5f);
+
+        float magnitude = Random.Range(spinSpeedRange.x, spinSpeedRange.y);
+
+        star.Age = 0f;
+        star.Life = Random.Range(lifeRange.x, lifeRange.y);
+        star.TargetSize = size;
+        star.TargetAlpha = Random.Range(alphaRange.x, alphaRange.y);
+        star.Spin = Random.value < 0.5f ? -magnitude : magnitude;
+        star.Alive = true;
+
+        star.Rect.gameObject.SetActive(true);
+        star.Rect.anchoredPosition = new Vector2(
+            Random.Range(-limitX, limitX),
+            Random.Range(-limitY, limitY));
+        star.Rect.localRotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
+        star.Rect.sizeDelta = Vector2.one * size * initialScale;
+
+        if (star.Image != null)
+        {
+            // Padrao original: StarIcon, StarIcon, StarIcon2, StarIcon2...
+            star.Image.sprite = SpriteForSpawn();
+            star.Image.color = new Color(
+                starColor.r, starColor.g, starColor.b, 0f);
+        }
+
+        return star;
     }
 
-    private Sprite SpriteFor(int slot)
+    private Sprite SpriteForSpawn()
     {
         if (starSprites == null || starSprites.Length == 0)
             return null;
-        // StarIcon, StarIcon, StarIcon2, StarIcon2, repetindo.
-        int pattern = ((slot % 4) + 4) % 4;
-        return starSprites[(pattern / 2) % starSprites.Length];
+        Sprite sprite = starSprites[(spawnIndex / 2) % starSprites.Length];
+        spawnIndex++;
+        return sprite;
     }
 
-    // =========================================
-    // SETUP
-    // =========================================
-
-    public void SetupAssets()
+    /// <summary>Nasce pequena, fica no tamanho normal e encolhe ao sumir.</summary>
+    private void ApplyVisual(Star star)
     {
-#if UNITY_EDITOR
-        if (starSprites == null || starSprites.Length == 0)
+        float u = Mathf.Clamp01(star.Age / Mathf.Max(0.01f, star.Life));
+        float appear = Mathf.Clamp01(appearFraction);
+        float disappear = Mathf.Clamp01(disappearFraction);
+        float scale;
+        float alphaFactor;
+
+        if (u < appear)
         {
-            starSprites = new[]
-            {
-                UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(StarIconPath),
-                UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(StarIcon2Path)
-            };
+            float k = Smooth(u / Mathf.Max(0.001f, appear));
+            scale = Mathf.Lerp(initialScale, 1f, k);
+            alphaFactor = k;
         }
-#endif
+        else if (u > 1f - disappear)
+        {
+            float k = Smooth((u - (1f - disappear)) / Mathf.Max(0.001f, disappear));
+            scale = Mathf.Lerp(1f, initialScale, k);
+            alphaFactor = 1f - k;
+        }
+        else
+        {
+            scale = 1f;
+            alphaFactor = 1f;
+        }
+
+        star.Rect.sizeDelta = Vector2.one * star.TargetSize * scale;
+
+        if (star.Image != null)
+        {
+            star.Image.color = new Color(
+                starColor.r,
+                starColor.g,
+                starColor.b,
+                star.TargetAlpha * alphaFactor);
+        }
     }
 
-    private StarParticle TakeStar()
+    private static float Smooth(float t)
     {
-        StarParticle star = stars.Find(s => s.Lane == null);
-        if (star != null)
-            return star;
+        t = Mathf.Clamp01(t);
+        return t * t * (3f - 2f * t);
+    }
 
+    private Star TakeStar()
+    {
         GameObject go = new GameObject(
             "Star", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         go.transform.SetParent(starsRoot, false);
@@ -284,10 +309,10 @@ public class SlimeSkinEffectsController : MonoBehaviour
         rect.pivot = new Vector2(0.5f, 0.5f);
 
         Image image = go.GetComponent<Image>();
-        image.color = starColor;
+        image.preserveAspect = true;
         image.raycastTarget = false;
 
-        star = new StarParticle { Rect = rect, Image = image };
+        Star star = new Star { Rect = rect, Image = image };
         stars.Add(star);
         return star;
     }
@@ -306,7 +331,6 @@ public class SlimeSkinEffectsController : MonoBehaviour
             GameObject root = new GameObject("Stars", typeof(RectTransform));
             root.transform.SetParent(transform, false);
             starsRoot = (RectTransform)root.transform;
-            // Atrás da scroll, do título e do botão de voltar.
             root.transform.SetSiblingIndex(0);
         }
 
@@ -314,11 +338,23 @@ public class SlimeSkinEffectsController : MonoBehaviour
         starsRoot.anchorMax = Vector2.one;
         starsRoot.offsetMin = Vector2.zero;
         starsRoot.offsetMax = Vector2.zero;
+    }
 
-        if (lanes.Count == 0)
+    // =========================================
+    // SETUP (EDITOR)
+    // =========================================
+
+    public void SetupAssets()
+    {
+#if UNITY_EDITOR
+        if (starSprites == null || starSprites.Length == 0)
         {
-            for (int i = 0; i < 5; i++)
-                lanes.Add(new StarLane());
+            starSprites = new[]
+            {
+                UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(StarIconPath),
+                UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(StarIcon2Path)
+            };
         }
+#endif
     }
 }

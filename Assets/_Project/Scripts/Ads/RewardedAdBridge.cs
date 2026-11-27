@@ -142,6 +142,18 @@ namespace Clickergochi.Ads
                 Mathf.Max(0f, timeoutSeconds), onComplete));
         }
 
+        /// <summary>Dispara uma acao uma vez, em tempo real, mesmo com o jogo pausado.</summary>
+        public void Schedule(float seconds, Action action)
+        {
+            StartCoroutine(ScheduleRoutine(Mathf.Max(0f, seconds), action));
+        }
+
+        private IEnumerator ScheduleRoutine(float seconds, Action action)
+        {
+            yield return new WaitForSecondsRealtime(seconds);
+            action?.Invoke();
+        }
+
         private IEnumerator UntilRoutine(Func<bool> condition,
             float timeoutSeconds, Action<bool> onComplete)
         {

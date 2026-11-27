@@ -32,6 +32,8 @@ public sealed class HygieneCockroachManager : MonoBehaviour
 
     [Header("Barata")]
     [SerializeField] private float roachSize = 150f;
+    [Tooltip("Area de toque invisivel, um pouco maior que a arte, para facilitar o clique no celular.")]
+    [SerializeField] private float hitboxSize = 190f;
     [SerializeField] private int hitsToKill = 3;
     [SerializeField] private float moveSpeedMin = 120f;
     [SerializeField] private float moveSpeedMax = 220f;
@@ -79,6 +81,9 @@ public sealed class HygieneCockroachManager : MonoBehaviour
 
     public int ActiveRoachCount => _roaches.Count;
 
+    /// <summary>Raio usado nas bordas: considera a hitbox, nao so a arte.</summary>
+    private float BoundsRadius => Mathf.Max(roachSize, hitboxSize) * 0.5f;
+
     /// <summary>Mapa de higiene -> quantidade de baratas.</summary>
     public static int DesiredRoachCount(float hygiene)
     {
@@ -112,6 +117,7 @@ public sealed class HygieneCockroachManager : MonoBehaviour
                 whiteFlashMaterial = new Material(shader);
         }
 
+        hitboxSize = Mathf.Max(roachSize, hitboxSize);
         EnsureLayer();
     }
 
@@ -233,6 +239,22 @@ public sealed class HygieneCockroachManager : MonoBehaviour
         image.preserveAspect = true;
         image.raycastTarget = true;
 
+        // Hitbox invisivel maior que a arte: o clique e recebido aqui e sobe
+        // para o HygieneRoachClickHandler no pai.
+        GameObject hitGo = new GameObject("Hitbox", typeof(RectTransform),
+            typeof(CanvasRenderer), typeof(Image));
+        hitGo.transform.SetParent(rect, false);
+        RectTransform hitRect = hitGo.GetComponent<RectTransform>();
+        hitRect.anchorMin = new Vector2(0.5f, 0.5f);
+        hitRect.anchorMax = new Vector2(0.5f, 0.5f);
+        hitRect.anchoredPosition = Vector2.zero;
+        hitRect.sizeDelta = Vector2.one * hitboxSize;
+        hitRect.SetAsFirstSibling();
+
+        Image hitImage = hitGo.GetComponent<Image>();
+        hitImage.color = new Color(1f, 1f, 1f, 0f);
+        hitImage.raycastTarget = true;
+
         Button button = go.GetComponent<Button>();
         button.transition = Selectable.Transition.None;
 
@@ -310,7 +332,7 @@ public sealed class HygieneCockroachManager : MonoBehaviour
             // rotacao abaixo, o vetor local (-1,0) passa a apontar no sentido
             // do movimento.
             float currentRad = roach.rect.localEulerAngles.z * Mathf.Deg2Rad;
-            float margin = roachSize * 0.5f *
+            float margin = BoundsRadius *
                 (Mathf.Abs(Mathf.Cos(currentRad)) + Mathf.Abs(Mathf.Sin(currentRad)));
 
             Vector2 pos = roach.rect.anchoredPosition + roach.direction * roach.speed * dt;
@@ -370,7 +392,7 @@ public sealed class HygieneCockroachManager : MonoBehaviour
     private Vector2 RandomPosition()
     {
         Vector2 half = _layer.rect.size * 0.5f;
-        float margin = roachSize * 0.5f;
+        float margin = BoundsRadius;
         return new Vector2(
             Random.Range(-half.x + margin, Mathf.Max(-half.x + margin, half.x - margin)),
             Random.Range(-half.y + margin, Mathf.Max(-half.y + margin, half.y - margin)));

@@ -5998,6 +5998,17 @@
       "dependencyXmlFileName": "ISVoodooAdapterDependencies.xml",
       "SKAdNetworkIdXmlURL": "https://s3.amazonaws.com/ssa.public/Unity/SKAdNetwork-IDs/All/skadnetworks.voodoo.plist.xml",
       "versions": {
+        "5.16.0.0": {
+          "ironSourceSdkVersion": "[9.0.0, 10.0[",
+          "android": {
+            "adapterVersion": "5.12.0",
+            "adNetworkVersion": "4.31.0"
+          },
+          "ios": {
+            "adapterVersion": "5.9.0.0",
+            "adNetworkVersion": "4.31.0"
+          }
+        },
         "5.15.0.0": {
           "ironSourceSdkVersion": "[9.0.0, 10.0[",
           "android": {

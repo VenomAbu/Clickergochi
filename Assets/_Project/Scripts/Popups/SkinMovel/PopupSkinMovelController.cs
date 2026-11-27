@@ -25,6 +25,13 @@ public class PopupSkinMovelController : MonoBehaviour
     private int currentSkinIndex;
     private bool middleWired;
 
+    /// <summary>Indice da skin que esta no centro (Main) do carrossel.</summary>
+    public int CurrentSkinIndex => currentSkinIndex;
+
+    /// <summary>Centro esta em uma skin desbloqueada?</summary>
+    public bool CurrentSkinOwned => HasAvailableSkins() &&
+        PopupController.IsSkinOwned(availableSkins[currentSkinIndex]);
+
     // =========================================
     // INITIALIZATION
     // =========================================
@@ -44,6 +51,11 @@ public class PopupSkinMovelController : MonoBehaviour
             skins != null && selectedIndex < skins.Count
             ? selectedIndex
             : 0;
+
+        // O centro (Main) manda na sala: se o save apontar para uma skin
+        // bloqueada, recua para a primeira desbloqueada antes de mostrar.
+        MoveLeftUntilOwned();
+        ApplyCurrentSkin(false);
 
         EnsureMiddleClickable();
         UpdateCarousel();
@@ -74,6 +86,7 @@ public class PopupSkinMovelController : MonoBehaviour
             currentSkinIndex = 0;
 
         UpdateCarousel();
+        ApplyCurrentSkin(false);
     }
 
     public void PreviousSkin()
@@ -86,6 +99,21 @@ public class PopupSkinMovelController : MonoBehaviour
         if (currentSkinIndex < 0)
             currentSkinIndex = availableSkins.Count - 1;
 
+        UpdateCarousel();
+        ApplyCurrentSkin(false);
+    }
+
+    /// <summary>
+    /// Ao fechar, uma skin bloqueada no centro nao pode ficar como selecionada:
+    /// recua para a esquerda ate encontrar uma desbloqueada e aplica essa.
+    /// </summary>
+    private void OnDisable()
+    {
+        if (!Application.isPlaying)
+            return;
+
+        MoveLeftUntilOwned();
+        ApplyCurrentSkin(false);
         UpdateCarousel();
     }
 
@@ -149,6 +177,47 @@ public class PopupSkinMovelController : MonoBehaviour
                availableSkins.Count > 0;
     }
 
+    /// <summary>Volta uma posicao (esquerda) ate o centro ser uma skin livre.</summary>
+    private void MoveLeftUntilOwned()
+    {
+        if (!HasAvailableSkins())
+            return;
+
+        for (int i = 0; i < availableSkins.Count; i++)
+        {
+            if (PopupController.IsSkinOwned(availableSkins[currentSkinIndex]))
+                return;
+
+            currentSkinIndex = GetCircularIndex(currentSkinIndex - 1);
+        }
+    }
+
+    /// <summary>
+    /// A skin do centro e a selecionada: aplica no movel do comodo
+    /// correspondente. Bloqueadas sao ignoradas (o clique explicito no Main
+    /// continua dando o feedback de travada).
+    /// </summary>
+    private void ApplyCurrentSkin(bool playSound)
+    {
+        if (!HasAvailableSkins() || popupController == null)
+            return;
+
+        if (!PopupController.IsSkinOwned(availableSkins[currentSkinIndex]))
+            return;
+
+        // Evita salvar/aplicar de novo quando o centro ja e a skin equipada.
+        SaveData save = SaveManager.Instance != null
+            ? SaveManager.Instance.GetSaveData()
+            : null;
+        int slot = (int)currentKind;
+        if (save != null && save.furnitureSkinIndex != null &&
+            slot < save.furnitureSkinIndex.Length &&
+            save.furnitureSkinIndex[slot] == currentSkinIndex)
+            return;
+
+        popupController.EquipSkin(currentKind, currentSkinIndex, playSound);
+    }
+
     /// <summary>Cor dos previews de skin ainda nao comprada (travada).</summary>
     private static readonly Color LockedColor =
         new Color(0.42f, 0.42f, 0.42f, 1f);
@@ -187,8 +256,9 @@ public class PopupSkinMovelController : MonoBehaviour
     // =========================================
 
     /// <summary>
-    /// Clicar no card do meio (skin selecionada) equipa na hora — sem
-    /// botao extra, o proprio preview e o gatilho.
+    /// Clicar no card do meio (skin selecionada) confirma a skin com som.
+    /// A sala ja acompanha o centro automaticamente; este clique tambem
+    /// da o feedback de "bloqueada" quando a skin ainda nao foi comprada.
     /// </summary>
     public void EquipSelected()
     {

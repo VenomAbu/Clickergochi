@@ -15,6 +15,7 @@ namespace Clickergochi.Ads
     public sealed class LevelPlayRewardedProvider : IRewardedAdProvider
     {
         private const float WaitForAdSeconds = 20f;
+        private const float WatchTimeoutSeconds = 60f;
 
         private int _requestId;
         private Action<RewardedAdResult> _onComplete;
@@ -93,12 +94,31 @@ namespace Clickergochi.Ads
             _rewarded = false;
 
             // OnAdRewarded do LevelPlay so dispara para o item configurado.
+            // O placement do fluxo nao e enviado: ate confirmar no painel, o
+            // ad unit padrao e o unico caminho seguro em build.
+            Debug.Log($"[Ads] Exibindo rewarded padrao do ad unit " +
+                      $"(placement '{placementId}' ignorado em build).");
             bool started = manager.MostrarRecompensado(
-                amount => { _rewarded = amount > 0; },
-                string.IsNullOrEmpty(placementId) ? null : placementId);
+                amount => { if (amount > 0) _rewarded = true; });
 
             if (!started)
+            {
                 Finish(id, RewardedAdResult.Unavailable);
+                return;
+            }
+
+            // Se o SDK aceitar ShowAd mas nao emitir close/display failed, o
+            // fluxo nao pode ficar preso para sempre. Nunca recompensa nesse caso.
+            RewardedAdRuntime.Ensure().Schedule(WatchTimeoutSeconds, () =>
+            {
+                if (id != _requestId)
+                    return;
+
+                Debug.LogWarning("[Ads] Timeout apos ShowAd; sem confirmacao de fechamento.");
+                if (manager != null)
+                    manager.CancelarRecompensado();
+                Finish(id, RewardedAdResult.Failed);
+            });
         }
 
         private void OnAdClosed()
@@ -134,6 +154,9 @@ namespace Clickergochi.Ads
             _manager = null;
             _onComplete = null;
             _rewarded = false;
+
+            // Invalida timeouts e callbacks das requisicoes anteriores.
+            _requestId++;
         }
     }
 }

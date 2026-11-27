@@ -14,6 +14,26 @@ public class PopUpConfirmController : MonoBehaviour
 {
     public static PopUpConfirmController Instance { get; private set; }
 
+    /// <summary>Busca um popup de confirmacao pelo nome do objeto na cena.</summary>
+    public static PopUpConfirmController FindByName(string objectName)
+    {
+        if (string.IsNullOrEmpty(objectName))
+            return null;
+
+        foreach (PopUpConfirmController popup in
+                 FindObjectsByType<PopUpConfirmController>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (popup.name == objectName)
+                return popup;
+        }
+        return null;
+    }
+
+    /// <summary>Popup generico PopUpConfirm2 da MainScene.</summary>
+    public static PopUpConfirmController FindPopUpConfirm2()
+        => FindByName("PopUpConfirm2");
+
     [Header("Information")]
     [SerializeField] private TMP_Text titleTMP;
     [SerializeField] private Image itemImage;

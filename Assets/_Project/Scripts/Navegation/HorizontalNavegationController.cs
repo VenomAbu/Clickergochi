@@ -20,6 +20,8 @@ public class HorizontalNavegationController : MonoBehaviour,
 
     [Header("Swipe Settings")]
     [SerializeField, Range(0.1f, 0.8f)] private float dragCommitThreshold = 0.25f;
+    [Tooltip("Boost aplicado quando o deslize comeca no terco central da tela.")]
+    [SerializeField, Range(1f, 2f)] private float centerDragMultiplier = 1.35f;
     [SerializeField] private HorizontalEdgeFadeController edgeFadeController;
 
     [Header("Slime na transicao")]
@@ -43,6 +45,7 @@ public class HorizontalNavegationController : MonoBehaviour,
 
     private float dragStartX;
     private float currentDragX;
+    private bool dragStartedInCenter;
 
     private int dragDirection;
     private int dragNextIndex;
@@ -164,6 +167,12 @@ public class HorizontalNavegationController : MonoBehaviour,
 
     /// <summary>Largura atual do viewport/Canvas (util para debug e testes).</summary>
     public float GetViewportWidth() => PanelWidth;
+
+    /// <summary>Deslocamento efetivo do ultimo drag (util para debug e testes).</summary>
+    public float GetCurrentDragX() => currentDragX;
+
+    /// <summary>O drag atual comecou no terco central da tela?</summary>
+    public bool IsDraggingFromCenter() => dragStartedInCenter;
 
     /// <summary>Forca o recorte apos alterar o Canvas em tempo de execucao.</summary>
     public void RefreshViewportClipping() => ApplyViewportClipping();
@@ -301,6 +310,7 @@ public class HorizontalNavegationController : MonoBehaviour,
             return;
 
         dragStartX = localPosition.x;
+        dragStartedInCenter = IsInCenterThird(localPosition);
         currentDragX = 0f;
         dragDirection = 0;
 
@@ -317,10 +327,11 @@ public class HorizontalNavegationController : MonoBehaviour,
             out Vector2 localPosition))
             return;
 
-        currentDragX = localPosition.x - dragStartX;
+        float rawDragX = localPosition.x - dragStartX;
+        float multiplier = dragStartedInCenter ? centerDragMultiplier : 1f;
 
         currentDragX = Mathf.Clamp(
-            currentDragX,
+            rawDragX * multiplier,
             -PanelWidth,
             PanelWidth
         );
@@ -553,6 +564,7 @@ public class HorizontalNavegationController : MonoBehaviour,
 
         dragDirection = 0;
         currentDragX = 0f;
+        dragStartedInCenter = false;
 
         if (edgeFadeController != null)
         {
@@ -629,6 +641,24 @@ public class HorizontalNavegationController : MonoBehaviour,
         );
     }
 
+    /// <summary>
+    /// Divide a largura do viewport em tres partes e identifica o terco do
+    /// meio. Usa o retango do viewport (nao o pivot) para funcionar com
+    /// qualquer ancoragem do Canvas.
+    /// </summary>
+    private bool IsInCenterThird(Vector2 localPosition)
+    {
+        if (panelsViewport == null)
+            return false;
+
+        Rect rect = panelsViewport.rect;
+        if (rect.width <= 0f)
+            return false;
+
+        float normalized = (localPosition.x - rect.xMin) / rect.width;
+        return normalized >= 1f / 3f && normalized <= 2f / 3f;
+    }
+
     public GameObject GetCurrentPanel()
     {
         if (navigationPanels == null ||
@@ -670,6 +700,8 @@ public class HorizontalNavegationController : MonoBehaviour,
         isTransitioning = false;
         isDragging = false;
         dragDirection = 0;
+        currentDragX = 0f;
+        dragStartedInCenter = false;
 
         if (index == currentPanelIndex)
         {

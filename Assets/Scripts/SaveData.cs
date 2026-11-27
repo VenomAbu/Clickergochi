@@ -78,6 +78,15 @@ public class SaveData
     // apaga esta lista apos confirmacao no PopUpConfirmTV.
     public List<string> ownedStickers;
 
+    // Ids dos stickers cujo card ja foi aberto no album. Usado pelas bolinhas
+    // vermelhas de "novo" no card e no AlbumBtt da HUD.
+    public List<string> seenStickers;
+
+    // Recompensas por anuncio no dia local do jogador: 1º Golden Pack,
+    // 2º Pacote Comum e, a partir do 3º, 1000 Slimes por anuncio.
+    public string adRewardDay;
+    public int adRewardWatchedCount;
+
     public SaveData()
     {
         clickCount = 0;
@@ -110,6 +119,9 @@ public class SaveData
         ownedSlimeSkins = new List<string>();
         slimeSkinId = "";
         ownedStickers = new List<string>();
+        seenStickers = new List<string>();
+        adRewardDay = "";
+        adRewardWatchedCount = 0;
     }
 
     /// <summary>
@@ -182,6 +194,20 @@ public class SaveData
                     ownedStickers.RemoveAt(i);
             }
         }
+        if (seenStickers == null)
+            seenStickers = new List<string>();
+        else
+        {
+            for (int i = seenStickers.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrEmpty(seenStickers[i]) ||
+                    seenStickers.IndexOf(seenStickers[i]) != i)
+                    seenStickers.RemoveAt(i);
+            }
+        }
+        if (adRewardDay == null)
+            adRewardDay = "";
+        adRewardWatchedCount = Math.Max(0, adRewardWatchedCount);
     }
 }
 
