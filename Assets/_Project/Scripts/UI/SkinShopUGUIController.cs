@@ -42,6 +42,7 @@ public class SkinShopUGUIController : MonoBehaviour
         public SkinRoom Room;
         public Button Button;
         public RectTransform ButtonTransform;
+        public UIFeelGeral Feel;
         public GameObject SelectPoint;
         public int[] RowIndices;
     }
@@ -210,12 +211,18 @@ public class SkinShopUGUIController : MonoBehaviour
             return;
         }
 
+        UIFeelGeral feel = button.GetComponent<UIFeelGeral>();
+        if (feel == null)
+            feel = button.gameObject.AddComponent<UIFeelGeral>();
+
         SkinRoom captured = room;
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(() =>
         {
             GameAudioManager.Instance?.PlayClick();
+            // Seleciona primeiro para a animacao usar a escala final do botao.
             SelectRoom(captured);
+            feel.PlayStretchAndSquash();
         });
 
         roomTabs.Add(new RoomTab
@@ -223,6 +230,7 @@ public class SkinShopUGUIController : MonoBehaviour
             Room = room,
             Button = button,
             ButtonTransform = buttonTransform as RectTransform,
+            Feel = feel,
             SelectPoint = selectPoint,
             RowIndices = rowIndices
         });
@@ -246,11 +254,14 @@ public class SkinShopUGUIController : MonoBehaviour
         foreach (RoomTab tab in roomTabs)
         {
             bool selected = tab.Room == room;
-            if (tab.ButtonTransform != null)
+            Vector3 targetScale = selected ? Vector3.one * 1.15f : Vector3.one;
+            if (tab.Feel != null)
             {
-                tab.ButtonTransform.localScale = selected
-                    ? Vector3.one * 1.15f
-                    : Vector3.one;
+                tab.Feel.SetBaseScale(targetScale);
+            }
+            else if (tab.ButtonTransform != null)
+            {
+                tab.ButtonTransform.localScale = targetScale;
             }
             if (tab.SelectPoint != null)
                 tab.SelectPoint.SetActive(selected);

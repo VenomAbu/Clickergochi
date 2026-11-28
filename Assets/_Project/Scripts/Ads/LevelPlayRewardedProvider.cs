@@ -14,7 +14,6 @@ namespace Clickergochi.Ads
     /// </summary>
     public sealed class LevelPlayRewardedProvider : IRewardedAdProvider
     {
-        private const float WaitForAdSeconds = 20f;
         private const float WatchTimeoutSeconds = 60f;
 
         private int _requestId;
@@ -25,11 +24,18 @@ namespace Clickergochi.Ads
 
         public string DisplayName => "LevelPlay (AdsManager)";
 
-        /// <summary>So depende do AdsManager existir; a prontidao e checada em Show.</summary>
-        public bool IsReady => AdsManager.Instance != null;
+        /// <summary>
+        /// So esta pronto quando o SDK inicializou E ha um anuncio carregado.
+        /// Assim o RewardedAdBridge consegue abrir a tela de espera antes do Show.
+        /// </summary>
+        public bool IsReady => AdsManager.Instance != null &&
+                               AdsManager.Instance.Inicializado &&
+                               AdsManager.Instance.RecompensadoPronto;
 
         public void Show(string placementId, Action<RewardedAdResult> onComplete)
         {
+            Cleanup();
+
 #if UNITY_EDITOR
             // O LevelPlay nao exibe anuncio no Editor e nao dispara close.
             // Mostra uma propaganda de teste que so recompensa ao fim do tempo;
@@ -43,7 +49,15 @@ namespace Clickergochi.Ads
             }
 #endif
 
-            Cleanup();
+            // Sem anuncio carregado, o Bridge mostra a tela de espera com
+            // contador. Quando ficar pronto, ele chama este Show de novo.
+            if (!IsReady)
+            {
+                Debug.Log("[Ads] Rewarded ainda nao carregado; abrindo tela de espera.");
+                RewardedAdWaitOverlay.Show(placementId, this, onComplete);
+                return;
+            }
+
             int id = ++_requestId;
             _onComplete = onComplete;
             _rewarded = false;
@@ -52,30 +66,6 @@ namespace Clickergochi.Ads
             if (manager == null)
             {
                 Finish(id, RewardedAdResult.Unavailable);
-                return;
-            }
-
-            // Primeira execucao pode acontecer antes do Init/load terminar.
-            // Espera o anuncio ficar pronto em vez de cancelar a recompensa.
-            if (!manager.Inicializado || !manager.RecompensadoPronto)
-            {
-                RewardedAdRuntime.Ensure().RunUntil(
-                    () => AdsManager.Instance == manager &&
-                          manager.Inicializado &&
-                          manager.RecompensadoPronto,
-                    WaitForAdSeconds,
-                    ready =>
-                    {
-                        if (id != _requestId)
-                            return;
-                        if (!ready || AdsManager.Instance != manager)
-                        {
-                            Finish(id, RewardedAdResult.Unavailable);
-                            return;
-                        }
-
-                        ShowNow(id, manager, placementId);
-                    });
                 return;
             }
 

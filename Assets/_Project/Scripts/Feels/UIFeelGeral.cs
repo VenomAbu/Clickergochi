@@ -17,6 +17,24 @@ public class UIFeelGeral : MonoBehaviour
         originalScale = transform.localScale;
     }
 
+    /// <summary>
+    /// Troca a escala base usada pela animacao. Necessario em botoes que
+    /// mudam de tamanho quando selecionados (ex.: seletor de comodos),
+    /// para o squash terminar no tamanho certo.
+    /// </summary>
+    public void SetBaseScale(Vector3 scale)
+    {
+        originalScale = scale;
+
+        if (animationCoroutine != null)
+        {
+            StopCoroutine(animationCoroutine);
+            animationCoroutine = null;
+        }
+
+        transform.localScale = scale;
+    }
+
     public void PlayStretchAndSquash()
     {
         // Botao de fechar: o popup ja foi desativado na mesma chamada do

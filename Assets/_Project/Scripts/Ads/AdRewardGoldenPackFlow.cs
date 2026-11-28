@@ -140,6 +140,9 @@ public sealed class AdRewardGoldenPackFlow : MonoBehaviour
             return;
         adResultHandled = true;
         waitingAd = false;
+        // O pedido foi respondido; nao reuse o rotulo do dia num proximo clique
+        // que tenha vindo sem passar pelo BeforeConfirmation.
+        pendingReward = null;
 
         if (requireWatched && result != RewardedAdResult.Watched)
         {

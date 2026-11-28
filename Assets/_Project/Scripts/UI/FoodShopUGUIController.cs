@@ -8,7 +8,8 @@ using UnityEngine.UI;
 /// TesteDanillo, SEM raridade: cada comida vende um card so, usando a
 /// variante do meio (tiers[1]) de preco/efeito. Monta os cards em runtime
 /// a partir do FoodCardPrefab que ja existe na cena (nenhuma edicao de
-/// cena) e toda compra pede confirmacao no PopUpConfirm (GDD/TP3).
+/// cena), mostra o efeito/fome no Food Description TMP e compra direto
+/// no clique, sem popup de confirmacao.
 /// </summary>
 public class FoodShopUGUIController : MonoBehaviour
 {
@@ -46,6 +47,12 @@ public class FoodShopUGUIController : MonoBehaviour
         }
 
         panel.gameObject.AddComponent<FoodShopUGUIController>().Build();
+    }
+
+    private void OnEnable()
+    {
+        // Atualiza na hora em que o painel abre, antes do primeiro Update.
+        RefreshButtons();
     }
 
     private void Update()
@@ -155,10 +162,16 @@ public class FoodShopUGUIController : MonoBehaviour
 
     private void Bind(Transform card, FoodItemData food, FoodTier tier, int index)
     {
+        int hungerPercent = Mathf.RoundToInt(tier.hungerRestore * 100f);
+
         SetText(card, "CardTittle", food.foodName);
-        SetText(card, "HungerInfo",
-            $"{Mathf.RoundToInt(tier.hungerRestore * 100f)}%");
+        SetText(card, "HungerInfo", $"{hungerPercent}%");
         SetText(card, "Text (TMP)", tier.price.ToString());
+
+        // Antes o efeito so aparecia no popup de confirmacao. Agora o card
+        // mostra os dados da comida direto no Food Description TMP.
+        SetText(card, "Food Description TMP",
+            $"{tier.Describe()}\nRecupera {hungerPercent}% da Fome");
 
         // O prefab ja traz um FoodIcon (Image). Se o ScriptableObject tiver
         // sprite definido, troca o sprite Padrao pelo da comida desta card.
@@ -184,7 +197,7 @@ public class FoodShopUGUIController : MonoBehaviour
     }
 
     // =========================================
-    // COMPRA (confirmada, GDD/TP3)
+    // COMPRA DIRETA (sem popup de confirmacao)
     // =========================================
 
     private void OnBuy(int index)
@@ -198,36 +211,28 @@ public class FoodShopUGUIController : MonoBehaviour
         if (bonus == null || !bonus.CanEat)
         {
             // Fome cheia: o botao ja fica desativado, so retranca.
-            GameAudioManager.Instance?.PlayClose();
+            RefreshButtons();
             return;
         }
 
-        void DoBuy()
+        // Sem saldo o botao tambem ja fica desativado. A checagem aqui so
+        // protege contra um clique vindo antes do RefreshButtons.
+        SaveData save = SaveManager.Instance?.GetSaveData();
+        float goo = save != null
+            ? save.goo
+            : SlimeManager.Instance != null ? SlimeManager.Instance.Goo : 0f;
+        if (goo < card.Tier.price)
         {
-            if (FoodBonusManager.Instance.TryEat(card.Food, card.Tier))
-                GameAudioManager.Instance?.PlayPurchase();
-            else
-                GameAudioManager.Instance?.PlayClose();
             RefreshButtons();
+            return;
         }
 
-        // Toda compra pede confirmacao (mesmo fluxo dos moveis).
-        PopupController popup = PopupController.Instance;
-        if (popup != null)
-        {
-            int hungerPercent = Mathf.RoundToInt(card.Tier.hungerRestore * 100f);
-            popup.ShowConfirm(
-                card.Food.foodName,
-                $"{card.Tier.Describe()}\nRecupera {hungerPercent}% da Fome\n" +
-                $"Por {card.Tier.price} gosma?",
-                "Comprar",
-                DoBuy,
-                card.Food.icon);
-        }
+        if (bonus.TryEat(card.Food, card.Tier))
+            GameAudioManager.Instance?.PlayPurchase();
         else
-        {
-            DoBuy();
-        }
+            GameAudioManager.Instance?.PlayClose();
+
+        RefreshButtons();
     }
 
     /// <summary>

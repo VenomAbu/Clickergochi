@@ -40,6 +40,9 @@ namespace Clickergochi.Ads
     /// </summary>
     public static class RewardedAdBridge
     {
+        /// <summary>Tempo maximo da tela de espera quando nao ha anuncio carregado.</summary>
+        public const float WaitForReadySeconds = 10f;
+
         public static event Action<IRewardedAdProvider> ProviderChanged;
 
         public static IRewardedAdProvider Provider { get; private set; }
@@ -65,8 +68,9 @@ namespace Clickergochi.Ads
 
             if (!provider.IsReady)
             {
-                Debug.LogWarning($"[Ads] Provedor '{provider.DisplayName}' nao esta pronto.");
-                onComplete?.Invoke(RewardedAdResult.Unavailable);
+                Debug.Log($"[Ads] Provedor '{provider.DisplayName}' sem anuncio pronto; " +
+                          $"abrindo espera de {WaitForReadySeconds:0}s.");
+                RewardedAdWaitOverlay.Show(placementId, provider, onComplete);
                 return;
             }
 
@@ -99,8 +103,32 @@ namespace Clickergochi.Ads
         [Tooltip("Altere para Skipped/Failed para testar os caminhos sem recompensa.")]
         public RewardedAdResult result = RewardedAdResult.Watched;
 
+        [Tooltip("Segundos demorando para 'carregar'. Use para testar a tela de espera.")]
+        public float simulateLoadingSeconds;
+
+        private float _readyAt = -1f;
+
         public string DisplayName => "Simulado (Editor)";
-        public bool IsReady => Application.isEditor || allowInBuilds;
+
+        public bool IsReady
+        {
+            get
+            {
+                if (!Application.isEditor && !allowInBuilds)
+                    return false;
+                if (simulateLoadingSeconds <= 0f)
+                    return true;
+                if (_readyAt < 0f)
+                    _readyAt = Time.realtimeSinceStartup + simulateLoadingSeconds;
+                return Time.realtimeSinceStartup >= _readyAt;
+            }
+        }
+
+        /// <summary>Reinicia a simulacao de carregamento (util em testes).</summary>
+        public void ResetLoading()
+        {
+            _readyAt = -1f;
+        }
 
         public void Show(string placementId, Action<RewardedAdResult> onComplete)
         {

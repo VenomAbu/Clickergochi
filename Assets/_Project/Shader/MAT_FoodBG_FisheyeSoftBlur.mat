@@ -44,8 +44,10 @@ Material:
     - _TileScale: 1
     - _UseUIAlphaClip: 0
     m_Colors:
+    - _AspectScale: {r: 1, g: 1.3498105, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _ScrollSpeed: {r: 0.009, g: 0.007, b: 0, a: 0}
-    - _UVOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _ScrollSpeed: {r: 0.009, g: 0.03, b: 0, a: 0}
+    - _SeamOffset: {r: -0.029516602, g: -0.07623826, b: 0, a: 0}
+    - _UVOffset: {r: -0.23, g: 0.31, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

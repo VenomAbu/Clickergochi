@@ -7,7 +7,9 @@ Shader "Clickergochi/UI Shop Fisheye Soft Blur"
 
         _ScrollSpeed ("Scroll Speed (Right, Down)", Vector) = (0.012, 0.009, 0, 0)
         _TileScale ("Tile Scale (Zoom)", Range(0.25, 4)) = 1
+        _AspectScale ("Aspect Scale (Fit)", Vector) = (1, 1, 0, 0)
         _UVOffset ("UV Offset", Vector) = (0, 0, 0, 0)
+        _SeamOffset ("Seam Offset (UV)", Vector) = (0, 0, 0, 0)
         _DistortStrength ("Fisheye Strength", Range(0, 0.5)) = 0.28
         _DistortRadius ("Fisheye Radius", Range(0.05, 0.6)) = 0.34
         _LensDrift ("Lens Drift", Range(0, 0.25)) = 0.12
@@ -89,7 +91,9 @@ Shader "Clickergochi/UI Shop Fisheye Soft Blur"
 
             float4 _ScrollSpeed;
             float _TileScale;
+            float4 _AspectScale;
             float4 _UVOffset;
+            float4 _SeamOffset;
             float _DistortStrength;
             float _DistortRadius;
             float _LensDrift;
@@ -177,7 +181,18 @@ Shader "Clickergochi/UI Shop Fisheye Soft Blur"
                 float2 framed = (rotated - 0.5) * _TileScale + 0.5 + _UVOffset.xy;
                 float2 scrolled = framed - float2(_ScrollSpeed.x, -_ScrollSpeed.y) * t;
 
-                fixed4 color = SoftSample(scrolled) * i.color;
+                // Enquadramento: o painel pode ter proporcao diferente da textura
+                // (ex.: WaffleBG3 e quadrada num painel retrato). Aplicar a escala
+                // so na amostragem preserva as ilhas de lente e a rotacao no
+                // espaco visual 0..1, enquanto o Repeat completa o tile extra.
+                // Sem frac(): a UV continua mantem as derivadas da emenda.
+                float2 fitted = scrolled * _AspectScale.xy;
+
+                // Move apenas a posicao onde o Repeat troca de chapa.
+                // Nao escala a UV: o padrao mantem o tamanho e a proporcao.
+                fitted += _SeamOffset.xy;
+
+                fixed4 color = SoftSample(fitted) * i.color;
 
                 #ifdef UNITY_UI_CLIP_RECT
                     color.a *= UnityGet2DClipping(i.worldPosition.xy, _ClipRect);
